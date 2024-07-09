@@ -91,6 +91,12 @@
 \usepackage{makecell}
 \usepackage[acronym]{glossaries}
 \usepackage{glossary-mcols}
+\usepackage[utf8]{inputenc}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{fullpage}
+\usepackage[upright]{fourier}
+\usepackage{tkz-graph}
+\usetikzlibrary{arrows}
 \renewcommand*{\glspostdescription}{} % Removes dots at the end of each entry.
 
 \renewcommand{\glossarypreamble}{\vspace*{-4em}}
@@ -125,6 +131,14 @@
 \setlist[questions,2]{label=(\alph*),ref=\thequestionsi(\alph*)}
 
 \renewcommand{\figurename}{Figure}
+\SetVertexNormal[Shape      = circle,
+                 FillColor  = orange,
+                 LineWidth  = 2pt]
+\SetUpEdge[lw         = 1.5pt,
+           color      = black,
+           labelcolor = white,
+           labeltext  = red,
+           labelstyle = {sloped,draw,text=blue}]
 \end_preamble
 \options intoc,bibliography=totoc,index=totoc,BCOR10mm,captions=tableheading,titlepage
 \use_default_options true
