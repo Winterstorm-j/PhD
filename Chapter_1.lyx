@@ -12,6 +12,7 @@
 % that links to image floats jumps to the beginning
 % of the float and not to its caption
 \usepackage[figure]{hypcap}
+\usepackage{tkz-graph}
 
 % the pages of the TOC is numbered roman
 % and a pdf-bookmark for the TOC is added
@@ -315,31 +316,238 @@ thepage
 \end_layout
 
 \begin_layout Chapter
-Introduction
+Introduction 
+\begin_inset CommandInset label
+LatexCommand label
+name "chap:Introduction"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
-Overview
+Overview of Bayesian Networks
+\begin_inset CommandInset label
+LatexCommand label
+name "chap:Overview"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-A Bayesian Network is statistical construct that combines probability theory and graph theory.
- It comprises a set of nodes that represent an event or process that is undertaken,
+A Bayesian Network (BN) is statistical model that combines probability theory and graph theory.
+ The underlying probabilistic architecture comprises a set of nodes that represent an event or process that is undertaken,
  grouped together into a network,
  known as a directed,
  acyclic graph (DAG).
  A graph is used to depict relationships by denoting nodes (also known as vertices) connected to each other with arcs known as edges.
- The vertices are governed by a finite set of states with probabilities.
- Vertex states are mutually exclusive and complete (add to one).
  In a DAG,
  the edges have an explicitly stated direction of relationship and there is no feedback loop between any two vertices.
+ Often,
+ nodes are described with a parent-child or sibling relationship.
+ A depiction of a simple BN can be seen in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:simpleBN"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ below.
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tikzpicture}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+SetVertexNormal[Shape = circle,
+\end_layout
+
+\begin_layout Plain Layout
+
+                 FillColor  = navy,
+\end_layout
+
+\begin_layout Plain Layout
+
+                 LineWidth  = 2pt]
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+SetUpEdge[lw = 1.5pt,
+\end_layout
+
+\begin_layout Plain Layout
+
+           color = blue]
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+GraphInit[vstyle=Normal] 
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+SetGraphUnit{3}
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+tikzset{VertexStyle/.append  style={fill}}
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+node (A) at (3.5,3)   [draw,
+ circle]{A};
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+node (B) at (6.5,3) [draw,
+ circle]{B};
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+node (C) at (5,1.5)   [draw,
+ circle]{C};
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+node (D) at (5,0)   [draw,
+ circle]{D};
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+tikzset{EdgeStyle/.style={->}}
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+Edge(B)(C)
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+Edge(C)(D)
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+Edge(A)(C)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tikzpicture}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Caption Below
+
+\begin_layout Plain Layout
+A simple Bayesian Network where A and B are parent vertices to C,
+ and D is a child vertex to C.
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:simpleBN"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In a BN,
+ the vertices are governed by a finite set of states with some probability of observance.
+ Vertex probabilities represent the complete set of possibilities for the state of the vertex given that of its parents and are mutually exclusive.
+ This architecture can be used to infer about a proposition by using the relationships to calculate the joint probability across the nodes of the BN.
+ This makes them ideal for scenario testing in forensic investigations 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vlek2015"
+literal "false"
+
+\end_inset
+
+.
  
 \end_layout
 
 \begin_layout Standard
+The calculation 
+\end_layout
+
+\begin_layout Standard
 DAGs are versatile constructs,
- used in many situations including evolutionary biology,
- epidemiology 
+ not restricted to just forensic science.
+ Ongoing use is common in many fields,
+ including epidemiology 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Taylor2024"
@@ -348,7 +556,16 @@ literal "false"
 \end_inset
 
 ,
- compiler design,
+ construction
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sridhar2024"
+literal "false"
+
+\end_inset
+
+,
+ compiler design ,
  process/data flow mapping 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -359,10 +576,22 @@ literal "false"
 
 ,
  cryptocurrency,
- and more.
- Most often,
- DAGs are used to infer causation from a set of observed or performed tasks.
- This makes them ideal for scenario testing in criminal investigations.
+ and more 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "BiedermanTaroni2012"
+literal "false"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Although there have been many advancements in causal model algorithms in the field of artificial intelligence in recent years,
+ there is a lag in the transparency or explainability of outputs derived from these complex models that makes them less attractive to a forensic or legal context.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -373,21 +602,30 @@ literal "false"
 \end_layout
 
 \begin_layout Section
-Bayesian Networks in Forensics
-\end_layout
-
-\begin_layout Standard
-Baysian Networks have been used in forensic science applications since the early 2000s.
-\end_layout
-
-\begin_layout Standard
+Bayesian Networks in Forensics 
 \begin_inset CommandInset label
 LatexCommand label
-name "sec:The-next-section"
+name "chap:BNsInFornesics"
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Bayesian Networks have been used in forensic science applications since the late 1980s 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "BiedermanTaroni2012"
+literal "false"
+
+\end_inset
+
+.
+ Initially,
+ as a means of inferring profiles from mixed DNA samples they began to be used to represent the relationships between different factors of other system.
+ As networks become more complex there has been a move to the use of object-oriented Bayesian Networks (OOBNs),
+ which allow the embedding of sub-networks within the larger network.
 \end_layout
 
 \begin_layout Standard
