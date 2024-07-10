@@ -12,7 +12,9 @@
 % that links to image floats jumps to the beginning
 % of the float and not to its caption
 \usepackage[figure]{hypcap}
+\usepackage{tikz}
 \usepackage{tkz-graph}
+\usetikzlibrary{positioning}
 
 % the pages of the TOC is numbered roman
 % and a pdf-bookmark for the TOC is added
@@ -343,12 +345,12 @@ A Bayesian Network (BN) is statistical model that combines probability theory an
  grouped together into a network,
  known as a directed,
  acyclic graph (DAG).
- A graph is used to depict relationships by denoting nodes (also known as vertices) connected to each other with arcs known as edges.
+ A DAG depicts relationships by denoting nodes (also known as vertices) connected to each other with arcs known as edges.
  In a DAG,
  the edges have an explicitly stated direction of relationship and there is no feedback loop between any two vertices.
  Often,
- nodes are described with a parent-child or sibling relationship.
- A depiction of a simple BN can be seen in 
+ vertices are described with a parent-child or sibling relationship.
+ A depiction of a simple BN can be seen in Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:simpleBN"
@@ -360,6 +362,24 @@ nolink "false"
 \end_inset
 
  below.
+ Each vertex's state is drawn from a finite set of possible states with some probability of observance.
+ Vertex probabilities represent the complete set of possibilities for the vertex and are mutually exclusive.
+ The conditional probability tables (CPTs) of each vertex are used to calculate the joint probability of a proposition using Bayes Theorem.
+ CPTs can be filled from experiments by the practitioner that mimic case circumstances;
+ published probabilities similar to the case;
+ a range of reasonable values;
+ or based on the practitioners prior experience or knowledge 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Schaapveld2019"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 placement document
 alignment document
@@ -375,24 +395,14 @@ status open
 
 
 \backslash
-begin{tikzpicture}
+center
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-SetVertexNormal[Shape = circle,
-\end_layout
-
-\begin_layout Plain Layout
-
-                 FillColor  = navy,
-\end_layout
-
-\begin_layout Plain Layout
-
-                 LineWidth  = 2pt]
+begin{tikzpicture}
 \end_layout
 
 \begin_layout Plain Layout
@@ -411,79 +421,87 @@ SetUpEdge[lw = 1.5pt,
 
 
 \backslash
-GraphInit[vstyle=Normal] 
-\end_layout
-
-\begin_layout Plain Layout
-
-  
-\backslash
 SetGraphUnit{3}
 \end_layout
 
 \begin_layout Plain Layout
 
-  
+
 \backslash
-tikzset{VertexStyle/.append  style={fill}}
+tikzset{vertex/.style={font = 
+\backslash
+sffamily
+\backslash
+bfseries,
 \end_layout
 
 \begin_layout Plain Layout
 
-  
-\backslash
-node (A) at (3.5,3)   [draw,
- circle]{A};
+			 text = white,shape = circle,
 \end_layout
 
 \begin_layout Plain Layout
 
-  
-\backslash
-node (B) at (6.5,3) [draw,
- circle]{B};
+             fill = blue,
 \end_layout
 
 \begin_layout Plain Layout
 
-  
-\backslash
-node (C) at (5,1.5)   [draw,
- circle]{C};
+             very thick}}
 \end_layout
 
 \begin_layout Plain Layout
 
-  
+
 \backslash
-node (D) at (5,0)   [draw,
- circle]{D};
+node[vertex](A) at (3.5,3){A};
 \end_layout
 
 \begin_layout Plain Layout
 
-  
+
+\backslash
+node[vertex](B) at (6.5,3){B};
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+node[vertex](C) at (5,1.5){C};
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+node[vertex](D) at (5,0){D};
+\end_layout
+
+\begin_layout Plain Layout
+
+
 \backslash
 tikzset{EdgeStyle/.style={->}}
 \end_layout
 
 \begin_layout Plain Layout
 
-  
+
 \backslash
 Edge(B)(C)
 \end_layout
 
 \begin_layout Plain Layout
 
-  
+
 \backslash
 Edge(C)(D)
 \end_layout
 
 \begin_layout Plain Layout
 
-  
+
 \backslash
 Edge(A)(C)
 \end_layout
@@ -523,10 +541,15 @@ name "fig:simpleBN"
 \end_layout
 
 \begin_layout Standard
-In a BN,
- the vertices are governed by a finite set of states with some probability of observance.
- Vertex probabilities represent the complete set of possibilities for the state of the vertex given that of its parents and are mutually exclusive.
- This architecture can be used to infer about a proposition by using the relationships to calculate the joint probability across the nodes of the BN.
+BNs show an interesting characteristic that the state of a vertex is conditional only on the state of its parents and not the state of any other vertex in the network,
+ a characteristic known as conditional independence.
+ This characteristic enables a reduction in the number of factors that need to be incorporated into the joint probability calculation for scenarios.
+ As computation power availability grows,
+ more complex BNs can be developed.
+\end_layout
+
+\begin_layout Standard
+This architecture can be used to infer about a proposition by using the relationships to calculate the joint probability of the proposition across the nodes of the BN.
  This makes them ideal for scenario testing in forensic investigations 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -536,15 +559,7 @@ literal "false"
 \end_inset
 
 .
- 
-\end_layout
-
-\begin_layout Standard
-The calculation 
-\end_layout
-
-\begin_layout Standard
-DAGs are versatile constructs,
+ DAGs are versatile constructs,
  not restricted to just forensic science.
  Ongoing use is common in many fields,
  including epidemiology 
@@ -585,13 +600,22 @@ literal "false"
 \end_inset
 
 .
- 
 \end_layout
 
 \begin_layout Standard
-Although there have been many advancements in causal model algorithms in the field of artificial intelligence in recent years,
+Concerns around the use of BNs in forensics include the subjectivity of the CPTs in networks assembled by different practitioners.
+ Why certain publications were used,
+ and Assessment of the network to determine the effect of the values used is important to ensure the evaluation is robust and limitations are understood 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chen2012,Schaapveld2019"
+literal "false"
+
+\end_inset
+
+.
+ Although there have been many advancements in causal model algorithms in the field of artificial intelligence in recent years,
  there is a lag in the transparency or explainability of outputs derived from these complex models that makes them less attractive to a forensic or legal context.
- 
 \end_layout
 
 \begin_layout Standard
@@ -623,7 +647,7 @@ literal "false"
 
 .
  Initially,
- as a means of inferring profiles from mixed DNA samples they began to be used to represent the relationships between different factors of other system.
+ as a means of inferring profiles from mixed DNA samples they began to be used to represent the relationships between different factors of other systems.
  As networks become more complex there has been a move to the use of object-oriented Bayesian Networks (OOBNs),
  which allow the embedding of sub-networks within the larger network.
 \end_layout
@@ -654,10 +678,10 @@ e.,
 \end_layout
 
 \begin_layout Section*
-\begin_inset VSpace medskip
+\begin_inset VSpace smallskip
 \end_inset
 
-Bibliography
+
 \end_layout
 
 \begin_layout Standard
