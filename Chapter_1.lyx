@@ -97,7 +97,7 @@ customHeadersFooters
 \bibtex_command bibtex
 \index_command default
 \float_placement h
-\float_alignment class
+\float_alignment center
 \paperfontsize 10
 \spacing single
 \use_hyperref true
@@ -341,13 +341,22 @@ name "chap:Overview"
 
 \begin_layout Standard
 A Bayesian Network (BN) is statistical model that combines probability theory and graph theory.
- The underlying probabilistic architecture comprises a set of nodes that represent an event or process that is undertaken,
+ The underlying graph architecture comprises a set of nodes that represent an event or process that is undertaken,
  grouped together into a network,
  known as a directed,
  acyclic graph (DAG).
  A DAG depicts relationships by denoting nodes (also known as vertices) connected to each other with arcs known as edges.
  In a DAG,
  the edges have an explicitly stated direction of relationship and there is no feedback loop between any two vertices.
+ Note should be taken that edges do not necessarily indicate causation in a BN 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lemmer2013,BiedermanTaroni2012"
+literal "false"
+
+\end_inset
+
+.
  Often,
  vertices are described with a parent-child or sibling relationship.
  A depiction of a simple BN can be seen in Figure 
@@ -364,8 +373,26 @@ nolink "false"
  below.
  Each vertex's state is drawn from a finite set of possible states with some probability of observance.
  Vertex probabilities represent the complete set of possibilities for the vertex and are mutually exclusive.
- The conditional probability tables (CPTs) of each vertex are used to calculate the joint probability of a proposition using Bayes Theorem.
- CPTs can be filled from experiments by the practitioner that mimic case circumstances;
+ The probabilities of the states are stored in a table,
+ either as probabilities conditional on the state of the parent vertices or,
+ if there are no parents,
+ as marginal probablities for the vertex.
+ In this paper,
+ for simplicity,
+ these tables will be referred to as probability tables (PTs) in all cases.
+ The PTs of each vertex are used to calculate the joint probability of a proposition by the equation in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:jointProb"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ below.
+ PTs can be filled from experiments by the practitioner that mimic case circumstances;
  published probabilities similar to the case;
  a range of reasonable values;
  or based on the practitioners prior experience or knowledge 
@@ -541,6 +568,52 @@ name "fig:simpleBN"
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment center
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Formula 
+\[
+{\displaystyle P(A_{1},A_{i},...,A_{n})=\mathop{\prod_{i=2}^{n}}P(A_{i}|par(A_{i}))}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Below
+
+\begin_layout Plain Layout
+Equation to calculate joint probability,
+ where n is the number of vertices in the network,
+ A denotes a vertex,
+ and par(A) denotes the state of the immediate parents of said vertex.
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "eq:jointProb"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 BNs show an interesting characteristic that the state of a vertex is conditional only on the state of its parents and not the state of any other vertex in the network,
  a characteristic known as conditional independence.
  This characteristic enables a reduction in the number of factors that need to be incorporated into the joint probability calculation for scenarios.
@@ -603,22 +676,6 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-Concerns around the use of BNs in forensics include the subjectivity of the CPTs in networks assembled by different practitioners.
- Why certain publications were used,
- and Assessment of the network to determine the effect of the values used is important to ensure the evaluation is robust and limitations are understood 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Chen2012,Schaapveld2019"
-literal "false"
-
-\end_inset
-
-.
- Although there have been many advancements in causal model algorithms in the field of artificial intelligence in recent years,
- there is a lag in the transparency or explainability of outputs derived from these complex models that makes them less attractive to a forensic or legal context.
-\end_layout
-
-\begin_layout Standard
 \begin_inset VSpace medskip
 \end_inset
 
@@ -648,7 +705,27 @@ literal "false"
 .
  Initially,
  as a means of inferring profiles from mixed DNA samples they began to be used to represent the relationships between different factors of other systems.
- As networks become more complex there has been a move to the use of object-oriented Bayesian Networks (OOBNs),
+ 
+\end_layout
+
+\begin_layout Standard
+Concerns around the use of BNs in forensics include the subjectivity of the CPTs in networks assembled by different practitioners.
+ Why certain publications were used,
+ and Assessment of the network to determine the effect of the values used is important to ensure the evaluation is robust and limitations are understood 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Schaapveld2019,ChenPollino2012"
+literal "false"
+
+\end_inset
+
+.
+ Although there have been many advancements in causal model algorithms in the field of artificial intelligence in recent years,
+ there is a lag in the transparency or explainability of outputs derived from these complex models that makes them less attractive to a forensic or legal context.
+\end_layout
+
+\begin_layout Standard
+As networks become more complex there has been a move to the use of object-oriented Bayesian Networks (OOBNs),
  which allow the embedding of sub-networks within the larger network.
 \end_layout
 
