@@ -12,9 +12,6 @@
 % that links to image floats jumps to the beginning
 % of the float and not to its caption
 \usepackage[figure]{hypcap}
-\usepackage{tikz}
-\usepackage{tkz-graph}
-\usetikzlibrary{positioning}
 
 % the pages of the TOC is numbered roman
 % and a pdf-bookmark for the TOC is added
@@ -36,7 +33,7 @@
 
 % fancy page header/footer settings
 % for more information see section 9 of
-% ftp://www.ctan.org/pub/tex-archive/macros/latex2e/contrib/fancyhdr/fancyhdr.pdf
+% http://www.ctan.org/tex-archive/macros/latex/contrib/fancyhdr/fancyhdr.pdf
 \renewcommand{\chaptermark}[1]{\markboth{#1}{#1}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
 
@@ -65,15 +62,93 @@
 % Added by lyx2lyx
 \setlength{\parskip}{\medskipamount}
 \setlength{\parindent}{0pt}
+
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{cmap}
+\usepackage{wrapfig}
+% \usepackage{algpseudocode}
+\usepackage{amssymb}
+\usepackage{moreverb}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{adjustbox}
+\usepackage{tabularx}
+\usepackage{tabularray}
+\usepackage{multicol}
+% \usepackage{caption}
+\usepackage{listings}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage[inline]{enumitem}
+\usepackage[table,usenames,dvipsnames]{xcolor}
+\usepackage{cleveref}
+\usepackage{rotating}
+\usepackage{makecell}
+\usepackage[acronym]{glossaries}
+\usepackage{glossary-mcols}
+\usepackage[utf8]{inputenc}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{fullpage}
+\usepackage[upright]{fourier}
+\usepackage{tkz-graph}
+\usetikzlibrary{arrows}
+\renewcommand*{\glspostdescription}{} % Removes dots at the end of each entry.
+
+\renewcommand{\glossarypreamble}{\vspace*{-4em}}
+
+\usepackage[Lenny]{fncychap}
+\ChNameVar{\fontsize{18}{20}\usefont{OT1}{ptm}{m}{n}\selectfont}
+% \ChNumVar{\huge\bfseries\fontfamily{ptm}\selectfont}
+\ChTitleVar{\huge\bfseries\fontfamily{ptm}\selectfont}
+
+% \usepackage{titlesec}
+% \titleformat{\section}{\large\scshape}{\thesection}{1em}{}
+% \titleformat{\subsection}{\normalsize\scshape}{\thesubsection}{1em}{}
+% \titleformat{\subsubsection}{\normalsize\scshape}{}{0.5em}{}
+
+
+\newtheorem{definition}{Definition}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+% some settings to fill pages more densely
+\renewcommand\floatpagefraction{.9}
+\renewcommand\topfraction{.9}
+\renewcommand\bottomfraction{.9}
+\renewcommand\textfraction{.1}
+\setcounter{totalnumber}{50}
+\setcounter{topnumber}{50}
+\setcounter{bottomnumber}{50}
+
+\definecolor{light-gray}{gray}{0.95}
+\newcommand{\code}[1]{\colorbox{light-gray}{\texttt{#1}}}
+
+\newlist{questions}{enumerate}{2}
+\setlist[questions,1]{label=\textit{RQ\arabic*.},ref=\textit{RQ\arabic*}}
+\setlist[questions,2]{label=(\alph*),ref=\thequestionsi(\alph*)}
+
+\renewcommand{\figurename}{Figure}
+\SetVertexNormal[Shape      = circle,
+                 FillColor  = orange,
+                 LineWidth  = 2pt]
+\SetUpEdge[lw         = 1.5pt,
+           color      = black,
+           labelcolor = white,
+           labeltext  = red,
+           labelstyle = {sloped,draw,text=blue}]
 \end_preamble
 \options intoc,bibliography=totoc,index=totoc,BCOR10mm,captions=tableheading,titlepage
 \use_default_options true
 \master main.lyx
 \begin_modules
 customHeadersFooters
+natbibapa
 \end_modules
 \maintain_unincluded_children no
-\language english
+\language newzealand
 \language_package default
 \inputencoding utf8
 \fontencoding auto
@@ -93,16 +168,14 @@ customHeadersFooters
 \use_dash_ligatures false
 \graphics default
 \default_output_format default
-\output_sync 0
+\output_sync 1
 \bibtex_command bibtex
 \index_command default
 \float_placement h
-\float_alignment center
+\float_alignment class
 \paperfontsize 10
-\spacing single
+\spacing onehalf
 \use_hyperref true
-\pdf_title "Your title"
-\pdf_author "Your name"
 \pdf_bookmarks true
 \pdf_bookmarksnumbered true
 \pdf_bookmarksopen true
@@ -111,7 +184,7 @@ customHeadersFooters
 \pdf_pdfborder true
 \pdf_colorlinks false
 \pdf_backref false
-\pdf_pdfusetitle false
+\pdf_pdfusetitle true
 \pdf_quoted_options "pdfpagelayout=OneColumn, pdfnewwindow=true, pdfstartview=XYZ, plainpages=false"
 \papersize a4
 \use_geometry false
@@ -125,22 +198,47 @@ customHeadersFooters
 \use_package stackrel 1
 \use_package stmaryrd 1
 \use_package undertilde 1
-\cite_engine basic
-\cite_engine_type default
-\biblio_style plain
+\cite_engine natbib
+\cite_engine_type authoryear
+\biblio_style apacite
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
-\suppress_date false
+\suppress_date true
 \justification true
 \use_refstyle 0
 \use_formatted_ref 0
 \use_minted 0
 \use_lineno 0
-\branch Standalone
+\branch chapter-1
 \selected 1
 \filename_suffix 0
-\color #ff0000 #00ffff
+\color #ffaa00 #0055ff
+\end_branch
+\branch chapter-2
+\selected 1
+\filename_suffix 0
+\color #55aaff #aa5500
+\end_branch
+\branch Summary
+\selected 1
+\filename_suffix 0
+\color #7f7f7f #808080
+\end_branch
+\branch Acknowledgments
+\selected 1
+\filename_suffix 0
+\color #ffff00 #0000ff
+\end_branch
+\branch Appendix
+\selected 1
+\filename_suffix 0
+\color background background
+\end_branch
+\branch Standalone
+\selected 0
+\filename_suffix 0
+\color background background
 \end_branch
 \index Index
 \shortcut idx
@@ -328,6 +426,66 @@ name "chap:Introduction"
 
 \end_layout
 
+\begin_layout Section*
+1.1 Background
+\begin_inset CommandInset label
+LatexCommand label
+name "chap:Background"
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+In the field of forensic science the idea of a hierarchy of propositions is well established 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "Cook1998"
+literal "false"
+
+\end_inset
+
+.
+ There is a common understanding within the forensic community that the offence-level propositions are for the fact-finder (aka the judicial system/jury) to address
+\begin_inset CommandInset citation
+LatexCommand citet
+key "Jackson2019,Evett2002,Schaapveld2019"
+literal "false"
+
+\end_inset
+
+.
+ The area of remit for the forensic practitioner is the assessment of lower level propositions (activity,
+ source,
+ sub-source,
+ sub-sub-source).
+ This assessment is often provided to the fact-finder in the form of a Bayesian likelihood ratio describing a numerical amount of support for one of two mutually exclusive propositions.
+ In recent years,
+ as forensic analytical methods become accepted by the judicial system,
+ focus has turned to questions of how or when the analysed evidence was deposited
+\begin_inset CommandInset citation
+LatexCommand citet
+key "Jackson2019"
+literal "false"
+
+\end_inset
+
+.
+ Often lawyers pose questions in an effort to gain clarity from the statistical expert witness testimony or to find a method to find alternative explanations for the results.
+ A majority of respondents to a survey of forensic practitioners in the United States in 2022 had been asked to give testimony on DNA transfer (80%) or activity-level propositions (almost 60%) in the preceding three years 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "Yangetal2022"
+literal "false"
+
+\end_inset
+
+.
+ A following worldwide survey from the same group found Questions are generally put forward in the form of what the possibility/probability of a given scenario which could give rise to trace evidence transfer having occurred might be.
+ 
+\end_layout
+
 \begin_layout Section
 Overview of Bayesian Networks
 \begin_inset CommandInset label
@@ -371,39 +529,7 @@ nolink "false"
 \end_inset
 
  below.
- Each vertex's state is drawn from a finite set of possible states with some probability of observance.
- Vertex probabilities represent the complete set of possibilities for the vertex and are mutually exclusive.
- The probabilities of the states are stored in a table,
- either as probabilities conditional on the state of the parent vertices or,
- if there are no parents,
- as marginal probablities for the vertex.
- In this paper,
- for simplicity,
- these tables will be referred to as probability tables (PTs) in all cases.
- The PTs of each vertex are used to calculate the joint probability of a proposition by the equation in Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:jointProb"
-plural "false"
-caps "false"
-noprefix "false"
-nolink "false"
-
-\end_inset
-
- below.
- PTs can be filled from experiments by the practitioner that mimic case circumstances;
- published probabilities similar to the case;
- a range of reasonable values;
- or based on the practitioners prior experience or knowledge 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Schaapveld2019"
-literal "false"
-
-\end_inset
-
-.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -568,6 +694,42 @@ name "fig:simpleBN"
 \end_layout
 
 \begin_layout Standard
+Each vertex's state is drawn from a finite set of possible states with some probability of observance.
+ Vertex probabilities represent the complete set of possibilities for the vertex and are mutually exclusive.
+ The probabilities of the states are stored in a table,
+ either as probabilities conditional on the state of the parent vertices or,
+ if there are no parents,
+ as marginal or unconditional probabilities for the vertex.
+ In this paper,
+ for simplicity,
+ these tables will be referred to as conditional probability tables (CPTs) in all cases.
+ The CPTs of each vertex are used to calculate the joint probability of a proposition by the equation in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:jointProb"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ below.
+ CPTs can be filled from experiments by the practitioner that mimic case circumstances;
+ published probabilities similar to the case;
+ a range of reasonable values;
+ or based on the practitioners prior experience or knowledge 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Schaapveld2019"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 placement document
 alignment center
@@ -637,8 +799,8 @@ literal "false"
  Ongoing use is common in many fields,
  including epidemiology 
 \begin_inset CommandInset citation
-LatexCommand cite
-key "Taylor2024"
+LatexCommand citet
+key "TaylorH2024"
 literal "false"
 
 \end_inset
@@ -694,7 +856,26 @@ name "chap:BNsInFornesics"
 \end_layout
 
 \begin_layout Standard
-Bayesian Networks have been used in forensic science applications since the late 1980s 
+BNs can be used to support these 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "Evett2002"
+literal "false"
+
+\end_inset
+
+.
+ Information obtained from evidence at source-level and below is used to inform a framework of circumstances.
+ utilise the hierarchy of propositions to guide the description of relationships between vertices 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "Evett2002"
+literal "false"
+
+\end_inset
+
+.
+ Bayesian Networks have been used in forensic science applications since the late 1980s 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "BiedermanTaroni2012"
@@ -704,7 +885,8 @@ literal "false"
 
 .
  Initially,
- as a means of inferring profiles from mixed DNA samples they began to be used to represent the relationships between different factors of other systems.
+ as a means of investigating sub-source propositions such as the inference of profiles from mixed DNA samples,
+ they began to be used to represent the relationships at higher levels as scientists found them to be a useful method of explaining the interaction of the pertinent evidence.
  
 \end_layout
 
