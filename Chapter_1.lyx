@@ -236,7 +236,7 @@ natbibapa
 \color background background
 \end_branch
 \branch Standalone
-\selected 0
+\selected 1
 \filename_suffix 0
 \color background background
 \end_branch
@@ -440,16 +440,16 @@ name "chap:Background"
 \begin_layout Standard
 In the field of forensic science the idea of a hierarchy of propositions is well established 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Cook1998"
 literal "false"
 
 \end_inset
 
 .
- There is a common understanding within the forensic community that the offence-level propositions are for the fact-finder (aka the judicial system/jury) to address
+ There is a common understanding within the forensic community that the offence-level propositions are for the fact-finder (aka the judicial system/jury) to address 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Jackson2019,Evett2002,Schaapveld2019"
 literal "false"
 
@@ -461,11 +461,86 @@ literal "false"
  sub-source,
  sub-sub-source).
  This assessment is often provided to the fact-finder in the form of a Bayesian likelihood ratio describing a numerical amount of support for one of two mutually exclusive propositions.
- In recent years,
- as forensic analytical methods become accepted by the judicial system,
- focus has turned to questions of how or when the analysed evidence was deposited
+ There is still some reticence within the global forensic community on who the appropriate assessor of activity-level propositions should be with some practitioners felling that it is not within the remit of a forensic practitioner 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
+key "Prinzetal2024"
+literal "false"
+
+\end_inset
+
+.
+ However more than half (56%) of global forensic practitioners that were surveyed in 2024 held the opinion is that it is the role of the forensic expert witness to speak to possible activities that result in the detection of trace DNA evidence (defined as evidence with no obvious attributable body fluid source) 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Prinzetal2024"
+literal "false"
+
+\end_inset
+
+.
+ Members of a judiciary system are likely to misunderstand the weight of evidence that should be given to source-level or lower findings without training in the consideration of what the pertinent question of interest is for a case 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ENFSI2016"
+literal "false"
+
+\end_inset
+
+.
+ For example,
+ if a suspect is the owner of a vehicle used in a crime,
+ whether their DNA is a match to that recovered from the steering wheel may be irrelevant to the question of who committed the crime.
+\end_layout
+
+\begin_layout Standard
+Bayesian statistics is based on the premise of belief in some information 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Bolstad2016"
+literal "false"
+
+\end_inset
+
+.
+ Collected data is analysed in the presence of a person's pre-existing knowledge and prior experiences.
+ In Bayesian statistics,
+ this prior knowledge or belief in a situation is depicted using of a prior probability distribution which is used to determine the plausibility of the prior belief when faced with new data 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Bolstad2016"
+literal "false"
+
+\end_inset
+
+.
+ Forensic applications face complications due to the highly dynamic nature of crime,
+ where no two cases will be exactly the same.
+ In some cases,
+ the question of interest will be treated as having been likely to occur with equal probability or disregarding prior knowledge,
+ such as in the process of determining the likelihood of two competing propositions where each can be considered equally plausible prior to examining evidence.
+ Others may have a vast array of pre-existing knowledge,
+ such as allele frequencies in the local population in determining the likelihood of a DNA profile.
+ However,
+ there is a number of cases,
+ such as during the assessment of activity-level propositions,
+ when the question has little or no supporting data to inform it.
+ When independently analysing a case,
+ the single data point that is presented will have very little impact if there is a lot of pre-existing knowledge,
+ and will be highly impactful if there is very little existing knowledge.
+ The values that describe the prior distribution are then highly subjective to the analysts existing knowledge and awareness of published literature.
+ This makes it extremely difficult to gain consensus across the forensic community,
+ which may lead to disagreements between experts in the courtroom,
+ complicating the the decision to be made by the fact-finder.
+ 
+\end_layout
+
+\begin_layout Standard
+In recent years,
+ as forensic analytical methods become accepted by the judicial system,
+ focus has turned from source level propositions to questions of how or when the analysed evidence was deposited 
+\begin_inset CommandInset citation
+LatexCommand citep
 key "Jackson2019"
 literal "false"
 
@@ -473,17 +548,18 @@ literal "false"
 
 .
  Often lawyers pose questions in an effort to gain clarity from the statistical expert witness testimony or to find a method to find alternative explanations for the results.
+ Questions are generally put forward in the form of what the possibility/probability of a given scenario which could give rise to trace evidence transfer having occurred might be.
  A majority of respondents to a survey of forensic practitioners in the United States in 2022 had been asked to give testimony on DNA transfer (80%) or activity-level propositions (almost 60%) in the preceding three years 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Yangetal2022"
 literal "false"
 
 \end_inset
 
 .
- A following worldwide survey from the same group found Questions are generally put forward in the form of what the possibility/probability of a given scenario which could give rise to trace evidence transfer having occurred might be.
- 
+ A following worldwide survey from the same group found [ufytdufygik].
+ The problem with addressing such questions in the courtroom is that opinion that is given is not backed by a robust statistical support framework and has not been per-reviewed to ensure consistency and accuracy.
 \end_layout
 
 \begin_layout Section
@@ -508,7 +584,7 @@ A Bayesian Network (BN) is statistical model that combines probability theory an
  the edges have an explicitly stated direction of relationship and there is no feedback loop between any two vertices.
  Note should be taken that edges do not necessarily indicate causation in a BN 
 \begin_inset CommandInset citation
-LatexCommand cite
+LatexCommand citep
 key "Lemmer2013,BiedermanTaroni2012"
 literal "false"
 
@@ -720,7 +796,7 @@ nolink "false"
  a range of reasonable values;
  or based on the practitioners prior experience or knowledge 
 \begin_inset CommandInset citation
-LatexCommand cite
+LatexCommand citep
 key "Schaapveld2019"
 literal "false"
 
@@ -787,7 +863,7 @@ BNs show an interesting characteristic that the state of a vertex is conditional
 This architecture can be used to infer about a proposition by using the relationships to calculate the joint probability of the proposition across the nodes of the BN.
  This makes them ideal for scenario testing in forensic investigations 
 \begin_inset CommandInset citation
-LatexCommand cite
+LatexCommand citep
 key "Vlek2015"
 literal "false"
 
@@ -799,16 +875,16 @@ literal "false"
  Ongoing use is common in many fields,
  including epidemiology 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "TaylorH2024"
 literal "false"
 
 \end_inset
 
 ,
- construction
+ construction 
 \begin_inset CommandInset citation
-LatexCommand cite
+LatexCommand citep
 key "Sridhar2024"
 literal "false"
 
@@ -818,7 +894,7 @@ literal "false"
  compiler design ,
  process/data flow mapping 
 \begin_inset CommandInset citation
-LatexCommand cite
+LatexCommand citep
 key "Astronomer2024"
 literal "false"
 
@@ -828,7 +904,7 @@ literal "false"
  cryptocurrency,
  and more 
 \begin_inset CommandInset citation
-LatexCommand cite
+LatexCommand citep
 key "BiedermanTaroni2012"
 literal "false"
 
@@ -858,7 +934,7 @@ name "chap:BNsInFornesics"
 \begin_layout Standard
 BNs can be used to support these 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Evett2002"
 literal "false"
 
@@ -868,7 +944,7 @@ literal "false"
  Information obtained from evidence at source-level and below is used to inform a framework of circumstances.
  utilise the hierarchy of propositions to guide the description of relationships between vertices 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Evett2002"
 literal "false"
 
@@ -877,7 +953,7 @@ literal "false"
 .
  Bayesian Networks have been used in forensic science applications since the late 1980s 
 \begin_inset CommandInset citation
-LatexCommand cite
+LatexCommand citep
 key "BiedermanTaroni2012"
 literal "false"
 
@@ -895,7 +971,7 @@ Concerns around the use of BNs in forensics include the subjectivity of the CPTs
  Why certain publications were used,
  and Assessment of the network to determine the effect of the values used is important to ensure the evaluation is robust and limitations are understood 
 \begin_inset CommandInset citation
-LatexCommand cite
+LatexCommand citep
 key "Schaapveld2019,ChenPollino2012"
 literal "false"
 
@@ -948,7 +1024,7 @@ e.,
 LatexCommand bibtex
 btprint "btPrintCited"
 bibfiles "library"
-options "plain"
+options "apacite"
 encoding "default"
 
 \end_inset
