@@ -168,10 +168,10 @@ natbibapa
 \use_dash_ligatures false
 \graphics default
 \default_output_format default
-\output_sync 1
+\output_sync 0
 \bibtex_command bibtex
 \index_command default
-\float_placement h
+\float_placement H
 \float_alignment class
 \paperfontsize 10
 \spacing onehalf
@@ -459,42 +459,9 @@ literal "false"
  The area of remit for the forensic practitioner is the assessment of lower level propositions (activity,
  source,
  sub-source,
- sub-sub-source).
- This assessment is often provided to the fact-finder in the form of a Bayesian likelihood ratio describing a numerical amount of support for one of two mutually exclusive propositions.
- There is still some reticence within the global forensic community on who the appropriate assessor of activity-level propositions should be with some practitioners felling that it is not within the remit of a forensic practitioner 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "Prinzetal2024"
-literal "false"
-
-\end_inset
-
-.
- However more than half (56%) of global forensic practitioners that were surveyed in 2024 held the opinion is that it is the role of the forensic expert witness to speak to possible activities that result in the detection of trace DNA evidence (defined as evidence with no obvious attributable body fluid source) 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "Prinzetal2024"
-literal "false"
-
-\end_inset
-
-.
- Members of a judiciary system are likely to misunderstand the weight of evidence that should be given to source-level or lower findings without training in the consideration of what the pertinent question of interest is for a case 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "ENFSI2016"
-literal "false"
-
-\end_inset
-
-.
- For example,
- if a suspect is the owner of a vehicle used in a crime,
- whether their DNA is a match to that recovered from the steering wheel may be irrelevant to the question of who committed the crime.
-\end_layout
-
-\begin_layout Standard
-Bayesian statistics is based on the premise of belief in some information 
+ and sub-sub-source).
+ In many jurisdictions this assessment is provided to the fact-finder in the form of a Bayesian likelihood ratio describing a numerical amount of support for one of at least two mutually exclusive propositions.
+ Bayesian statistics is based on the premise of belief in some information 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Bolstad2016"
@@ -514,8 +481,97 @@ literal "false"
 \end_inset
 
 .
+ The use of Bayesian statistics in forensic science intuitively aligns with the way that judicial systems decide on criminal culpability 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Shengelia2021"
+literal "false"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+In recent years,
+ as forensic analytical methods become accepted by the judicial system,
+ focus has turned from source level propositions to questions of how or when the analysed evidence was deposited 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Jackson2019"
+literal "false"
+
+\end_inset
+
+.
+ There is still some reticence within the global forensic community on who the appropriate assessor of activity-level propositions should be with some practitioners feeling that it is not within the remit of a forensic practitioner 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Prinzetal2024"
+literal "false"
+
+\end_inset
+
+.
+ However more than half (56%) of global forensic practitioners that were surveyed in 2024 held the opinion is that it is the role of the forensic expert witness to speak to possible activities that result in the detection of trace DNA evidence (defined as evidence with no obvious attributable body fluid source) 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Prinzetal2024"
+literal "false"
+
+\end_inset
+
+.
+ Often lawyers pose questions in an effort to gain clarity from the statistical expert witness testimony or to find a method to find alternative explanations for the results.
+ Questions are generally put forward in the form of what the possibility/probability of a given scenario which could give rise to trace evidence transfer having occurred might be.
+ A majority of respondents to a survey of forensic practitioners in the United States in 2022 had been asked to give testimony on DNA transfer (80%) or activity-level propositions (almost 60%) in the preceding three years 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Yangetal2022"
+literal "false"
+
+\end_inset
+
+.
+ A following worldwide survey from the same group found testimony on DNA transfer (almost 68% of respondents),
+ activity-level propositions (51% of respondents) and consideration of DNA given possible activities (59% of respondents) has been widespread over the last three years 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Prinzetal2024"
+literal "false"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The problem with addressing such questions in the courtroom is that opinion that is given is not backed by a robust statistical support framework and has not been peer-reviewed to ensure consistency and accuracy.
+ Members of a judiciary system are likely to misunderstand the weight of evidence that should be given to source-level or lower findings without training in the consideration of what the pertinent question of interest is for a case 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "ENFSI2016"
+literal "false"
+
+\end_inset
+
+.
+ For example,
+ if a suspect is the owner of a vehicle used in a crime,
+ whether their DNA is a match to that recovered from the steering wheel may be irrelevant to the question of who committed the crime.
  Forensic applications face complications due to the highly dynamic nature of crime,
  where no two cases will be exactly the same.
+ The analyst is also usually unable to obtain Choosing appropriate prior distributions and likelihood values are forced to rely on a framework of assumptions 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Biedermann2009"
+literal "false"
+
+\end_inset
+
+.
  In some cases,
  the question of interest will be treated as having been likely to occur with equal probability or disregarding prior knowledge,
  such as in the process of determining the likelihood of two competing propositions where each can be considered equally plausible prior to examining evidence.
@@ -533,33 +589,6 @@ literal "false"
  which may lead to disagreements between experts in the courtroom,
  complicating the the decision to be made by the fact-finder.
  
-\end_layout
-
-\begin_layout Standard
-In recent years,
- as forensic analytical methods become accepted by the judicial system,
- focus has turned from source level propositions to questions of how or when the analysed evidence was deposited 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "Jackson2019"
-literal "false"
-
-\end_inset
-
-.
- Often lawyers pose questions in an effort to gain clarity from the statistical expert witness testimony or to find a method to find alternative explanations for the results.
- Questions are generally put forward in the form of what the possibility/probability of a given scenario which could give rise to trace evidence transfer having occurred might be.
- A majority of respondents to a survey of forensic practitioners in the United States in 2022 had been asked to give testimony on DNA transfer (80%) or activity-level propositions (almost 60%) in the preceding three years 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "Yangetal2022"
-literal "false"
-
-\end_inset
-
-.
- A following worldwide survey from the same group found [ufytdufygik].
- The problem with addressing such questions in the courtroom is that opinion that is given is not backed by a robust statistical support framework and has not been per-reviewed to ensure consistency and accuracy.
 \end_layout
 
 \begin_layout Section
@@ -932,7 +961,7 @@ name "chap:BNsInFornesics"
 \end_layout
 
 \begin_layout Standard
-BNs can be used to support these 
+BNs can be used to support the assessment of opposing propositions 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Evett2002"
@@ -941,7 +970,7 @@ literal "false"
 \end_inset
 
 .
- Information obtained from evidence at source-level and below is used to inform a framework of circumstances.
+ Information obtained from evidence is used to inform a framework of circumstances.
  utilise the hierarchy of propositions to guide the description of relationships between vertices 
 \begin_inset CommandInset citation
 LatexCommand citep
