@@ -588,7 +588,19 @@ literal "false"
  This makes it extremely difficult to gain consensus across the forensic community,
  which may lead to disagreements between experts in the courtroom,
  complicating the the decision to be made by the fact-finder.
- 
+ Kokshoorn et al (2018) have attempted to address the issue by creating a publicly available spreadsheet database called 'DNA-TrAC'.
+ DNA-TrAC,
+ a collection of summary information about published DNA transfer,
+ persistence,
+ prevalence and recovery (TPPR) studies to enable practitioners from around the world to be aware of all existing literature on the topic 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "DNA-TRAC2018"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
