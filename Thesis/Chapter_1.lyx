@@ -3,7 +3,7 @@
 \begin_document
 \begin_header
 \save_transient_properties true
-\origin unavailable
+\origin "C:/Users/jstacey/OneDrive - ESR/WorkStuff/Projects/PhD/Thesis/"
 \textclass scrbook
 \begin_preamble
 % in case somebody want to have the label "Equation"
@@ -664,7 +664,10 @@ status open
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename assets/simpleBN.png
-	BoundingBox 0bp 0bp 104bp 297bp
+	lyxscale 15
+	width 3cm
+	height 3cm
+	keepAspectRatio
 	groupId simpleBN
 
 \end_inset

@@ -5,6 +5,6 @@ Creating tikz pictures
 	- use pdflatex to compile tex to pdf
 	`pdflatex Ch1pic.tex -synctex=1 -interaction=nonstopmode -shell-escape`
 	- convert pdf to png with ImageMagick 7
-	`magick -background white Ch1pic.pdf simpleBN.png`
+	`magick -background white -density 600 Thesis\\Ch1pic.pdf Thesis\\assets\\simpleBN.png`
 	- save png into assets directory
 	- insert png into thesis 
