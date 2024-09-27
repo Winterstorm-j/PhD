@@ -898,7 +898,7 @@ literal "false"
 
 .
  However,
- contributing to DNA-TrAC is voluntary and so the collection is limited and updates sporadic.
+ contributing to DNA-TrAC is voluntary and so the collection is limited and updates occur sporadically.
 \end_layout
 
 \begin_layout Standard
@@ -916,8 +916,9 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-As networks become more complex there has been a move to the use of object-oriented Bayesian Networks (OOBNs),
- which allow the embedding of sub-networks within the larger network.
+As networks become more complex there has been a move to save sub-networks of common processes to allow for reuse in other networks.
+ These are termed object-oriented Bayesian Networks (OOBNs),
+ which has opened the door to the creation of highly complex and large networks by embedding the sub-networks within the larger network.
 \end_layout
 
 \begin_layout Standard
