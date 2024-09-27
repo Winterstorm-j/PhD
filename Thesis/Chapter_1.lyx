@@ -460,8 +460,13 @@ literal "false"
  source,
  sub-source,
  and sub-sub-source).
- In many jurisdictions this assessment is provided to the fact-finder in the form of a Bayesian likelihood ratio describing a numerical amount of support for one of at least two mutually exclusive propositions.
- Bayesian statistics is based on the premise of belief in some information 
+ In many jurisdictions,
+ this assessment is provided to the fact-finder in the form of a Bayesian likelihood ratio describing a numerical amount of support for one of two mutually exclusive propositions.
+ 
+\end_layout
+
+\begin_layout Standard
+Bayesian statistics is based on the premise of belief in some information 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Bolstad2016"
@@ -561,50 +566,7 @@ literal "false"
  For example,
  if a suspect is the owner of a vehicle used in a crime,
  whether their DNA is a match to that recovered from the steering wheel may be irrelevant to the question of who committed the crime.
- Forensic applications face complications due to the highly dynamic nature of crime,
- where no two cases will be exactly the same.
- Choosing appropriate prior distributions and likelihood values are forced to rely on a framework of assumptions 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "Biedermann2009"
-literal "false"
-
-\end_inset
-
-.
- In some cases,
- the question of interest will be treated as having been likely to occur with equal probability or disregarding prior knowledge,
- such as in the process of determining the likelihood of two competing propositions where each can be considered equally plausible prior to examining evidence.
- Others may have a vast array of pre-existing knowledge,
- such as allele frequencies in the local population in determining the likelihood of a DNA profile.
- However,
- there is a number of cases,
- such as during the assessment of activity-level propositions,
- when the question has little or no supporting data to inform it.
- In the absence of an non-coerced confession from a suspect,
- the ground-truth of all instantiations of a network can not be known (ie whether a suspect's DNA was on the knife handle from the incident rather than coincidentally).
- As such,
- previous casework samples cannot be used to inform prior probabilities for any node.
- When independently analysing a case,
- the single data point that is presented will have very little impact if there is a lot of pre-existing knowledge,
- and will be highly impactful if there is very little existing knowledge.
- The values that describe the prior distribution are then highly subjective to the analysts existing knowledge and awareness of published literature.
- This makes it extremely difficult to gain consensus across the forensic community,
- which may lead to disagreements between experts in the courtroom,
- complicating the the decision to be made by the fact-finder.
- Kokshoorn et al (2018) have attempted to address the issue by creating a publicly available spreadsheet database called 'DNA-TrAC'.
- DNA-TrAC,
- a collection of summary information about published transfer,
- persistence,
- prevalence and recovery (TPPR) studies for DNA to enable practitioners from around the world to be aware of all existing literature on the topic 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "DNA-TRAC2018"
-literal "false"
-
-\end_inset
-
-.
+ 
 \end_layout
 
 \begin_layout Section
@@ -627,7 +589,8 @@ A Bayesian Network (BN) is statistical model that combines probability theory an
  A DAG depicts relationships by denoting nodes (also known as vertices) connected to each other with arcs known as edges.
  In a DAG,
  the edges have an explicitly stated direction of relationship and there is no feedback loop between any two vertices.
- Note should be taken that edges do not necessarily indicate causation in a BN 
+ In BNs,
+ edges do not necessarily indicate causation 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Lemmer2013,BiedermanTaroni2012"
@@ -869,8 +832,7 @@ literal "false"
 \end_inset
 
 .
- Information obtained from evidence is used to inform a framework of circumstances.
- utilise the hierarchy of propositions to guide the description of relationships between vertices 
+ Information obtained from evidence is used to inform a framework of circumstances and utilises the hierarchy of propositions to guide the description of relationships between vertices 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Evett2002"
@@ -891,13 +853,56 @@ literal "false"
  Initially,
  as a means of investigating sub-source propositions such as the inference of profiles from mixed DNA samples,
  they began to be used to represent the relationships at higher levels as scientists found them to be a useful method of explaining the interaction of the pertinent evidence.
- 
+ Forensic applications face complications due to the highly dynamic nature of crime,
+ where no two cases will be exactly the same.
+ Concerns around the use of BNs in forensics include the subjectivity of the CPTs in networks assembled by different practitioners.
+ Choosing appropriate prior distributions and likelihood values are forced to rely on a framework of assumptions 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Biedermann2009"
+literal "false"
+
+\end_inset
+
+.
+ In some cases,
+ the question of interest will be treated as having been likely to occur with equal probability or disregarding prior knowledge,
+ such as in the process of determining the likelihood of two competing propositions where each can be considered equally plausible prior to examining evidence.
+ Others may have a vast array of pre-existing knowledge,
+ such as allele frequencies in the local population in determining the likelihood of a DNA profile.
+ However,
+ there is a number of cases,
+ such as during the assessment of activity-level propositions,
+ when the question has little or no supporting data to inform it.
+ In the absence of an non-coerced confession from a suspect,
+ the ground-truth of all instantiations of a network can not be known (ie whether a suspect's DNA was on the knife handle from the incident rather than coincidentally).
+ As such,
+ previous casework samples cannot be used to inform prior probabilities for any node.
+ When independently analysing a case,
+ the single data point that is presented will have very little impact if there is a lot of pre-existing knowledge,
+ and will be highly impactful if there is very little existing knowledge.
+ The values that describe the prior distribution are then highly subjective to the analysts existing knowledge and awareness of published literature.
+ This makes it extremely difficult to gain consensus across the forensic community,
+ which may lead to disagreements between experts in the courtroom,
+ complicating the the decision to be made by the fact-finder.
+ Kokshoorn et al (2018) have attempted to address the issue by creating a publicly available spreadsheet database called 'DNA-TrAC'.
+ It is a collection of summary information about published transfer,
+ persistence,
+ prevalence and recovery (TPPR) studies for DNA to enable practitioners from around the world to be aware of existing literature on the topic 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "DNA-TRAC2018"
+literal "false"
+
+\end_inset
+
+.
+ However,
+ contributing to DNA-TrAC is voluntary and so the collection is limited and updates sporadic.
 \end_layout
 
 \begin_layout Standard
-Concerns around the use of BNs in forensics include the subjectivity of the CPTs in networks assembled by different practitioners.
- Why certain publications were used,
- and Assessment of the network to determine the effect of the values used is important to ensure the evaluation is robust and limitations are understood 
+Assessment of the network to determine the effect of the values used is important to ensure the evaluation is robust and limitations are understood 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Schaapveld2019,ChenPollino2012"
