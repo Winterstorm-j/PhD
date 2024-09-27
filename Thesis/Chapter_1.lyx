@@ -563,7 +563,7 @@ literal "false"
  whether their DNA is a match to that recovered from the steering wheel may be irrelevant to the question of who committed the crime.
  Forensic applications face complications due to the highly dynamic nature of crime,
  where no two cases will be exactly the same.
- The analyst is also usually unable to obtain Choosing appropriate prior distributions and likelihood values are forced to rely on a framework of assumptions 
+ Choosing appropriate prior distributions and likelihood values are forced to rely on a framework of assumptions 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Biedermann2009"
@@ -581,6 +581,10 @@ literal "false"
  there is a number of cases,
  such as during the assessment of activity-level propositions,
  when the question has little or no supporting data to inform it.
+ In the absence of an non-coerced confession from a suspect,
+ the ground-truth of all instantiations of a network can not be known (ie whether a suspect's DNA was on the knife handle from the incident rather than coincidentally).
+ As such,
+ previous casework samples cannot be used to inform prior probabilities for any node.
  When independently analysing a case,
  the single data point that is presented will have very little impact if there is a lot of pre-existing knowledge,
  and will be highly impactful if there is very little existing knowledge.
@@ -590,9 +594,9 @@ literal "false"
  complicating the the decision to be made by the fact-finder.
  Kokshoorn et al (2018) have attempted to address the issue by creating a publicly available spreadsheet database called 'DNA-TrAC'.
  DNA-TrAC,
- a collection of summary information about published DNA transfer,
+ a collection of summary information about published transfer,
  persistence,
- prevalence and recovery (TPPR) studies to enable practitioners from around the world to be aware of all existing literature on the topic 
+ prevalence and recovery (TPPR) studies for DNA to enable practitioners from around the world to be aware of all existing literature on the topic 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "DNA-TRAC2018"
@@ -652,136 +656,16 @@ nolink "false"
 \begin_layout Standard
 \begin_inset Float figure
 placement document
-alignment document
+alignment center
 wide false
 sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-center
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{tikzpicture}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-SetUpEdge[lw = 1.5pt,
-\end_layout
-
-\begin_layout Plain Layout
-
-           color = blue]
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-SetGraphUnit{3}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-tikzset{vertex/.style={font = 
-\backslash
-sffamily
-\backslash
-bfseries,
-\end_layout
-
-\begin_layout Plain Layout
-
-			 text = white,shape = circle,
-\end_layout
-
-\begin_layout Plain Layout
-
-             fill = blue,
-\end_layout
-
-\begin_layout Plain Layout
-
-             very thick}}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-node[vertex](A) at (3.5,3){A};
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-node[vertex](B) at (6.5,3){B};
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-node[vertex](C) at (5,1.5){C};
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-node[vertex](D) at (5,0){D};
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-tikzset{EdgeStyle/.style={->}}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-Edge(B)(C)
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-Edge(C)(D)
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-Edge(A)(C)
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{tikzpicture}
-\end_layout
+\begin_inset Graphics
+	filename assets/simpleBN.png
+	BoundingBox 0bp 0bp 104bp 297bp
+	groupId simpleBN
 
 \end_inset
 

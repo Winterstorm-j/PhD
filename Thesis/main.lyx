@@ -171,7 +171,7 @@ natbibapa
 \output_sync 0
 \bibtex_command bibtex
 \index_command default
-\float_placement h
+\float_placement H
 \float_alignment class
 \paperfontsize 10
 \spacing onehalf
@@ -364,7 +364,7 @@ Janet Stacey
 
 
 \begin_inset Graphics
-	filename University_of_Auckland_Coat_of_Arms.png
+	filename assets/University_of_Auckland_Coat_of_Arms.png
 	lyxscale 25
 	scale 25
 	groupId logo
@@ -424,7 +424,7 @@ height "0.5pt"
 \size scriptsize
 A thesis submitted in fulfilment of the requirements for the degree of Doctor of Philosophy in Forensic Science,
  the University of Auckland,
- 2024.
+ 2026.
  This thesis is for examination purposes only and is confidential to the examination process.
 \end_layout
 
@@ -711,7 +711,7 @@ literal "true"
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
