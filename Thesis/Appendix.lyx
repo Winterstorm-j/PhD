@@ -3,7 +3,7 @@
 \begin_document
 \begin_header
 \save_transient_properties true
-\origin unavailable
+\origin "C:/Users/jstacey/OneDrive - ESR/WorkStuff/Projects/PhD/Thesis/"
 \textclass scrbook
 \begin_preamble
 % in case somebody want to have the label "Equation"
@@ -315,11 +315,11 @@ thepage
 \end_layout
 
 \begin_layout Chapter
-Title of the first appendix chapter
+Appendices
 \end_layout
 
 \begin_layout Section
-Overview
+Appendix 1 - Title
 \end_layout
 
 \begin_layout Standard
@@ -352,7 +352,7 @@ For nomenclature entries with indices one need to enclose the expression with $-
 \end_layout
 
 \begin_layout Section
-The next section
+Appendix 2 - Title
 \end_layout
 
 \begin_layout Standard

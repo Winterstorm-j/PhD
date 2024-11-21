@@ -3,7 +3,7 @@
 \begin_document
 \begin_header
 \save_transient_properties true
-\origin unavailable
+\origin "C:/Users/jstacey/OneDrive - ESR/WorkStuff/Projects/PhD/Thesis/"
 \textclass scrbook
 \begin_preamble
 % in case somebody want to have the label "Equation"
@@ -68,22 +68,20 @@
 \usepackage{algorithmic}
 \usepackage{cmap}
 \usepackage{wrapfig}
-% \usepackage{algpseudocode}
+%\usepackage{algpseudocode}
 \usepackage{amssymb}
 \usepackage{moreverb}
 \usepackage{setspace}
 \usepackage{booktabs}
 \usepackage{url}
-\usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{adjustbox}
 \usepackage{tabularx}
 \usepackage{tabularray}
 \usepackage{multicol}
-% \usepackage{caption}
+%\usepackage{caption}
 \usepackage{listings}
 \usepackage{subcaption}
-\usepackage{tabularx}
 \usepackage[inline]{enumitem}
 \usepackage[table,usenames,dvipsnames]{xcolor}
 \usepackage{cleveref}
@@ -92,15 +90,10 @@
 \usepackage[acronym]{glossaries}
 \usepackage{glossary-mcols}
 \usepackage[utf8]{inputenc}
-\usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{fullpage}
 \usepackage[upright]{fourier}
 \usepackage{tkz-graph}
 \usetikzlibrary{arrows}
-\renewcommand*{\glspostdescription}{} % Removes dots at the end of each entry.
-
-\renewcommand{\glossarypreamble}{\vspace*{-4em}}
-
 \usepackage[Lenny]{fncychap}
 \ChNameVar{\fontsize{18}{20}\usefont{OT1}{ptm}{m}{n}\selectfont}
 % \ChNumVar{\huge\bfseries\fontfamily{ptm}\selectfont}
@@ -119,6 +112,11 @@
 \renewcommand\topfraction{.9}
 \renewcommand\bottomfraction{.9}
 \renewcommand\textfraction{.1}
+
+\renewcommand*{\glspostdescription}{} % Removes dots at the end of each entry.
+\renewcommand{\glossarypreamble}{\vspace*{-4em}}
+%\renewcommand{\rule}[0.5ex]{0.98\columnwidth}
+
 \setcounter{totalnumber}{50}
 \setcounter{topnumber}{50}
 \setcounter{bottomnumber}{50}
@@ -237,6 +235,11 @@ natbibapa
 \end_branch
 \branch Standalone
 \selected 0
+\filename_suffix 0
+\color background background
+\end_branch
+\branch chapter-3
+\selected 1
 \filename_suffix 0
 \color background background
 \end_branch
@@ -366,7 +369,7 @@ Janet Stacey
 \begin_inset Graphics
 	filename assets/University_of_Auckland_Coat_of_Arms.png
 	lyxscale 25
-	scale 25
+	height 2cm
 	groupId logo
 
 \end_inset
@@ -843,6 +846,27 @@ literal "true"
 \end_layout
 
 \begin_layout Standard
+\begin_inset Branch chapter-3
+inverted 0
+status open
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "Chapter_3.lyx"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Newpage cleardoublepage
 \end_inset
 
@@ -859,7 +883,7 @@ status open
 
 \end_inset
 
-Acknowledgments
+Acknowledgements
 \begin_inset Note Note
 status collapsed
 
@@ -885,7 +909,7 @@ Acknowledgments
 status open
 
 \begin_layout Plain Layout
-Acknowledgments
+Acknowledgements
 \end_layout
 
 \end_inset
@@ -919,7 +943,7 @@ status open
 \begin_layout Standard
 \begin_inset CommandInset include
 LatexCommand include
-filename "Acknowledgments.lyx"
+filename "Acknowledgements.lyx"
 literal "true"
 
 \end_inset

@@ -6,3 +6,11 @@ STATS331/
 Thesis/Compiled/
 .vscode
 Presentations/
+*.xlsx
+*.pdf
+*.docx
+Thesis/Temp/*
+*.pdf
+Thesis/utils/
+*.tex
+

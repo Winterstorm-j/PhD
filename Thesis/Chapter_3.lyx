@@ -1,0 +1,459 @@
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin "C:/Users/jstacey/OneDrive - ESR/WorkStuff/Projects/PhD/Thesis/"
+\textclass scrbook
+\options intoc,bibliography=totoc,index=totoc,BCOR10mm,captions=tableheading,titlepage
+\use_default_options true
+\master main.lyx
+\begin_modules
+customHeadersFooters
+\end_modules
+\maintain_unincluded_children no
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding auto
+\font_roman "lmodern" "Times New Roman"
+\font_sans "lmss" "Arial"
+\font_typewriter "lmtt" "Courier New"
+\font_math "auto" "auto"
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command bibtex
+\index_command default
+\float_placement h
+\float_alignment class
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_title "Your title"
+\pdf_author "Your name"
+\pdf_bookmarks true
+\pdf_bookmarksnumbered true
+\pdf_bookmarksopen true
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder true
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle false
+\pdf_quoted_options "pdfpagelayout=OneColumn, pdfnewwindow=true, pdfstartview=XYZ, plainpages=false"
+\papersize a4
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\branch Standalone
+\selected 1
+\filename_suffix 0
+\color #ff0000 #00ffff
+\end_branch
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 1
+\math_indentation default
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\end_header
+
+\begin_body
+
+\begin_layout Left Header
+
+\lang newzealand
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+chaptername
+\end_layout
+
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+thechapter
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+rightmark
+\end_layout
+
+\end_inset
+
+
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Enable page headers and add the chapter to the header line.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Right Header
+
+\lang newzealand
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+leftmark
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Left Footer
+
+\lang newzealand
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+thepage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Center Footer
+
+\end_layout
+
+\begin_layout Right Footer
+
+\lang newzealand
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+thepage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+
+\lang newzealand
+Data Storage
+\end_layout
+
+\begin_layout Section
+
+\lang newzealand
+Overview
+\end_layout
+
+\begin_layout Standard
+
+\lang newzealand
+In order to ensure data integrity and optimal data processing speeds,
+ it is best practice that data used for a project is stored in a single ground-truth form that is secure and persistent.
+ The form that this takes is dependent on the amount of data;
+ how each piece of information relates to each other;
+ and how it will be used by an application.
+ This chapter outlines common database forms and sets out considerations in relation to their use in this project.
+\end_layout
+
+\begin_layout Section
+
+\lang newzealand
+Common database structures
+\end_layout
+
+\begin_layout Subsection
+
+\lang newzealand
+File-based database
+\end_layout
+
+\begin_layout Standard
+
+\lang newzealand
+In this type of data structure,
+ information is held within a single file such as a spreadsheet.
+ The data is stored as a single fixed table containing records as rows and features of the record as columns.
+ It is commonly used for small data sources as it is easy to view and maintain.
+ Drawbacks to this type of holding are:
+\end_layout
+
+\begin_layout Itemize
+
+\lang newzealand
+there is an upper limit to the number of records and number of features that can be held due to increasing file size.
+\end_layout
+
+\begin_layout Itemize
+
+\lang newzealand
+metadata about the record or relationships between records might be difficult to store and might be lost.
+\end_layout
+
+\begin_layout Itemize
+
+\lang newzealand
+careful management of data integrity is required for certain data types such as dates or highly precise numbers.
+\end_layout
+
+\begin_layout Itemize
+
+\lang newzealand
+as the size of the database increases,
+ the difficulty in finding information increases,
+ causing increasingly long query times that are not optimal for a in-production system.
+\end_layout
+
+\begin_layout Subsection
+
+\lang newzealand
+Relational databases
+\end_layout
+
+\begin_layout Standard
+
+\lang newzealand
+In relational databases,
+ information about a record is stored in multiple tables and an identifier is used as a key to map all information about a record across the different tables.
+ Relational databases are the standard structure for databases used by businesses to store their data.
+ They are very proficient at high throughput fast return of information using search queries.
+ However,
+ the time taken to query large databases for information increases as the number of records or tables increase.
+ A single relational database can grow complicated as features are added about a record and it can be difficult to visualise or explain the relationships.
+ 
+\end_layout
+
+\begin_layout Subsection
+
+\lang newzealand
+Vector databases
+\end_layout
+
+\begin_layout Standard
+
+\lang newzealand
+Vector databases use a transformation technique to store information as a single dimensional object that characterises the semantic understanding of each record.
+ These types of databases are used in semantic models to improve the return of search queries as a response is focussed on information similar to the query text.
+ Speed is optimised as a string of characters is easier for a computer to assess for similarity than a paragraph,
+ image or table of data.
+ A disadvantage of vector embedding is that meta-relationships between records is not maintained.
+ If similar words are used,
+ records may cluster together however understanding of higher topics of text or domains is lost.
+\end_layout
+
+\begin_layout Subsection
+
+\lang newzealand
+Graph database
+\end_layout
+
+\begin_layout Standard
+
+\lang newzealand
+Graph databases use graph theory to create a structure.
+ Record information is stored as nodes with properties depicting features of the record and relationships are characterised between nodes via labelled edges.
+ Graph databases are relatively new and are utilised for any large data where relationship is important,
+ recommendation models,
+ social media networks,
+ causation models.
+ To some extent,
+ they can be considered similar to an information heavy version of a Bayesian network architecture without the calculation of probabilities.
+ Graph databases use index-free adjacency so have a computation advantage over other database types when the the database is queried.
+ Relationships are stored when first added to the database in Graph databases,
+ unlike relational databases where these relationships are found during the query response in the form of joining datasets.
+ This means that the query time does not grow with more datapoints stored in graph databases as time is only required for the number of nodes and edges touched during the query.
+ Fewer index lookups are required and less duplication of data that is stored as an entity or record can become associated with new information through relationships and properties rather than the addition of a new record.
+ 
+\end_layout
+
+\begin_layout Subsection
+
+\lang newzealand
+Hybrid database architecture
+\end_layout
+
+\begin_layout Standard
+
+\lang newzealand
+As different database architecture arises,
+ there is a move to integrate the different types to maximise their combined benefits and minimise their drawbacks
+\end_layout
+
+\begin_layout Standard
+
+\lang newzealand
+\begin_inset Branch Standalone
+inverted 0
+status open
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+The contents of this branch is only output if this chapter is processed on its own,
+ i.
+\begin_inset space \thinspace{}
+\end_inset
+
+e.,
+ not from the master.
+ This allows you to have a bibliography and a nomenclature if you only want to output this chapter.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "library"
+options "apacite"
+encoding "default"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

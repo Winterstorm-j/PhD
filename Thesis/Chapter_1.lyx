@@ -6,139 +6,7 @@
 \origin "C:/Users/jstacey/OneDrive - ESR/WorkStuff/Projects/PhD/Thesis/"
 \textclass scrbook
 \begin_preamble
-% in case somebody want to have the label "Equation"
-%\renewcommand{\eqref}[1]{Equation~(\negthinspace\autoref{#1})}
 
-% that links to image floats jumps to the beginning
-% of the float and not to its caption
-\usepackage[figure]{hypcap}
-
-% the pages of the TOC is numbered roman
-% and a pdf-bookmark for the TOC is added
-\let\myTOC\tableofcontents
-\renewcommand\tableofcontents{%
-  \frontmatter
-  \pdfbookmark[1]{\contentsname}{}
-  \myTOC
-  \mainmatter }
-
-% makes caption labels bold
-% for more info about these settings, see
-% https://ctan.org/tex-archive/macros/latex/contrib/koma-script/doc/scrguien.pdf
-\setkomafont{captionlabel}{\bfseries}
-\setcapindent{1em}
-
-% enables calculations
-\usepackage{calc}
-
-% fancy page header/footer settings
-% for more information see section 9 of
-% http://www.ctan.org/tex-archive/macros/latex/contrib/fancyhdr/fancyhdr.pdf
-\renewcommand{\chaptermark}[1]{\markboth{#1}{#1}}
-\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
-
-% increases the bottom float placement fraction
-\renewcommand{\bottomfraction}{0.5}
-
-% avoids that floats are placed above its sections
-\let\mySection\section\renewcommand{\section}{\suppressfloats[t]\mySection}
-
-% increases link area for cross-references and autoname them
-% if you change the document language to e.g. French
-% you must change "extrasenglish" to "extrasfrench"
-% if you uncomment the following lines, you cannot use the reference version Ref+Text in LyX
-%\AtBeginDocument{%
-% \renewcommand{\ref}[1]{\autoref{#1}}
-%}
-%\def\refnamechanges{%
-% \renewcommand*{\equationautorefname}[1]{}
-% \renewcommand{\sectionautorefname}{sec.\negthinspace}
-% \renewcommand{\subsectionautorefname}{sec.\negthinspace}
-% \renewcommand{\subsubsectionautorefname}{sec.\negthinspace}
-% \renewcommand{\figureautorefname}{Fig.\negthinspace}
-% \renewcommand{\tableautorefname}{Tab.\negthinspace}
-%}
-%\@ifpackageloaded{babel}{\addto\extrasenglish{\refnamechanges}}{\refnamechanges}
-% Added by lyx2lyx
-\setlength{\parskip}{\medskipamount}
-\setlength{\parindent}{0pt}
-
-\usepackage{graphicx}
-\usepackage{algorithm}
-\usepackage{algorithmic}
-\usepackage{cmap}
-\usepackage{wrapfig}
-% \usepackage{algpseudocode}
-\usepackage{amssymb}
-\usepackage{moreverb}
-\usepackage{setspace}
-\usepackage{booktabs}
-\usepackage{url}
-\usepackage{amssymb}
-\usepackage{amsmath}
-\usepackage{adjustbox}
-\usepackage{tabularx}
-\usepackage{tabularray}
-\usepackage{multicol}
-% \usepackage{caption}
-\usepackage{listings}
-\usepackage{subcaption}
-\usepackage{tabularx}
-\usepackage[inline]{enumitem}
-\usepackage[table,usenames,dvipsnames]{xcolor}
-\usepackage{cleveref}
-\usepackage{rotating}
-\usepackage{makecell}
-\usepackage[acronym]{glossaries}
-\usepackage{glossary-mcols}
-\usepackage[utf8]{inputenc}
-\usepackage[usenames,dvipsnames]{xcolor}
-\usepackage{fullpage}
-\usepackage[upright]{fourier}
-\usepackage{tkz-graph}
-\usetikzlibrary{arrows}
-\renewcommand*{\glspostdescription}{} % Removes dots at the end of each entry.
-
-\renewcommand{\glossarypreamble}{\vspace*{-4em}}
-
-\usepackage[Lenny]{fncychap}
-\ChNameVar{\fontsize{18}{20}\usefont{OT1}{ptm}{m}{n}\selectfont}
-% \ChNumVar{\huge\bfseries\fontfamily{ptm}\selectfont}
-\ChTitleVar{\huge\bfseries\fontfamily{ptm}\selectfont}
-
-% \usepackage{titlesec}
-% \titleformat{\section}{\large\scshape}{\thesection}{1em}{}
-% \titleformat{\subsection}{\normalsize\scshape}{\thesubsection}{1em}{}
-% \titleformat{\subsubsection}{\normalsize\scshape}{}{0.5em}{}
-
-
-\newtheorem{definition}{Definition}
-\newcolumntype{Y}{>{\centering\arraybackslash}X}
-% some settings to fill pages more densely
-\renewcommand\floatpagefraction{.9}
-\renewcommand\topfraction{.9}
-\renewcommand\bottomfraction{.9}
-\renewcommand\textfraction{.1}
-\setcounter{totalnumber}{50}
-\setcounter{topnumber}{50}
-\setcounter{bottomnumber}{50}
-
-\definecolor{light-gray}{gray}{0.95}
-\newcommand{\code}[1]{\colorbox{light-gray}{\texttt{#1}}}
-
-\newlist{questions}{enumerate}{2}
-\setlist[questions,1]{label=\textit{RQ\arabic*.},ref=\textit{RQ\arabic*}}
-\setlist[questions,2]{label=(\alph*),ref=\thequestionsi(\alph*)}
-
-\renewcommand{\figurename}{Figure}
-\SetVertexNormal[Shape      = circle,
-                 FillColor  = orange,
-                 LineWidth  = 2pt]
-\SetUpEdge[lw         = 1.5pt,
-           color      = black,
-           labelcolor = white,
-           labeltext  = red,
-           labelstyle = {sloped,draw,text=blue}]
 \end_preamble
 \options intoc,bibliography=totoc,index=totoc,BCOR10mm,captions=tableheading,titlepage
 \use_default_options true
@@ -670,18 +538,6 @@ Each vertex's state is drawn from a finite set of possible states with some prob
  In this paper,
  for simplicity,
  these tables will be referred to as conditional probability tables (CPTs) in all cases.
- The CPTs of each vertex are used to calculate the joint probability of a proposition by the equation in Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:jointProb"
-plural "false"
-caps "false"
-noprefix "false"
-nolink "false"
-
-\end_inset
-
- below.
  CPTs can be filled from experiments by the practitioner that mimic case circumstances;
  published probabilities similar to the case;
  a range of reasonable values;
@@ -694,6 +550,40 @@ literal "false"
 \end_inset
 
 .
+ The CPTs of each vertex are used to calculate the joint probability of a proposition by the equation in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:jointProb"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ below.
+ This equation is based on an assumption known as the Markov Property that individual vertices are independent of all preceding vertices except its direct ancestors.
+ The Markov property enables a simplification to the joint probability calculation for a scenario as there can be a reduction made to the number of factors that are involved.
+ This is important as more complex BNs are developed as required computational power is a limiting factor constraining the usability of networks.
+ As computation power availability grows,
+ more complex BNs can be developed.
+ The Markov property creates a characteristic that the state of a vertex is conditional only on the state of its parents and not the state of any other vertex in the network,
+ known as conditional independence.
+ In 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:simpleBN"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ vertices A and D are conditionally independent.
+ Additionally,
+ the possible state that a child node may take may be dependant on the state of it's immediate parents,
+ a characteristic known as being conditionally dependant.
 \end_layout
 
 \begin_layout Standard
@@ -707,7 +597,7 @@ status open
 \begin_layout Plain Layout
 \begin_inset Formula 
 \[
-{\displaystyle P(A_{1},A_{i},...,A_{n})=\mathop{\prod_{i=2}^{n}}P(A_{i}|par(A_{i}))}
+{\displaystyle P(A_{1},A_{i},...,A_{n})=\mathop{P(A_{1})\prod_{i=2}^{n}}P(A_{i}|par(A_{i}))}
 \]
 
 \end_inset
@@ -740,14 +630,6 @@ name "eq:jointProb"
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-BNs show an interesting characteristic that the state of a vertex is conditional only on the state of its parents and not the state of any other vertex in the network,
- a characteristic known as conditional independence.
- This characteristic enables a reduction in the number of factors that need to be incorporated into the joint probability calculation for scenarios.
- As computation power availability grows,
- more complex BNs can be developed.
 \end_layout
 
 \begin_layout Standard
@@ -797,6 +679,39 @@ literal "false"
 \begin_inset CommandInset citation
 LatexCommand citep
 key "BiedermanTaroni2012"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+As vertices are treated as independent random variables following a multinomial distribution,
+ the likelihood values within a Bayesian Network can be described using a named probability distribution,
+ the Dirichlet distribution.,
+ The Dirichlet distribution is a multivariate generalisation of the Beta distribution and acts as a conjugate prior distribution for the multinomial distribution
+\begin_inset CommandInset citation
+LatexCommand citep
+key "kotz_chapter_2019"
+literal "false"
+
+\end_inset
+
+.
+ Using a value of one for the concentration parameter (denoted by the Greek letter α) of a Dirichlet distribution is equivalent to using a multivariate version of a uniform flat prior distribution to allow a situation where no prior knowledge is known
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Taylor2016,kotz_chapter_2019"
+literal "false"
+
+\end_inset
+
+.
+ This can be used to test sensitivity of the resultant LR to the CPT information that is used in a given vertex 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "kotz_chapter_2019,Taylor2016"
 literal "false"
 
 \end_inset
@@ -876,16 +791,31 @@ literal "false"
  when the question has little or no supporting data to inform it.
  In the absence of an non-coerced confession from a suspect,
  the ground-truth of all instantiations of a network can not be known (ie whether a suspect's DNA was on the knife handle from the incident rather than coincidentally).
- As such,
- previous casework samples cannot be used to inform prior probabilities for any node.
+ Due to the highly dynamic nature of crime,
+ previous casework samples cannot be reliably used to inform prior probabilities for any node.
  When independently analysing a case,
  the single data point that is presented will have very little impact if there is a lot of pre-existing knowledge,
  and will be highly impactful if there is very little existing knowledge.
  The values that describe the prior distribution are then highly subjective to the analysts existing knowledge and awareness of published literature.
- This makes it extremely difficult to gain consensus across the forensic community,
- which may lead to disagreements between experts in the courtroom,
+ Published data is sparse or even non-existent for many situations,
+ and for situations with suitable data,
+ it is reliant on the case manager to be aware of them.
+ This has caused many in the field to feel that no testimony on evidentiary support for activity-level propositions should be offered.
+ However,
+ the experience of scientists in their field often provides an understanding of typical presentations of evidence that would provide more context to evidentiary support than is provided when just reporting on source or sub-source propositions.
+ R v Atkins and Anor.
+ (2009) and R v Reed and Anor (2009) are just two examples from one jurisdiction where the presiding judges have stated that opinion based on an expert's years of experience and with sufficiently reliable underlying science should be shared with a jury if it provides a mechanism for the evaluation of the evidence within the scope of the case circumstances
+\begin_inset CommandInset citation
+LatexCommand citep
+key "thomas_regina_2009,hughes_regina_2009"
+literal "false"
+
+\end_inset
+
+.The discrepancy of knowledge between different experts makes it extremely difficult to gain consensus across the forensic community.
+ This may lead to disagreements between experts in the courtroom,
  complicating the the decision to be made by the fact-finder.
- Kokshoorn et al (2018) have attempted to address the issue by creating a publicly available spreadsheet database called 'DNA-TrAC'.
+ Kokshoorn et al (2018) have attempted to address the issue for DNA cases by creating a publicly available spreadsheet database called 'DNA-TrAC'.
  It is a collection of summary information about published transfer,
  persistence,
  prevalence and recovery (TPPR) studies for DNA to enable practitioners from around the world to be aware of existing literature on the topic 
@@ -921,6 +851,34 @@ As networks become more complex there has been a move to save sub-networks of co
  which has opened the door to the creation of highly complex and large networks by embedding the sub-networks within the larger network.
 \end_layout
 
+\begin_layout Section
+Project Aims
+\end_layout
+
+\begin_layout Standard
+The use of commercial software such as Hugin Expert 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Andersen1989"
+literal "false"
+
+\end_inset
+
+ for building and inferring from BNs has become common for forensic science analysis.
+ However,
+ a graphical interface such as is provided by these software solutions is not viable to support the automated building of BNs at scale.
+ As such the enviable work carried out by previous studies needs to be adapted to be computationally created by a computer system.
+ ,
+ to assist the forensic practitioner in fast easy inference 
+\end_layout
+
+\begin_layout Section*
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 \begin_inset Branch Standalone
 inverted 0
@@ -941,13 +899,6 @@ e.,
  This allows you to have a bibliography and a nomenclature if you only want to output this chapter.
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section*
-\begin_inset VSpace smallskip
 \end_inset
 
 
