@@ -257,7 +257,7 @@ thepage
 \end_layout
 
 \begin_layout Chapter
-Foundation Models
+Assessing Transfer and Persistance Data
 \end_layout
 
 \begin_layout Section
@@ -265,21 +265,55 @@ Overview
 \end_layout
 
 \begin_layout Standard
-bla bla bla bla bla bla bla bla bla bla bla bla bla PPS
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "PPS"
-description "Polyphenylene sulfide"
+One of the major barriers to the global acceptance of evaluations with activity-level propositions is a perceived lack of data to inform the conditional probability tables used within a created BN.
+ It has been recommended that the search and assessment of data should be systematic
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gosch_dna_2019"
 literal "false"
 
 \end_inset
 
- bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla,
- see .
+.
+ A knowledge base of TPPR studies across a number of trace types called the TTADB has been developed by the Forensic Science Research Group (GRSF) at the University of Quebec in Trois-Rivières 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "cadola_occurrence_2021"
+literal "false"
+
+\end_inset
+
+.
+ In this chapter,
+ I have assessed the available TPPR data contained in the TTADB database to determine trends and characteristics.
+ This is necessary to consider where there might be sufficient published data for activity-level reporting and where gaps exist in the literature that may need addressing.
+ 
 \end_layout
 
 \begin_layout Section
-The next section
+Methods
+\end_layout
+
+\begin_layout Standard
+All entries in the TTADB database were downloaded from https://cieqwebdirect.uqtr.ca/fmi/webd/OD_CIEQ_CRIMINALISTIQUE in comma-separated values format (.csv).
+ Due to the existence of entries in multiple languages within the database (english,
+ french and german),
+ special characters existed.
+ On download,
+ these characters were corrupted and data cleaning was required.
+ Data cleaning consisted of correcting the special characters;
+ authors,
+ title,
+ date,
+ journal/book or meeting name,
+ and publishing information were received as one field of information.
+ These required separation.
+ Once these details were in separate fields,
+ standardisation of journal/book or meeting name was carried out to remove typographical errors and ensure correct relationships were recorded.
+\end_layout
+
+\begin_layout Standard
+https://www.sbert.net/
 \end_layout
 
 \begin_layout Standard
