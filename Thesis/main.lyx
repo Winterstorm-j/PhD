@@ -1007,7 +1007,7 @@ Include:
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 btprint "btPrintCited"
-bibfiles "library"
+bibfiles "library,C:/Users/jstacey/OneDrive - ESR/WorkStuff/Projects/PhD/LitReviewBib"
 options "bibtotoc,apacite"
 encoding "default"
 
