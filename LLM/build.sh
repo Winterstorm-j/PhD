@@ -4,12 +4,16 @@
 set -e
 
 # ======== CONFIGURATION ========
-MODEL_NAME="TheBloke/Mistral-7B-Instruct-v0.2-GGUF"  # Change to your preferred model
-MODEL_FILE="mistral-7b-instruct-v0.2.Q4_K_M.gguf"     # Adjust for your hardware (check Hugging Face repo)
+MODEL_NAME="deepseek-ai/DeepSeek-R1"  # Change to your preferred model
+MODEL_FILE="deepseek-ai/DeepSeek-R1"     # Adjust for your hardware (check Hugging Face repo)
+
+# MODEL_NAME="TheBloke/Mistral-7B-Instruct-v0.2-GGUF"  # Change to your preferred model
+# MODEL_FILE="mistral-7b-instruct-v0.2.Q4_K_M.gguf"     # Adjust for your hardware (check Hugging Face repo)
+
 PORT=8000
 # =================================
 
-# echo "[1/6] Creating virtual environment..."
+echo "[1/6] Creating virtual environment..."
 python3 -m venv .llm_env
 source .llm_env/bin/activate
 
@@ -28,7 +32,7 @@ from fastapi import FastAPI, Request
 from llama_cpp import Llama
 
 app = FastAPI()
-llm = Llama(model_path="models/$MODEL_FILE", n_ctx=2048)
+llm = Llama(model_path="LLM/models/$MODEL_FILE", n_ctx=2048)
 
 @app.post("/generate")
 async def generate(request: Request):
