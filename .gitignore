@@ -14,4 +14,5 @@ Thesis/Temp/*
 *.tex
 .llm_env/*
 __pycache__
-LLM/models/*
+PhD-Windows//BNs/ShinyReact-main/*
+PhD-Windows/LLM/models/*
