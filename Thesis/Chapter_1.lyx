@@ -306,7 +306,16 @@ name "chap:Background"
 \end_layout
 
 \begin_layout Standard
-In the field of forensic science the idea of a hierarchy of propositions is well established 
+The field of forensic science exists to support the justice sector in the resolution of criminal investigations.
+ But the forensic practitioner works in an area of uncertainty as they were not present during the events that have occurred and can only rely on information able to be gathered from the aftermath.
+ Instead they must use their subject matter expertise to assist in the understanding of the significance of found forensic traces in relation to a suggested scenario.
+ Usually this has been in the form of determining who is involved,
+ what happened during an event and trying to ascertain the order of a set of events.
+ 
+\end_layout
+
+\begin_layout Standard
+The range of In the field of forensic science the idea of a hierarchy of propositions is well established 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Cook1998"
@@ -369,7 +378,8 @@ literal "false"
 \begin_layout Standard
 In recent years,
  as forensic analytical methods become accepted by the judicial system,
- focus has turned from source level propositions to questions of how or when the analysed evidence was deposited 
+ focus has turned from propositions with the purpose of identification or source attribution,
+ to questions of how or when the analysed evidence was deposited 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Jackson2019"
@@ -387,41 +397,9 @@ literal "false"
 \end_inset
 
 .
- However more than half (56%) of global forensic practitioners that were surveyed in 2024 held the opinion is that it is the role of the forensic expert witness to speak to possible activities that result in the detection of trace DNA evidence (defined as evidence with no obvious attributable body fluid source) 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "Prinzetal2024"
-literal "false"
-
-\end_inset
-
-.
  Often lawyers pose questions in an effort to gain clarity from the statistical expert witness testimony or to find a method to find alternative explanations for the results.
  Questions are generally put forward in the form of what the possibility/probability of a given scenario which could give rise to trace evidence transfer having occurred might be.
- A majority of respondents to a survey of forensic practitioners in the United States in 2022 had been asked to give testimony on DNA transfer (80%) or activity-level propositions (almost 60%) in the preceding three years 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "Yangetal2022"
-literal "false"
-
-\end_inset
-
-.
- A following worldwide survey from the same group found testimony on DNA transfer (almost 68% of respondents),
- activity-level propositions (51% of respondents) and consideration of DNA given possible activities (59% of respondents) has been widespread over the last three years 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "Prinzetal2024"
-literal "false"
-
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-The problem with addressing such questions in the courtroom is that opinion that is given is not backed by a robust statistical support framework and has not been peer-reviewed to ensure consistency and accuracy.
+ The problem with addressing such questions in the courtroom is that opinion that is given is not backed by a robust statistical framework and has not been peer-reviewed to ensure consistency and accuracy.
  Members of a judiciary system are likely to misunderstand the weight of evidence that should be given to source-level or lower findings without training in the consideration of what the pertinent question of interest is for a case 
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -435,6 +413,15 @@ literal "false"
  if a suspect is the owner of a vehicle used in a crime,
  whether their DNA is a match to that recovered from the steering wheel may be irrelevant to the question of who committed the crime.
  
+\end_layout
+
+\begin_layout Standard
+Some forensic disciplines,
+ such as glass or fibre analysis,
+ have considered findings in the context of activities for many years.
+ Others such as forensic biology have only recently moved to evaluating finding in this way.
+ These disciplines are facing reticience from different jurisdictions to the admissibility of the evaluation of findings given activity-level propositions.
+ Solutions are needed to remedy the barriers that are stalling the uptake of this type of forensic analyses.
 \end_layout
 
 \begin_layout Section

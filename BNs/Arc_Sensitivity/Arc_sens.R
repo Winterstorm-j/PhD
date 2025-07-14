@@ -37,7 +37,7 @@ set.seed(123)  # For reproducibility
 arcs <- arcs(originalNetwork)
 nrow <- length(arcs[, 1])
 origBN <- originalNetwork
-sim_data <- rbn(origBN, n = 10000)  
+sim_data <- rbn(origBN, n = 100000)
 
 for (i in 1:nrow) {
   print(i)
@@ -47,8 +47,13 @@ for (i in 1:nrow) {
   bn_structure <- bn.net(origBN)
   newBN <- drop.arc(bn_structure, parent, child)
   graphviz.plot(newBN)
+  new_data <- cptable(child,
+    levels=levels(sim_data[, which(names(sim_data) == child)]),
+    values = table(sim_data[ , which(names(sim_data) == child)])/nrow(sim_data)
+  )
 
-  tempBN_fitted <- bn.fit(newBN, sim_data) #[ , - which(names(sim_data) == parent)])
+  replace_cpt(as.grain(origBN), new_data)
+  tempBN_fitted <- bn.fit(newBN, sim_data) #[ , - which(names(sim_data) == child)])
 
   tempBN_pred  <- predict(tempBN_fitted,
     data = data.frame(Results7 = factor("Yes", levels = c("Yes", "No"))),
