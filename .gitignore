@@ -12,3 +12,6 @@ Presentations/
 Thesis/Temp/*
 *.pdf
 *.tex
+.llm_env/*
+__pycache__
+LLM/models/*
