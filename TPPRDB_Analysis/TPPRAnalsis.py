@@ -15,6 +15,7 @@ import re
 
 TPPR_db = pd.read_csv("./PhD-Windows/TPPRDB_Analysis/TTADB_Feb2025_cleaned.csv").map(str)
 
+
 TPPR_db.head
 
 ''' Likely need to change the data into a dict so that the papers are objects with properties in order to put into the db'''
@@ -159,18 +160,16 @@ topic_model.visualize_documents(docs=dataAsList, topics=topics)#.write_html("./P
 
 # Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:
 reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
-topic_model.visualize_documents(dataAsList, reduced_embeddings=reduced_embeddings)#.write_html("./PhD-Windows/TPPRDB_Analysis/reduced_projections.html")
+topic_model.visualize_documents(dataAsList, reduced_embeddings=np.array(reduced_embeddings))#.write_html("./PhD-Windows/TPPRDB_Analysis/reduced_projections.html")
 
-plt.scatter(dataAsList, s=50, linewidth=0, c='b', alpha=0.25)
+plt.hist(dataAsList, s=50, linewidth=0, c='b', alpha=0.25)
 
 
 
 # time series analysis
 
 # The data to encode
-datedData = TPPR_db[['Year','Title','Trace_Type','Keywords','Abstract','Exp_Conditions_and_Results','Relevance_to_Canada']].filter(
-    like=
-)
+datedData = TPPR_db[['Year','Title','Trace_Type','Keywords','Abstract','Exp_Conditions_and_Results','Relevance_to_Canada']]#.filter(like=)
 dataAsDatedList = datedData.apply(
     lambda row: '; '.join(row.dropna().astype(str)), axis=1
 ).to_list()
@@ -179,5 +178,5 @@ date = datedData.Year
 date[date=='s.d.'] = np.NaN
 
 
-topics_over_time = topic_model.topics_over_time(dataAsDatedList, date)
+topics_over_time = topic_model.topics_over_time(dataAsDatedList, date.astype('str').to_list())
 model.visualize_topics_over_time(topics_over_time, topics=[range(1,21)])
