@@ -19,3 +19,5 @@ __pycache__
 *.tmp
 *.AppImage
 *.tar.gz
+*.DS_Store
+*.zip
