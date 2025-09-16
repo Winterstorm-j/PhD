@@ -19,5 +19,9 @@ __pycache__
 *.tmp
 *.AppImage
 *.tar.gz
+BNs/ShinyReact-main/*
+LLM/models/*
+Overleaf Projects/*
+PhD-Windows/LLM/models/*
 *.DS_Store
 *.zip
