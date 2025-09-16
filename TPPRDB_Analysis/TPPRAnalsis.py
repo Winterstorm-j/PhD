@@ -6,19 +6,65 @@ import torch
 from bertopic import BERTopic
 from hdbscan import HDBSCAN
 from umap import UMAP
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
 from bertopic.representation import KeyBERTInspired
 from sentence_transformers import SentenceTransformer, util
 from sklearn.feature_extraction.text import CountVectorizer
 import re
 
-TPPR_db = pd.read_csv("./PhD-Windows/TPPRDB_Analysis/TTADB_Feb2025_cleaned.csv").map(str)
-
+# IMPORT TTADB
+TPPR_db = pd.read_csv("PhD/TPPRDB_Analysis/TTADB_Feb2025_cleaned1.csv").map(str).map(str.strip).reset_index(drop=True)
 
 TPPR_db.head
 
+
+# IMPORT DNA-TRAC
+dnaTrac = pd.read_excel('PhD/TPPRDB_Analysis/DNA-TrAC_Ver-2019-12-16.xlsx').map(str).map(str.strip).reset_index(drop=True)
+
+#IMPORT WoS SEARCH RESULTS
+searchResults = pd.read_excel('PhD/TPPRDB_Analysis/articleList.xlsx').map(str).map(str.strip).reset_index(drop=True)
+
+TPPR_db.shape
+for index, value in dnaTrac.dtypes.items():
+    print("column %s dtype[class: %s; name: %s; code: %s; kind: %s]" % (index, type(value), value.name, value.str, value.kind))
+
+newDnaTrac = dnaTrac.groupby(['Title','Year']).agg(pd.unique).applymap(lambda x: x[0] if len(x)==1 else x)
+newTTADB = TPPR_db.groupby(['Title','Year']).agg(pd.unique).applymap(lambda x: x[0] if len(x)==1 else x)
+len(newDnaTrac.reset_index(drop=False).Title.unique())
+len(newTTADB.reset_index(drop=False).Title)
+newTTADB.shape
+
+len(dnaTrac.reset_index(drop=False).Title.unique())
+dnaTrac.shape
+newDnaTrac.columns
+combined = newTTADB.join(newDnaTrac, on=['Title','Year'],lsuffix='_dnatrac', rsuffix='_ttadb', validate='1:1')
+combined.shape
 ''' Likely need to change the data into a dict so that the papers are objects with properties in order to put into the db'''
+
+'Index', 'Doc_Type', 'Authors', 'Year', 'Title','Journal_Book_Institution_Meeting', 'Publishing_Details', 'Trace_Type',
+'Study_Type', 'Keywords', 'Abstract', 'Exp_Conditions_and_Results','Relevance_to_Canada'
+
+'Column1', 'source_title', 'publish_year', 'publish_month', 'volume', 'issue', 'supplement', 'special_issue', 'article_number', 'pages',
+'authors', 'inventors', 'book_corp', 'book_editors', 'books', 'additional_authors', 'anonymous', 'assignees', 'editors', 'record',
+'references', 'related', 'doi', 'issn', 'eissn', 'isbn', 'eisbn','pmid', 'author_keywords', 'unique_type', 'uid'
+
+'Authors', 'Year', 'Title', 'Journal', 'Addressed question','Activity context', 'Category', 'Specifications','Variables of interest',
+'stringency of control', 'No of individuals','Replicates per Individual and condition', 'Nucleic Acid','Bodily origin', 'depositor characteristics',
+'Criteria for shedder status', 'Previous activities','Contact scenario', 'Primary substrate type',
+'Primary substrate Material', 'Deposit', 'Delay (conditions)','Secondary substrate type', 'Secondary Substrate material',
+'Type of secondary contact', 'Further transfer','Background DNA on sampled surface', 'Sampling time','Persistance (conditions)', 
+'Sampling method', 'Sampling area','Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling',
+'Reference samples', 'Profile interpretation and mixture analysis','RNA data interpretation', 'DNA Quantitiy', 'Profile Quality',
+'Parameter used for comparison', 'Summary of results','Raised questions (by authors)', 'Cautionary remarks'
+
+
+mergedDF = TPPR_db.map(str.upper).merge(dnaTrac.map(str.upper), on=['Authors','Year','Title'] ,how='outer')
+
+for col in mergedDF.select_dtypes(include='object').columns:
+    mergedDF[col] = mergedDF[col].str.title()
+
+mergedDF.to_csv('PhD/TPPRDB_Analysis/mergedData.csv')
 
 # combine title, keywords, abstract, relevance and trace type columns into a single column
 TPPR_db.columns
@@ -169,7 +215,7 @@ plt.hist(dataAsList, s=50, linewidth=0, c='b', alpha=0.25)
 # time series analysis
 
 # The data to encode
-datedData = TPPR_db[['Year','Title','Trace_Type','Keywords','Abstract','Exp_Conditions_and_Results','Relevance_to_Canada']]#.filter(like=)
+datedData = TPPR_db[['Year','Title','Trace_Type','Keywords','Abstract','Exp_Conditions_and_Results','Relevance_to_Canada']]
 dataAsDatedList = datedData.apply(
     lambda row: '; '.join(row.dropna().astype(str)), axis=1
 ).to_list()
