@@ -1,8 +1,8 @@
-#! ~\AppData\Local\Programs\Python\Python312\Projects\python
+#! /Users/jbuc045/Projects/.venv/bin/python
 
 import pandas as pd
 import numpy as np
-import torch
+# import torch
 from bertopic import BERTopic
 from hdbscan import HDBSCAN
 from umap import UMAP
@@ -12,63 +12,91 @@ from bertopic.representation import KeyBERTInspired
 from sentence_transformers import SentenceTransformer, util
 from sklearn.feature_extraction.text import CountVectorizer
 import re
+import ast
 
-# IMPORT TTADB
-TPPR_db = pd.read_csv("PhD/TPPRDB_Analysis/TTADB_Feb2025_cleaned1.csv").map(str).map(str.strip).reset_index(drop=True)
+def get_names(val,col):
+    if isinstance(val, str):
+        try:
+            # Use literal_eval to convert the string to a list of dicts
+            data = ast.literal_eval(val)
+            
+            # Use a list comprehension to extract 'display_name' from each dictionary
+            return [d[col] for d in data if col in d]
+        except (ValueError, SyntaxError):
+            # Handle malformed strings
+            return val
+    return val
 
-TPPR_db.head
+# IMPORT TTADB removing any trailing whitespace
+TPPR_db = pd.read_csv("PhD/TPPRDB_Analysis/TTADB-Aug2025.csv").map(str).map(str.strip).reset_index(drop=True)
 
+searchTerm = [re.search(r'(.+)\(([0-9sd\.]{4})\)(.*)',row).groups() for row in TPPR_db['Authors']]
+TPPR_db['Authors'] = [row[0] for row in searchTerm]
+TPPR_db['Year'] = [row[1] for row in searchTerm]
+TPPR_db['Title'] = [row[2] for row in searchTerm]
 
-# IMPORT DNA-TRAC
-dnaTrac = pd.read_excel('PhD/TPPRDB_Analysis/DNA-TrAC_Ver-2019-12-16.xlsx').map(str).map(str.strip).reset_index(drop=True)
+# IMPORT DNA-TRAC removing any trailing whitespace
+dnaTrac = pd.read_excel('PhD/TPPRDB_Analysis/DNA-TrAC_Ver-2019-12-16.xlsx').map(str).map(str.strip).reset_index(drop=True)6
 
-#IMPORT WoS SEARCH RESULTS
+#IMPORT WoS SEARCH RESULTS removing any trailing whitespace
 searchResults = pd.read_excel('PhD/TPPRDB_Analysis/articleList.xlsx').map(str).map(str.strip).reset_index(drop=True)
 
-TPPR_db.shape
-for index, value in dnaTrac.dtypes.items():
-    print("column %s dtype[class: %s; name: %s; code: %s; kind: %s]" % (index, type(value), value.name, value.str, value.kind))
+#remove duplicates
+searchResults = searchResults.loc[~searchResults.duplicated(subset='uid'),:]
+newDnaTrac = dnaTrac.groupby(['Title','Authors','Year']).agg(pd.unique).apply(lambda x: x[0] if len(x)==1 else x)
+newTTADB = TPPR_db.sort_values(['Title','Authors','Year','Relevance_to_Canada'], na_position='last').groupby(
+    ['Title','Authors','Year']).agg(pd.unique).apply(lambda x: x[0] if len(x)==1 else x)
 
-newDnaTrac = dnaTrac.groupby(['Title','Year']).agg(pd.unique).applymap(lambda x: x[0] if len(x)==1 else x)
-newTTADB = TPPR_db.groupby(['Title','Year']).agg(pd.unique).applymap(lambda x: x[0] if len(x)==1 else x)
-len(newDnaTrac.reset_index(drop=False).Title.unique())
-len(newTTADB.reset_index(drop=False).Title)
+# change results so all dictionary columns contain flat data
+searchResults = searchResults.replace({"nan": np.nan })
+searchResults['authors'] = searchResults.iloc[:,10].apply(lambda x: get_names(x,'wos_standard')).apply(lambda x: "; ".join(x) if isinstance(x,list) else x )
+searchResults['book_editors'] = searchResults.iloc[:,13].apply(lambda x: get_names(x,'display_name')).apply(lambda x: "; ".join(x) if isinstance(x,list) else x )
+searchResults['editors'] = searchResults.iloc[:,13].apply(lambda x: get_names(x,'display_name')).apply(lambda x: "; ".join(x) if isinstance(x,list) else x )
+searchResults['pages'] = searchResults.iloc[:,13].apply(lambda x: get_names(x,'range')).apply(lambda x: "- ".join(x) if isinstance(x,list) else x )
+
+# rename columns in searchResulat to match the other datasets
+searchResults.columns = ['Title', 'source_title', 'Year', 'Month', 'Volume', 'Issue', 'Supplement', 'special_issue', 'article_number', 'pages',
+'Authors', 'inventors', 'book_corp', 'book_editors', 'books', 'additional_authors', 'anonymous', 'assignees', 'Editors', 'record',
+'references', 'related', 'doi', 'issn', 'eissn', 'isbn', 'eisbn','pmid', 'author_keywords', 'unique_type', 'uid']
+
+searchResults = searchResults.reset_index(drop=True)
+searchResults.shape
 newTTADB.shape
+newTTADB.head(1)
 
-len(dnaTrac.reset_index(drop=False).Title.unique())
+
 dnaTrac.shape
 newDnaTrac.columns
-combined = newTTADB.join(newDnaTrac, on=['Title','Year'],lsuffix='_dnatrac', rsuffix='_ttadb', validate='1:1')
+
+#combine data sources into one df making sure case is not a factor ()
+# DNA_trac to TTADB
+combined = newTTADB.map(str).map(str.upper).merge(
+    newDnaTrac.map(str).map(str.upper),
+          on=['Title','Authors','Year'],suffixes = ['_dnatrac', '_ttadb'], validate='one_to_one', how="outer").reset_index(drop=False)
+
 combined.shape
-''' Likely need to change the data into a dict so that the papers are objects with properties in order to put into the db'''
+combined.loc[~pd.isna(combined.Journal),:]
 
-'Index', 'Doc_Type', 'Authors', 'Year', 'Title','Journal_Book_Institution_Meeting', 'Publishing_Details', 'Trace_Type',
-'Study_Type', 'Keywords', 'Abstract', 'Exp_Conditions_and_Results','Relevance_to_Canada'
-
-'Column1', 'source_title', 'publish_year', 'publish_month', 'volume', 'issue', 'supplement', 'special_issue', 'article_number', 'pages',
-'authors', 'inventors', 'book_corp', 'book_editors', 'books', 'additional_authors', 'anonymous', 'assignees', 'editors', 'record',
-'references', 'related', 'doi', 'issn', 'eissn', 'isbn', 'eisbn','pmid', 'author_keywords', 'unique_type', 'uid'
-
-'Authors', 'Year', 'Title', 'Journal', 'Addressed question','Activity context', 'Category', 'Specifications','Variables of interest',
-'stringency of control', 'No of individuals','Replicates per Individual and condition', 'Nucleic Acid','Bodily origin', 'depositor characteristics',
-'Criteria for shedder status', 'Previous activities','Contact scenario', 'Primary substrate type',
-'Primary substrate Material', 'Deposit', 'Delay (conditions)','Secondary substrate type', 'Secondary Substrate material',
-'Type of secondary contact', 'Further transfer','Background DNA on sampled surface', 'Sampling time','Persistance (conditions)', 
-'Sampling method', 'Sampling area','Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling',
-'Reference samples', 'Profile interpretation and mixture analysis','RNA data interpretation', 'DNA Quantitiy', 'Profile Quality',
-'Parameter used for comparison', 'Summary of results','Raised questions (by authors)', 'Cautionary remarks'
+# combine WoS search reaults to combined
+combined = combined.map(str).map(str.upper).merge(
+    searchResults.map(str).map(str.upper),
+          on=['Title','Authors','Year'],suffixes =['_comb', '_wos'], validate='one_to_one', how="outer").reset_index(drop=False)
 
 
-mergedDF = TPPR_db.map(str.upper).merge(dnaTrac.map(str.upper), on=['Authors','Year','Title'] ,how='outer')
+combined.shape
+combined.columns
+searchResults.columns
 
-for col in mergedDF.select_dtypes(include='object').columns:
-    mergedDF[col] = mergedDF[col].str.title()
 
-mergedDF.to_csv('PhD/TPPRDB_Analysis/mergedData.csv')
+# reset format of all character strings to title case 
+for col in combined.select_dtypes(include='object').columns:
+    combined[col] = combined[col].str.title()
+
+combined.to_csv('PhD/TPPRDB_Analysis/mergedDataSept.csv')#, encoding='ISO-8859-2')
 
 # combine title, keywords, abstract, relevance and trace type columns into a single column
-TPPR_db.columns
-TPPR_db['allData'] = TPPR_db[['Title','Trace_Type','Keywords','Abstract','Exp_Conditions_and_Results','Relevance_to_Canada']].agg('; '.join, axis=1)
+combined.index
+combined['allData'] = combined[['Title','Trace_Type','Keywords','Abstract','Exp_Conditions_and_Results','Relevance_to_Canada']].agg('; '.join, axis=1)
 
 # The sentences to encode
 dataAsList = TPPR_db['allData'].astype('str').to_list()
@@ -226,3 +254,35 @@ date[date=='s.d.'] = np.NaN
 
 topics_over_time = topic_model.topics_over_time(dataAsDatedList, date.astype('str').to_list())
 model.visualize_topics_over_time(topics_over_time, topics=[range(1,21)])
+
+
+
+''' 
+'Index', 'Doc_Type', 'Authors', 'Year', 'Title','Journal_Book_Institution_Meeting', 'Publishing_Details', 'Trace_Type',
+'Study_Type', 'Keywords', 'Abstract', 'Exp_Conditions_and_Results','Relevance_to_Canada'
+
+'Column1', 'source_title', 'publish_year', 'publish_month', 'volume', 'issue', 'supplement', 'special_issue', 'article_number', 'pages',
+'authors', 'inventors', 'book_corp', 'book_editors', 'books', 'additional_authors', 'anonymous', 'assignees', 'editors', 'record',
+'references', 'related', 'doi', 'issn', 'eissn', 'isbn', 'eisbn','pmid', 'author_keywords', 'unique_type', 'uid'
+
+'Authors', 'Year', 'Title', 'Journal', 'Addressed question','Activity context', 'Category', 'Specifications','Variables of interest',
+'stringency of control', 'No of individuals','Replicates per Individual and condition', 'Nucleic Acid','Bodily origin', 'depositor characteristics',
+'Criteria for shedder status', 'Previous activities','Contact scenario', 'Primary substrate type',
+'Primary substrate Material', 'Deposit', 'Delay (conditions)','Secondary substrate type', 'Secondary Substrate material',
+'Type of secondary contact', 'Further transfer','Background DNA on sampled surface', 'Sampling time','Persistance (conditions)', 
+'Sampling method', 'Sampling area','Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling',
+'Reference samples', 'Profile interpretation and mixture analysis','RNA data interpretation', 'DNA Quantitiy', 'Profile Quality',
+'Parameter used for comparison', 'Summary of results','Raised questions (by authors)', 'Cautionary remarks'
+
+
+'Title', 'Year', 'Index', 'Doc_Type', 'Authors', 'Journal_Book_Institution_Meeting', 'Publishing_Details', 'Trace_Type',
+'Study_Type', 'Keywords', 'Abstract', 'Exp_Conditions_and_Results', 'Relevance_to_Canada', 'Journal', 'Addressed question',
+'Activity context', 'Category', 'Specifications', 'Variables of interest', 'stringency of control', 'No of individuals',
+'Replicates per Individual and condition', 'Nucleic Acid', 'Bodily origin', 'depositor characteristics',
+'Criteria for shedder status', 'Previous activities', 'Contact scenario', 'Primary substrate type',
+'Primary substrate Material', 'Deposit', 'Delay (conditions)', 'Secondary substrate type', 'Secondary Substrate material',
+'Type of secondary contact', 'Further transfer', 'Background DNA on sampled surface', 'Sampling time',
+'Persistance (conditions)', 'Sampling method', 'Sampling area', 'Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling',
+'Reference samples', 'Profile interpretation and mixture analysis', 'RNA data interpretation', 'DNA Quantitiy', 'Profile Quality',
+'Parameter used for comparison', 'Summary of results', 'Raised questions (by authors)', 'Cautionary remarks'
+'''
