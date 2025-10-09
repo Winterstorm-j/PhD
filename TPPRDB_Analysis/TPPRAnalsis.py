@@ -2,7 +2,6 @@
 
 import pandas as pd
 import numpy as np
-# import torch
 from bertopic import BERTopic
 from hdbscan import HDBSCAN
 from umap import UMAP
@@ -30,7 +29,7 @@ def get_names(val,col):
 
 ####### TTADB
 # IMPORT TTADB removing any trailing whitespace
-TPPR_db = pd.read_csv("PhD/TPPRDB_Analysis/TTADB-Aug2025.csv").map(str).map(str.strip).reset_index(drop=True)
+TPPR_db = pd.read_csv("PhD/TPPRDB_Analysis/TTADB-Aug2025.csv", encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
 
 # remove empty columns and rename last column
 TPPR_db = TPPR_db.drop(['Unnamed: 13','Unnamed: 14', 'Unnamed: 15'], axis=1)
@@ -42,18 +41,32 @@ TPPR_db['Authors'] = [row.groups()[0] if row else None for row in searchTerm]
 TPPR_db['Year'] = [row.groups()[1] if row else None for row in searchTerm]
 TPPR_db['Title'] = [row.groups()[2] if row else None for row in searchTerm]
 
+#standardise how authors are displayed
+TPPR_db['Authors'] = (TPPR_db['Authors'].str.replace(r"[;,]", " ", regex=True)
+                      .str.replace(r"\.", "", regex=True)
+                      .str.replace(r"  ", " ", regex=True)
+                      .str.strip()
+)
+
 # remove leading whitespace and fullstop then split into columns on remaining fullstops, 
-# Title everything before fullstop, Journal,Book,Meeting everything after (with leading whitespace removed)
+# Title = everything before fullstop with «, " , and » removed, 
 TPPR_db['Title'] = TPPR_db['Title'].str.replace(r"^[ ]*\.[ ]*", "", regex=True)
-searchTitle = TPPR_db['Title'].str.split(r"\.",expand=True)
+searchTitle = TPPR_db['Title'].str.split(r"(\.)(?=[ A-Z]+)|(,[ ]*in )",expand=True)
 TPPR_db['Title'] = searchTitle[0]
-TPPR_db['Journal_Book_Institution_Meeting'] = searchTitle[1] + searchTitle[2] + searchTitle[3]
+TPPR_db['Title'] = TPPR_db['Title'].str.replace(r"[«\"»]*", "", regex=True)
+
+# Journal,Book,Meeting = everything after (with leading whitespace removed)
+TPPR_db['Journal_Book_Institution_Meeting'] = [
+    "".join([str(cell) for cell in row[3:22] if pd.notna(cell) and cell is not None]).strip() 
+    if any(pd.notna(cell) and cell is not None for cell in row[3:22]) else None
+    for _, row in searchTitle.iterrows()
+]
 TPPR_db['Journal_Book_Institution_Meeting'] = TPPR_db['Journal_Book_Institution_Meeting'].str.replace(r"^[ ]*", "", regex=True)
 
 # initialise empty output lists
 Publishing_Details = []
 Journal = []
- 
+
 # split Journal_Book_Institution_Meeting into the two output lists on first comma, 
 # If it starts with Academic Press, it is a book so everything to Publishing_Details only
 # save back to TPPR_db object
@@ -65,7 +78,7 @@ for row in TPPR_db['Journal_Book_Institution_Meeting'] :
         Publishing_Details.append(None)
         Journal.append(None)
     else: 
-        splitCol = str(row).split(",", maxsplit=1)
+        splitCol = re.split(r",|\.",str(row), maxsplit=1)
         if len(splitCol)==2:
             Journal.append(splitCol[0])
             Publishing_Details.append(splitCol[1])
@@ -73,79 +86,118 @@ for row in TPPR_db['Journal_Book_Institution_Meeting'] :
              Journal.append(splitCol[0])
              Publishing_Details.append(None)
         
-TPPR_db['Journal_Book_Institution_Meeting'] = pd.Series(Journal)
-TPPR_db['Publishing_Details'] = pd.Series(Publishing_Details).str.replace(r"^[ ]*", "", regex=True)
+TPPR_db['Journal_Book_Institution_Meeting'] = pd.Series(Journal).str.strip()
+TPPR_db['Publishing_Details'] = pd.Series(Publishing_Details).str.strip()
 
+newTTADB = TPPR_db.sort_values(['Title','Authors','Year','Relevance_to_Canada'], na_position='last').groupby(['Title','Authors','Year']).first().reset_index()
 
 ####### DNA-TrAC
 # IMPORT DNA-TRAC removing any trailing whitespace
-dnaTrac = pd.read_excel('PhD/TPPRDB_Analysis/DNA-TrAC_Ver-2019-12-16.xlsx').map(str).map(str.strip).reset_index(drop=True)
+dnaTrac = pd.read_csv('PhD/TPPRDB_Analysis/DNA-TrAC_Ver-2019-12-16.csv', encoding='utf-8')
+
+dnaTrac = dnaTrac.map(str).map(str.strip).reset_index(drop=True)
+
+dnaTrac['Authors'] = (dnaTrac['Authors'].str.replace(r"[;,]", " ", regex=True)
+                      .str.replace(r"\.", "", regex=True)
+                      .str.replace(r"  ", " ", regex=True)
+)
+
+dnaTrac['Journal'] = dnaTrac['Journal'].str.replace(r"FSI[:]* ", "FORENSIC SCIENCE INTERNATIONAL: ", regex=True)
+dnaTrac['Journal'] = dnaTrac['Journal'].str.replace("FSI", "FORENSIC SCIENCE INTERNATIONAL")
+dnaTrac['Journal'] = dnaTrac['Journal'].str.replace("Science and Justice", "SCIENCE & JUSTICE")
 
 #remove duplicates
-newDnaTrac = dnaTrac.groupby(['Title','Authors','Year']).agg(pd.unique).apply(lambda x: x[0] if len(x)==1 else x)
+newDnaTrac = dnaTrac.map(str.strip).groupby(['Title','Authors','Year']).first().reset_index()
 
-#unlist all columns imported as lists
-newDnaTrac['Journal'] = newDnaTrac['Journal'].apply(lambda x: x[0])
-[df[col].apply(lambda x: np.array2string(x)) if isinstance(df[col], np.ndarray) else df[col] for col in df.columns ]
+newTTADB.shape
+newTTADB.head(1)
+dnaTrac.shape
+newDnaTrac.columns
+newTTADB['Journal_Book_Institution_Meeting']
 
+#combine data sources into one df making sure case is not a factor in matching
+# DNA_trac to TTADB
+combined = (newTTADB.map(str).map(str.upper)
+            .merge(newDnaTrac.map(str).map(str.upper).map(str.strip), on=['Title','Authors','Year'],
+                   suffixes = ['_dnatrac', '_ttadb'], validate='one_to_one', how="outer")
+            .reset_index(drop=False))
+
+combined.shape
+combined['Journal_Book_Institution_Meeting'] = [
+    combined.loc[record,'Journal'] 
+                if (pd.isna(combined.loc[record,'Journal_Book_Institution_Meeting']) or combined.loc[record,'Journal_Book_Institution_Meeting'] == None) 
+                else combined.loc[record,'Journal_Book_Institution_Meeting'] for record in combined.index
+                ]
+
+# sense check - if Journal_Book... from TTADB is different to Journal in DNA TrAc 
+test = combined.loc[(combined['Journal_Book_Institution_Meeting'] != combined['Journal']) & (~pd.isna(combined['Journal'])),['Title','Authors','Year','Journal_Book_Institution_Meeting', 'Journal']]
+# replace Journal_Book... with Journal from DNA Trac if journal name has been truncated due to previous split
+combined.loc[(combined['Journal_Book_Institution_Meeting'] != combined['Journal']) & (~pd.isna(combined['Journal'])),'Journal_Book_Institution_Meeting'] = test['Journal']
 
 ###### Web of Science results
 #IMPORT WoS SEARCH RESULTS removing any trailing whitespace
-searchResults = pd.read_excel('PhD/TPPRDB_Analysis/articleList.xlsx').map(str).map(str.strip).reset_index(drop=True)
+searchResults = pd.read_csv('PhD/TPPRDB_Analysis/articleList.csv', encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
 
 #remove duplicates
 searchResults = searchResults.loc[~searchResults.duplicated(subset='uid'),:]
 
-
-newTTADB = TPPR_db.sort_values(['Title','Authors','Year','Relevance_to_Canada'], na_position='last').groupby(
-    ['Title','Authors','Year']).agg(pd.unique).apply(lambda x: x[0] if len(x)==1 else x)
-
 # change results so all dictionary columns contain flat data
 searchResults = searchResults.replace({"nan": np.nan })
-searchResults['authors'] = searchResults.iloc[:,10].apply(lambda x: get_names(x,'wos_standard')).apply(lambda x: "; ".join(x) if isinstance(x,list) else x )
-searchResults['book_editors'] = searchResults.iloc[:,13].apply(lambda x: get_names(x,'display_name')).apply(lambda x: "; ".join(x) if isinstance(x,list) else x )
-searchResults['editors'] = searchResults.iloc[:,13].apply(lambda x: get_names(x,'display_name')).apply(lambda x: "; ".join(x) if isinstance(x,list) else x )
-searchResults['pages'] = searchResults.iloc[:,13].apply(lambda x: get_names(x,'range')).apply(lambda x: "- ".join(x) if isinstance(x,list) else x )
+searchResults['authors'] = (
+    searchResults.iloc[:, 10]
+    .apply(lambda x: get_names(x, 'wos_standard'))
+    .apply(lambda x: " ".join(x) if isinstance(x, list) else x)
+    .str.replace(r"[;,]", " ", regex=True)
+    .str.replace(r"\.", "", regex=True)
+    .str.replace(r"  ", " ", regex=True)
+)
+searchResults['book_editors'] = (searchResults.iloc[:,13]
+    .apply(lambda x: get_names(x,'display_name'))
+    .apply(lambda x: " ".join(x) if isinstance(x,list) else x )
+    .str.replace(r"[;,]", " ", regex=True)
+    .str.replace(r"\.", "", regex=True)
+    .str.replace(r"  ", " ", regex=True)
+)
+searchResults['editors'] = (searchResults.iloc[:,13]
+                            .apply(lambda x: get_names(x,'display_name'))
+                            .apply(lambda x: " ".join(x) if isinstance(x,list) else x )
+                            .str.replace(r"[;,]", " ", regex=True)
+                            .str.replace(r"\.", "", regex=True)
+                            .str.replace(r"  ", " ", regex=True)
+)
+searchResults['pages'] = (searchResults.iloc[:,13]
+                          .apply(lambda x: get_names(x,'range'))
+                          .apply(lambda x: "- ".join(x) if isinstance(x,list) else x )
+)
 
 # rename columns in searchResulat to match the other datasets
 searchResults.columns = ['Title', 'source_title', 'Year', 'Month', 'Volume', 'Issue', 'Supplement', 'special_issue', 'article_number', 'pages',
 'Authors', 'inventors', 'book_corp', 'book_editors', 'books', 'additional_authors', 'anonymous', 'assignees', 'Editors', 'record',
 'references', 'related', 'doi', 'issn', 'eissn', 'isbn', 'eisbn','pmid', 'author_keywords', 'unique_type', 'uid']
 
+searchResults['Year'] = searchResults['Year'].str.replace(r",", "", regex=True)
+
 searchResults = searchResults.reset_index(drop=True)
 searchResults.shape
-newTTADB.shape
-newTTADB.head(1)
 
-
-dnaTrac.shape
-newDnaTrac.columns
-
-#combine data sources into one df making sure case is not a factor ()
-# DNA_trac to TTADB
-combined = newTTADB.map(str).map(str.upper).merge(
-    newDnaTrac.map(str).map(str.upper),
-          on=['Title','Authors','Year'],suffixes = ['_dnatrac', '_ttadb'], validate='one_to_one', how="outer").reset_index(drop=False)
-
-combined.shape
-combined.loc[~pd.isna(combined.Journal),'Journal']
+# check for duplicated rows
+searchResults[searchResults.duplicated(subset=['Title','Authors','Year'], keep=False)].sort_values(by=['Title','Authors','Year'])
 
 # combine WoS search reaults to combined
 combined = combined.map(str).map(str.upper).merge(
     searchResults.map(str).map(str.upper),
-          on=['Title','Authors','Year'],suffixes =['_comb', '_wos'], validate='one_to_one', how="outer").reset_index(drop=False)
+          on=['Title','Authors','Year'],suffixes =['_comb', '_wos'], validate='one_to_one', how="outer").reset_index(drop=True)
 
 
 combined.shape
 combined.columns
 searchResults.columns
 
-
 # reset format of all character strings to title case 
 for col in combined.select_dtypes(include='object').columns:
     combined[col] = combined[col].str.title()
 
-combined.to_csv('PhD/TPPRDB_Analysis/mergedDataSept.csv')#, encoding='ISO-8859-2')
+combined.to_csv('PhD/TPPRDB_Analysis/mergedDataSept.csv', encoding='UTF-8')
 
 # combine title, keywords, abstract, relevance and trace type columns into a single column
 combined.index
@@ -306,7 +358,7 @@ date[date=='s.d.'] = np.NaN
 
 
 topics_over_time = topic_model.topics_over_time(dataAsDatedList, date.astype('str').to_list())
-model.visualize_topics_over_time(topics_over_time, topics=[range(1,21)])
+# ßmodel.visualize_topics_over_time(topics_over_time, topics=[range(1,21)])
 
 
 
