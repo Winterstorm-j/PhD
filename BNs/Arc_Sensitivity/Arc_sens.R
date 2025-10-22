@@ -15,12 +15,20 @@ origPlot <- graphviz.plot(originalNetwork,
   )
 )
 
-graphviz.chart(originalNetwork,
+origPlot <- graphviz.chart(originalNetwork,
                             type = "barprob",
                             grid = TRUE, 
                             bar.col = "darkgreen",
                             strip.bg = "lightskyblue")
 
+png('toyNetwork.png', height=650, width = 500)
+
+graphviz.chart(originalNetwork,
+                            type = "barprob",
+                            grid = TRUE, 
+                            bar.col = "darkgreen",
+                            strip.bg = "lightskyblue")
+dev.off()
 # arcArray = list()
 # arcs <- arcs(originalNetwork)  
 # arcBool <- if_else(in.degree(originalNetwork, arcs[,"to"]) >= 1, TRUE, FALSE)
