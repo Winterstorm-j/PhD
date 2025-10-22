@@ -1,0 +1,4 @@
+To run unit tests for the agentic.py script:
+
+#bash
+python -m unittest unit_tests.py
