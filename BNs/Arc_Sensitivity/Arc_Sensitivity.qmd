@@ -40,6 +40,7 @@ A simple BN (shown in @fig-simpleBN) was created in Hugin Expert Software (Ander
 
 ```{r}
 originalNetwork  <- read.net("simpleBNexample.net")
+#bn_grain <- loadHuginNet("BNs/Arc_Sensitivity/simpleBNexample.net")
 ```
 
 The network was then visualised with probabilities showing using graphviz to ensure that it was consistent with Hugin
@@ -59,6 +60,8 @@ graphviz.chart(originalNetwork,
 
 ```
 
+I think there is an issue with the CPTs as the values are not showing as each option conditional on the parents. Rather the unconditional dists for the options
+
 ### Set Seed for Reproducibility
 ```{r}
 set.seed(123) 
@@ -75,7 +78,7 @@ nrow <- length(arcs[, 1])
 ```
 
 
-# simulate the marginal distributions of the original network (on a new copy to not overwrite the original import)
+## Simulate the marginal distributions of the original network (on a new copy to not overwrite the original import)
 ```{r}
 origBN <- originalNetwork
 sim_data <- rbn(origBN, n = 100000)
@@ -83,6 +86,18 @@ sim_data <- rbn(origBN, n = 100000)
 
 ## Loop through the list of arcs, identifying parent and child, drop the arc and recreate and replace the CPT
 ```{r}
+# arcArray = list()
+# arcs <- arcs(originalNetwork)  
+# arcBool <- if_else(in.degree(originalNetwork, arcs[,"to"]) >= 1, TRUE, FALSE)
+# arcs <- cbind(arcs,arcBool)
+
+# iterArc <- function(BN) {
+#     arcs <- arcs(BN)  
+#     for(arc in arcs) {
+#         
+#         }
+#     }
+
 for (i in 1:nrow) {
   print(i)
   parent <- arcs[[i, "from"]]
@@ -96,16 +111,10 @@ for (i in 1:nrow) {
     values = table(sim_data[ , which(names(sim_data) == child)])/nrow(sim_data)
   )
 
-  replace_cpt(as.grain(origBN), new_data)
-  ```
+  replace_cpt(as.grain(origBN), new_data) 
+  tempBN_fitted <- bn.fit(newBN, sim_data)
 
-As networks become more complex, an iterative loop becomes a non-viable method due to computational runtime.
-More work is needed to investigate possible methods to assess the effect of node inclusion. Possible methods include Monte Carlo, or MCMC methods.
-
-## Try with Monte Carlo Sampling
-  ```{r}
-  tempBN_fitted <- bn.fit(newBN, sim_data) #[ , - which(names(sim_data) == child)])
-
+# Determine nes marginal distribution with Monte Carlo Sampling
   tempBN_pred  <- predict(tempBN_fitted,
     data = data.frame(Results7 = factor("Yes", levels = c("Yes", "No"))),
     node = "HpHd",
@@ -113,10 +122,8 @@ More work is needed to investigate possible methods to assess the effect of node
     n = 10000,
     prob = TRUE
   ) # Generate 10,000 samples if results true
-```
 
   # Compute empirical marginal distributions
-  ```{r}
   marginal_HpHd <- attributes(tempBN_pred)$prob
 
   cat("Empirical Marginals via Monte Carlo Sampling:\n")
@@ -127,6 +134,8 @@ More work is needed to investigate possible methods to assess the effect of node
 
 }
 ```
+
+Loop not working as replaceCPT needs values as a named list not a CPT (this doesnt make sense why it was made this way). I dont think Ive got the new data right yet anyway in terms of maintaining the conditionalality. 
 
 
 Consider computation using maths to deal with multiple parents
