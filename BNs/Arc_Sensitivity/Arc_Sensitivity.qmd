@@ -1,5 +1,8 @@
 ---
 title: "Assessing the Effect of Bayesian Network Arc Removal on the Calculated Likelihood Ratio"
+project:
+  type: website
+  output-dir: docs
 ---
 
 # Introduction
@@ -39,7 +42,9 @@ A simple BN (shown in @fig-simpleBN) was created in Hugin Expert Software (Ander
 ![A simple BN created using Hugin](../../Thesis/assets/toyNetworkLabels.png){#fig-simpleBN}
 
 ```{r}
+# filepath for render 
 originalNetwork  <- read.net("simpleBNexample.net")
+#  file path when running manually = "BNs/Arc_Sensitivity/simpleBNexample.net"
 #bn_grain <- loadHuginNet("BNs/Arc_Sensitivity/simpleBNexample.net")
 ```
 
@@ -111,7 +116,7 @@ for (i in 1:nrow) {
     values = table(sim_data[ , which(names(sim_data) == child)])/nrow(sim_data)
   )
 
-  replace_cpt(as.grain(origBN), new_data) 
+  #replace_cpt(as.grain(origBN), new_data) 
   tempBN_fitted <- bn.fit(newBN, sim_data)
 
 # Determine nes marginal distribution with Monte Carlo Sampling
@@ -143,7 +148,7 @@ Consider computation using maths to deal with multiple parents
 #bnlearn::BF(numerator, denom) computes bayes factor between two networks
 # P(Child∣Remaining Parents)= ∑ P(Child∣Parents,Remaining Parents)⋅P(Parents)
 
-new_prob <- querygrain(tempBN, nodes = child, type = "conditional")* querygrain(tempBN, nodes = parent, type = "conditional")
+new_prob <- querygrain(as.grain(origBN), nodes = child, type = "conditional")* querygrain(as.grain(origBN), nodes = parent, type = "conditional")
 
 ```
 
