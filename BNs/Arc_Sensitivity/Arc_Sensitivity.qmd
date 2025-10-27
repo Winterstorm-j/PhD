@@ -39,7 +39,7 @@ library("gRain")
 ### Importing and Visualisation of a Toy Network
 A simple BN (shown in @fig-simpleBN) was created in Hugin Expert Software (Andersen 1989) and then imported into R (v4.4.1) using the BNLearn package. 
 
-![A simple BN created using Hugin](../../Thesis/assets/toyNetworkLabels.png){#fig-simpleBN}
+![A simple BN created using Hugin](toyNetworkLabels.png){#fig-simpleBN}
 
 ```{r}
 # filepath for render 
