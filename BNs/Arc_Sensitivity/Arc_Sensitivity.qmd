@@ -1,14 +1,10 @@
 ---
 title: "Assessing the Effect of Bayesian Network Arc Removal on the Calculated Likelihood Ratio"
-project:
-  type: website
-  output-dir: docs
 ---
 
 # Introduction
-Understanding how BNs work and what the effect of networks created by different practitioners is key to supporting robust, reproducible science. As networks become more complex there has been a move to save sub-networks of common processes to allow for reuse in other networks. These are termed OOBNs, which has opened the door to the creation of highly complex and large networks by embedding the sub-networks within the larger network. 
-Assessment of the network to determine the effect of the values used is important to ensure the evaluation is robust and limitations are understood (Schaapveld 2019, Chen and Pollino 2012). Although there have been many advancements in causal model algorithms in the field of artificial intelligence in recent years, there is a lag in the transparency or explainability of outputs derived from these complex models that makes them less attractive to a forensic or legal context.
-Whether a node is included in a network is at the discretion of the practitioner and is based on the framework of circumstance and their assumptions. The effect of different practitioners can be modelled by modifying the architecture of a BN for a case by removing arcs between nodes.  This changes the state probabilities of the child node so that it is no longer conditional on the parent. Determining changes in the resultant likelihood ratio value that is obtained will describe the sensitivity to networks created by different practitioners for the same case.
+
+Understanding how BNs work and what the effect of networks created by different practitioners is key to supporting robust, reproducible science. As networks become more complex there has been a move to save sub-networks of common processes to allow for reuse in other networks. These are termed OOBNs, which has opened the door to the creation of highly complex and large networks by embedding the sub-networks within the larger network. Assessment of the network to determine the effect of the values used is important to ensure the evaluation is robust and limitations are understood (Schaapveld 2019, Chen and Pollino 2012). Although there have been many advancements in causal model algorithms in the field of artificial intelligence in recent years, there is a lag in the transparency or explainability of outputs derived from these complex models that makes them less attractive to a forensic or legal context. Whether a node is included in a network is at the discretion of the practitioner and is based on the framework of circumstance and their assumptions. The effect of different practitioners can be modelled by modifying the architecture of a BN for a case by removing arcs between nodes. This changes the state probabilities of the child node so that it is no longer conditional on the parent. Determining changes in the resultant likelihood ratio value that is obtained will describe the sensitivity to networks created by different practitioners for the same case.
 
 ```{r setup}
 #| echo: false
@@ -34,10 +30,11 @@ library("gRain")
 
 ```
 
-
 # Methods
+
 ### Importing and Visualisation of a Toy Network
-A simple BN (shown in @fig-simpleBN) was created in Hugin Expert Software (Andersen 1989) and then imported into R (v4.4.1) using the BNLearn package. 
+
+A simple BN (shown in @fig-simpleBN) was created in Hugin Expert Software (Andersen 1989) and then imported into R (v4.4.1) using the BNLearn package.
 
 ![A simple BN created using Hugin](toyNetworkLabels.png){#fig-simpleBN}
 
@@ -49,6 +46,7 @@ originalNetwork  <- read.net("simpleBNexample.net")
 ```
 
 The network was then visualised with probabilities showing using graphviz to ensure that it was consistent with Hugin
+
 ```{r}
 # origPlot <- graphviz.plot(originalNetwork,
 #   groups = list(
@@ -68,28 +66,29 @@ graphviz.chart(originalNetwork,
 I think there is an issue with the CPTs as the values are not showing as each option conditional on the parents. Rather the unconditional dists for the options
 
 ### Set Seed for Reproducibility
+
 ```{r}
 set.seed(123) 
 ```
 
-
-
-Initially, I attempted to identify and then iterate through the edges, removing and calculating the marginal probabilities with sampling with replacement. This would work if the nodes needed to change from conditional probabilities to unconditional probabilities for the child nodes but not when only one condition is removed. 
+Initially, I attempted to identify and then iterate through the edges, removing and calculating the marginal probabilities with sampling with replacement. This would work if the nodes needed to change from conditional probabilities to unconditional probabilities for the child nodes but not when only one condition is removed.
 
 ## Identifying the arcs
+
 ```{r}
 arcs <- arcs(originalNetwork)
 nrow <- length(arcs[, 1])
 ```
 
-
 ## Simulate the marginal distributions of the original network (on a new copy to not overwrite the original import)
+
 ```{r}
 origBN <- originalNetwork
 sim_data <- rbn(origBN, n = 100000)
 ```
 
 ## Loop through the list of arcs, identifying parent and child, drop the arc and recreate and replace the CPT
+
 ```{r}
 # arcArray = list()
 # arcs <- arcs(originalNetwork)  
@@ -140,10 +139,10 @@ for (i in 1:nrow) {
 }
 ```
 
-Loop not working as replaceCPT needs values as a named list not a CPT (this doesnt make sense why it was made this way). I dont think Ive got the new data right yet anyway in terms of maintaining the conditionalality. 
-
+Loop not working as replaceCPT needs values as a named list not a CPT (this doesnt make sense why it was made this way). I dont think Ive got the new data right yet anyway in terms of maintaining the conditionalality.
 
 Consider computation using maths to deal with multiple parents
+
 ```{r}
 #bnlearn::BF(numerator, denom) computes bayes factor between two networks
 # P(Child∣Remaining Parents)= ∑ P(Child∣Parents,Remaining Parents)⋅P(Parents)
@@ -151,6 +150,3 @@ Consider computation using maths to deal with multiple parents
 new_prob <- querygrain(as.grain(origBN), nodes = child, type = "conditional")* querygrain(as.grain(origBN), nodes = parent, type = "conditional")
 
 ```
-
-
-
