@@ -162,9 +162,9 @@ Figure&nbsp;1: A simple BN created using Hugin
 <h2 class="anchored" data-anchor-id="identifying-the-arcs">Identifying the arcs</h2>
 <p>All of the arcs present in the toy BN are listed in the table below.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>arcs <span class="ot">&lt;-</span> <span class="fu">arcs</span>(originalNetwork)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>arcs <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">arcs</span>(originalNetwork))</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>nrow <span class="ot">&lt;-</span> <span class="fu">length</span>(arcs[, <span class="dv">1</span>])</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(arcs) <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">1</span>,nrow,<span class="dv">1</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>arcs <span class="sc">%&gt;%</span> <span class="fu">kable</span>(<span class="at">row.names =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -215,108 +215,233 @@ Figure&nbsp;1: A simple BN created using Hugin
 </table>
 </div>
 </div>
+<p>Taking into account Duncan’s thoughts, we need a way to decide which nodes require the addition of a gatekeeping node to switch it on or off. We could find the leaf nodes but they wont neccessarily be results nodes especially if we have a BN with multiple tests of the item. If the leaf nodes are results then they would have transfer nodes as parents so would be the arcs we want to adjust. But it would not include transfer nodes as parents of other transfer nodes or test nodes.</p>
+<p>Instead, we can choose based on the arc table any arcs which dont have HpHd, as a first filter. Addtionally, Aany direct descendant of HpHd will also be a proposed activity. Any child node of these activity nodes would have a required arc so the arc should be excluded.</p>
 </section>
-<section id="simulate-the-marginal-distributions-of-the-original-network-on-a-new-copy-to-not-overwrite-the-original-import" class="level2">
-<h2 class="anchored" data-anchor-id="simulate-the-marginal-distributions-of-the-original-network-on-a-new-copy-to-not-overwrite-the-original-import">Simulate the marginal distributions of the original network (on a new copy to not overwrite the original import)</h2>
+<section id="filtering-the-arc-table-to-find-nodes-of-interest" class="level2">
+<h2 class="anchored" data-anchor-id="filtering-the-arc-table-to-find-nodes-of-interest">Filtering the arc table to find nodes of interest</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>origBN <span class="ot">&lt;-</span> originalNetwork</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">rbn</span>(origBN, <span class="at">n =</span> <span class="dv">100000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># exclude arcs that originate from "HpHd" or that originate from any child of "HpHd"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>activityNodes <span class="ot">&lt;-</span> arcs <span class="sc">%&gt;%</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(from <span class="sc">==</span> <span class="st">"HpHd"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(to)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>arcsOfInterest <span class="ot">&lt;-</span> arcs <span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(from <span class="sc">==</span> <span class="st">"HpHd"</span> <span class="sc">|</span> from <span class="sc">%in%</span> activityNodes))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>arcsOfInterest <span class="sc">%&gt;%</span> <span class="fu">kable</span>(<span class="at">row.names =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">from</th>
+<th style="text-align: left;">to</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">TPPR6</td>
+<td style="text-align: left;">Results7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">TPPR5</td>
+<td style="text-align: left;">Results7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">TPPR4</td>
+<td style="text-align: left;">Results7</td>
+</tr>
+</tbody>
+</table>
 </div>
-</section>
-<section id="loop-through-the-list-of-arcs-identifying-parent-and-child-drop-the-arc-and-recreate-and-replace-the-cpt" class="level2">
-<h2 class="anchored" data-anchor-id="loop-through-the-list-of-arcs-identifying-parent-and-child-drop-the-arc-and-recreate-and-replace-the-cpt">Loop through the list of arcs, identifying parent and child, drop the arc and recreate and replace the CPT</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># arcArray = list()</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># arcs &lt;- arcs(originalNetwork)  </span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># arcBool &lt;- if_else(in.degree(originalNetwork, arcs[,"to"]) &gt;= 1, TRUE, FALSE)</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># arcs &lt;- cbind(arcs,arcBool)</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># iterArc &lt;- function(BN) {</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#     arcs &lt;- arcs(BN)  </span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#     for(arc in arcs) {</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#         </span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#         }</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#     }</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>i<span class="ot">=</span><span class="dv">1</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"># for (i in 1:nrow) {</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  parent <span class="ot">&lt;-</span> arcs[[i, <span class="st">"from"</span>]]</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  child <span class="ot">&lt;-</span> arcs[[i, <span class="st">"to"</span>]]</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Clarify which arc we are working on </span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">glue</span>(<span class="st">"Arc between Parent: {parent} and Child: {child}"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Arc between Parent: TPPR6 and Child: Results7</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get the underlying structure of the bn.fitted object</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  bn_structure <span class="ot">&lt;-</span> <span class="fu">bn.net</span>(origBN)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#remove the arc</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  newBN <span class="ot">&lt;-</span> <span class="fu">drop.arc</span>(bn_structure, parent, child)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># make new CPT</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  new_data <span class="ot">&lt;-</span> <span class="fu">cptable</span>(child,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">levels=</span><span class="fu">levels</span>(sim_data[, <span class="fu">which</span>(<span class="fu">names</span>(sim_data) <span class="sc">==</span> child)]),</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">table</span>(sim_data[ , <span class="fu">which</span>(<span class="fu">names</span>(sim_data) <span class="sc">==</span> child)])<span class="sc">/</span><span class="fu">nrow</span>(sim_data)</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># replace the old CPT with the new</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">#replace_cpt(as.grain(origBN), new_data) </span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># fit the new structure with some data</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  tempBN_fitted <span class="ot">&lt;-</span> <span class="fu">bn.fit</span>(newBN, sim_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in check.data(data, allow.missing = TRUE): variable TPPR6 in the data
-has levels that are not observed in the data.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in check.data(data, allow.missing = TRUE): variable Activity3 in the
-data has levels that are not observed in the data.</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine new marginal distribution with Monte Carlo Sampling</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  tempBN_pred  <span class="ot">&lt;-</span> <span class="fu">predict</span>(tempBN_fitted,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">Results7 =</span> <span class="fu">factor</span>(<span class="st">"Yes"</span>, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Yes"</span>, <span class="st">"No"</span>))),</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">node =</span> <span class="st">"HpHd"</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"bayes-lw"</span>,</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="dv">10000</span>,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">prob =</span> <span class="cn">TRUE</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="co"># Generate 10,000 samples if results true</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Compute empirical marginal distributions</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  marginal_HpHd <span class="ot">&lt;-</span> <span class="fu">attributes</span>(tempBN_pred)<span class="sc">$</span>prob</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Empirical Marginals via Monte Carlo Sampling:</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Empirical Marginals via Monte Carlo Sampling:</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"P(HpHd):</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>P(HpHd):</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(marginal_HpHd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>       [,1]
+<p>The parent nodes of these remaining arcs would be candidates for having a gatekeeping boolean node added as an additional parent.</p>
+<!-- ## Simulate the marginal distributions of the original network (on a new copy to not overwrite the original import)
+
+::: {.cell}
+
+```{.r .cell-code}
+origBN <- originalNetwork
+sim_data <- rbn(origBN, n = 100000)
+```
+:::
+
+
+## Loop through the list of arcs, identifying parent and child, drop the arc and recreate and replace the CPT
+
+
+::: {.cell}
+
+```{.r .cell-code}
+# arcArray = list()
+# arcs <- arcs(originalNetwork)  
+# arcBool <- if_else(in.degree(originalNetwork, arcs[,"to"]) >= 1, TRUE, FALSE)
+# arcs <- cbind(arcs,arcBool)
+
+# iterArc <- function(BN) {
+#     arcs <- arcs(BN)  
+#     for(arc in arcs) {
+#         
+#         }
+#     }
+i=1
+# for (i in 1:nrow) {
+
+  parent <- arcs[[i, "from"]]
+  child <- arcs[[i, "to"]]
+
+  # Clarify which arc we are working on 
+  print(glue("Arc between Parent: {parent} and Child: {child}"))
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+Arc between Parent: TPPR6 and Child: Results7
+```
+
+
+:::
+
+```{.r .cell-code}
+  # get the underlying structure of the bn.fitted object
+  bn_structure <- bn.net(origBN)
+
+  #remove the arc
+  newBN <- drop.arc(bn_structure, parent, child)
+
+  # make new CPT
+  new_data <- cptable(child,
+    levels=levels(sim_data[, which(names(sim_data) == child)]),
+    values = table(sim_data[ , which(names(sim_data) == child)])/nrow(sim_data)
+  )
+
+  # replace the old CPT with the new
+  #replace_cpt(as.grain(origBN), new_data) 
+
+  # fit the new structure with some data
+  tempBN_fitted <- bn.fit(newBN, sim_data)
+```
+
+::: {.cell-output .cell-output-stderr}
+
+```
+Warning in check.data(data, allow.missing = TRUE): variable TPPR6 in the data
+has levels that are not observed in the data.
+```
+
+
+:::
+
+::: {.cell-output .cell-output-stderr}
+
+```
+Warning in check.data(data, allow.missing = TRUE): variable Activity3 in the
+data has levels that are not observed in the data.
+```
+
+
+:::
+
+```{.r .cell-code}
+# Determine new marginal distribution with Monte Carlo Sampling
+  tempBN_pred  <- predict(tempBN_fitted,
+    data = data.frame(Results7 = factor("Yes", levels = c("Yes", "No"))),
+    node = "HpHd",
+    method = "bayes-lw",
+    n = 10000,
+    prob = TRUE
+  ) # Generate 10,000 samples if results true
+
+  # Compute empirical marginal distributions
+  marginal_HpHd <- attributes(tempBN_pred)$prob
+
+  cat("Empirical Marginals via Monte Carlo Sampling:\n")
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+Empirical Marginals via Monte Carlo Sampling:
+```
+
+
+:::
+
+```{.r .cell-code}
+  cat("P(HpHd):\n")
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+P(HpHd):
+```
+
+
+:::
+
+```{.r .cell-code}
+  print(marginal_HpHd)
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+       [,1]
 Hp 0.819478
-Hd 0.180522</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"LR:"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>LR:</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(marginal_HpHd[<span class="dv">1</span>]<span class="sc">/</span> marginal_HpHd[<span class="dv">2</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 4.53949</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Loop not working as replaceCPT needs values as a named list not a CPT (this doesnt make sense why it was made this way). I dont think Ive got the new data right yet anyway in terms of maintaining the conditionalality.</p>
-<p>Consider computation using maths to deal with multiple parents</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#bnlearn::BF(numerator, denom) computes bayes factor between two networks</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># P(Child∣Remaining Parents)= ∑ P(Child∣Parents,Remaining Parents)⋅P(Parents)</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>new_prob <span class="ot">&lt;-</span> <span class="fu">querygrain</span>(<span class="fu">as.grain</span>(origBN), <span class="at">nodes =</span> child, <span class="at">type =</span> <span class="st">"conditional"</span>)<span class="sc">*</span> <span class="fu">querygrain</span>(<span class="fu">as.grain</span>(origBN), <span class="at">nodes =</span> parent, <span class="at">type =</span> <span class="st">"conditional"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
+Hd 0.180522
+```
+
+
+:::
+
+```{.r .cell-code}
+  cat("LR:")
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+LR:
+```
+
+
+:::
+
+```{.r .cell-code}
+  print(marginal_HpHd[1]/ marginal_HpHd[2])
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+[1] 4.53949
+```
+
+
+:::
+
+```{.r .cell-code}
+# }
+```
+:::
+
+
+Loop not working as replaceCPT needs values as a named list not a CPT (this doesnt make sense why it was made this way). I dont think Ive got the new data right yet anyway in terms of maintaining the conditionalality.
+
+Consider computation using maths to deal with multiple parents
+
+#bnlearn::BF(numerator, denom) computes bayes factor between two networks
+# P(Child∣Remaining Parents)= ∑ P(Child∣Parents,Remaining Parents)⋅P(Parents)
+
+new_prob <- querygrain(as.grain(origBN), nodes = child, type = "conditional")* querygrain(as.grain(origBN), nodes = parent, type = "conditional")
+
+``` -->
 </section>
 </section>
 <section id="content-from-duncans-thoughts-document" class="level1">
@@ -335,30 +460,40 @@ Figure&nbsp;2: This is the BN
 </div>
 <p>Node 4 just has the transfer probability for digital penetration, node 5 has the probability for DNA transfer from social contact, node 6 has the probability for contamination occurring, and the results node (node 7) is just an accumulation node, where if any of the three parents have occurred then we expect DNA to be present.</p>
 <p>It is easy conceptually to remove some arcs, adjust the BN and show the effect. For example, we could remove the arc between node 5 and 7, and then adjust the probabilities in node 7 so they still function the same way (i.e.&nbsp;accumulation), but now three are only two possible soures of DNA (coming from node 4 or node 6). Similarly we could remove the arc from node 6 to 7, and again adjust the probabilities in node 7 to suit the new BN structure.</p>
-<p>The image <strong>?@fig-hugin-arcsmoved</strong> below shows the behaviour of the BN under these three configurations: <img src="HuginMoveArcs.png" id="fig-hugin-arcsmoved" class="img-fluid"></p>
+<p>The image <a href="#fig-hugin-arcsmoved" class="quarto-xref">Figure&nbsp;3</a> below shows the behaviour of the BN under these three configurations:</p>
+<div id="fig-hugin-arcsmoved" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hugin-arcsmoved-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="HuginMoveArcs.png" id="fig-hugin-arcsmoved" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-hugin-arcsmoved-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
 <p>It’s a bit small, but zooming in you can see that when removing the arc between node 5 and 7 (middle BN) the LR shifts dramatically from the base BN (shown on the left). However, removing the arc between node 6 and 7 (right BN) has little effect at all. We conclude from this that the node between 6 and 7 is not important in this BN (for this result at least).</p>
-<p>So how can this idea be extrapolated up to an automated way of testing arc significance? I was thinking about this on the weekend, and it was not a trivial undertaking. At first, I thought it would be easy to just marginalise out the arc being removed, adjust the probabilities in the child node so that it was no longer dependent on that parent and then compare to the result to the base BN. A quick play around and this didn’t work (at least for me in the way I was doing it). It showed that all arcs were important. I then thought that this problem would be easier for DNA amounts as in HUGIN you just use DNA expressions and they would automatically adjust if an arc was taken out (well they would ‘automatically’ adjust, but the thinking would) e.g.&nbsp;node 7 would simply have an expression of ‘sum the parents’ regardless of what parents were there. So then I thought that this same thinking could be applied to any BN, it’s just that they would need to be set up in a specific way, and would need to use expressions. So…. here is what I got to. 1. All human assignments need to occur in founder nodes (the exception to this is activity nodes, in blue, which can just stay as they are). 2. All non-founder nodes then must be populated with expressions that are general across however many parent nodes are present (again activity nodes are the exception). The altered structure of the simple BN that adheres to these rules is <a href="#fig-huginaltered" class="quarto-xref">Figure&nbsp;3</a> below.</p>
+<p>So how can this idea be extrapolated up to an automated way of testing arc significance? I was thinking about this on the weekend, and it was not a trivial undertaking. At first, I thought it would be easy to just marginalise out the arc being removed, adjust the probabilities in the child node so that it was no longer dependent on that parent and then compare to the result to the base BN. A quick play around and this didn’t work (at least for me in the way I was doing it). It showed that all arcs were important. I then thought that this problem would be easier for DNA amounts as in HUGIN you just use DNA expressions and they would automatically adjust if an arc was taken out (well they would ‘automatically’ adjust, but the thinking would) e.g.&nbsp;node 7 would simply have an expression of ‘sum the parents’ regardless of what parents were there. So then I thought that this same thinking could be applied to any BN, it’s just that they would need to be set up in a specific way, and would need to use expressions. So…. here is what I got to. 1. All human assignments need to occur in founder nodes (the exception to this is activity nodes, in blue, which can just stay as they are). 2. All non-founder nodes then must be populated with expressions that are general across however many parent nodes are present (again activity nodes are the exception). The altered structure of the simple BN that adheres to these rules is <a href="#fig-huginaltered" class="quarto-xref">Figure&nbsp;4</a> below.</p>
 <div id="fig-huginaltered" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-huginaltered-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="HuginAltered.png" id="fig-huginaltered" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-huginaltered-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3
+Figure&nbsp;4
 </figcaption>
 </figure>
 </div>
 <p>All the nodes (apart from the proposition node) are Boolean, and nodes 4, 5 and 7 are all expression based.</p>
 <p>Node 4 has expression: And(node4a, node2)</p>
 <p>Node5 has expression: And(node5a, node3)</p>
-<p>As both nodes require both conditions to be met in order to be true. Taking out an arc is now easy, and the general expression of “and(parents)” can still be maintained, it’s just that with one parent “and(parent)” will just equal whatever the remaining “parent” is. Node 7 has expression: Or(node4, node5, node6) Because it is true if any of the parents are true. Evidence that this BN still functions is shown <a href="#fig-huginprobsshown" class="quarto-xref">Figure&nbsp;4</a> below:</p>
+<p>As both nodes require both conditions to be met in order to be true. Taking out an arc is now easy, and the general expression of “and(parents)” can still be maintained, it’s just that with one parent “and(parent)” will just equal whatever the remaining “parent” is. Node 7 has expression: Or(node4, node5, node6) Because it is true if any of the parents are true. Evidence that this BN still functions is shown <a href="#fig-huginprobsshown" class="quarto-xref">Figure&nbsp;5</a> below:</p>
 <div id="fig-huginprobsshown" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-huginprobsshown-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="HuginAlteredProbs.png" id="fig-huginprobsshown" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-huginprobsshown-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4
+Figure&nbsp;5
 </figcaption>
 </figure>
 </div>

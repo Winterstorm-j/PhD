@@ -12,7 +12,7 @@ Understanding how BNs work and what the effect of networks created by different 
 #| include: false
 
 sapply(
-  c("dplyr","bnlearn","gRain","BiocManager"),
+  c("dplyr","magrittr","bnlearn","gRain","BiocManager"),
   FUN=function (x){
     if(!x %in% installed.packages()){
       install.packages(x) }
@@ -25,6 +25,7 @@ sapply(
       BiocManager::install(x) }
     })  
 library("dplyr")
+library("magrittr")
 library("bnlearn")
 library("gRain")
 library("knitr")
@@ -80,14 +81,32 @@ Initially, I attempted to identify and then iterate through the edges, removing 
 All of the arcs present in the toy BN are listed in the table below.
 
 ```{r}
-arcs <- arcs(originalNetwork)
+arcs <- as.data.frame(arcs(originalNetwork))
 nrow <- length(arcs[, 1])
-row.names(arcs) = seq(1,nrow,1)
+
 arcs %>% kable(row.names = TRUE)
 ```
 
-## Simulate the marginal distributions of the original network (on a new copy to not overwrite the original import)
+Taking into account Duncan's thoughts, we need a way to decide which nodes require the addition of a gatekeeping node to switch it on or off. We could find the leaf nodes but they wont neccessarily be results nodes especially if we have a BN with multiple tests of the item. If the leaf nodes are results then they would have transfer nodes as parents so would be the arcs we want to adjust. But it would not include transfer nodes as parents of other transfer nodes or test nodes.
 
+Instead, we can choose based on the arc table any arcs which dont have HpHd, as a first filter. Addtionally, Aany direct descendant of HpHd will also be a proposed activity. Any child node of these activity nodes would have a required arc so the arc should be excluded.
+
+## Filtering the arc table to find nodes of interest
+```{r}
+# exclude arcs that originate from "HpHd" or that originate from any child of "HpHd"
+activityNodes <- arcs %>% 
+    filter(from == "HpHd") %>% 
+    pull(to)
+
+arcsOfInterest <- arcs %>%
+  filter(!(from == "HpHd" | from %in% activityNodes))
+
+arcsOfInterest %>% kable(row.names = TRUE)
+```
+
+The parent nodes of these remaining arcs would be candidates for having a gatekeeping boolean node added as an additional parent.
+
+<!-- ## Simulate the marginal distributions of the original network (on a new copy to not overwrite the original import)
 ```{r}
 origBN <- originalNetwork
 sim_data <- rbn(origBN, n = 100000)
@@ -166,7 +185,7 @@ Consider computation using maths to deal with multiple parents
 
 new_prob <- querygrain(as.grain(origBN), nodes = child, type = "conditional")* querygrain(as.grain(origBN), nodes = parent, type = "conditional")
 
-```
+``` -->
 
 # Content from Duncan's Thoughts Document
 
@@ -180,7 +199,9 @@ Node 4 just has the transfer probability for digital penetration, node 5 has the
 
 It is easy conceptually to remove some arcs, adjust the BN and show the effect. For example, we could remove the arc between node 5 and 7, and then adjust the probabilities in node 7 so they still function the same way (i.e. accumulation), but now three are only two possible soures of DNA (coming from node 4 or node 6). Similarly we could remove the arc from node 6 to 7, and again adjust the probabilities in node 7 to suit the new BN structure.
 
-The image @fig-hugin-arcsmoved below shows the behaviour of the BN under these three configurations: ![](HuginMoveArcs.png){#fig-hugin-arcsmoved}
+The image @fig-hugin-arcsmoved below shows the behaviour of the BN under these three configurations: 
+
+![](HuginMoveArcs.png){#fig-hugin-arcsmoved}
 
 It’s a bit small, but zooming in you can see that when removing the arc between node 5 and 7 (middle BN) the LR shifts dramatically from the base BN (shown on the left). However, removing the arc between node 6 and 7 (right BN) has little effect at all. We conclude from this that the node between 6 and 7 is not important in this BN (for this result at least).
 
