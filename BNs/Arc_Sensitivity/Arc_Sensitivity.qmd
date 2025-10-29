@@ -92,6 +92,7 @@ Taking into account Duncan's thoughts, we need a way to decide which nodes requi
 Instead, we can choose based on the arc table any arcs which dont have HpHd, as a first filter. Addtionally, Aany direct descendant of HpHd will also be a proposed activity. Any child node of these activity nodes would have a required arc so the arc should be excluded.
 
 ## Filtering the arc table to find nodes of interest
+
 ```{r}
 # exclude arcs that originate from "HpHd" or that originate from any child of "HpHd"
 activityNodes <- arcs %>% 
@@ -106,86 +107,88 @@ arcsOfInterest %>% kable(row.names = TRUE)
 
 The parent nodes of these remaining arcs would be candidates for having a gatekeeping boolean node added as an additional parent.
 
-<!-- ## Simulate the marginal distributions of the original network (on a new copy to not overwrite the original import)
-```{r}
-origBN <- originalNetwork
-sim_data <- rbn(origBN, n = 100000)
-```
+# *Old code below set as block code to keep but not run*
+
+## Simulate the marginal distributions of the original network (on a new copy to not overwrite the original import)
+
+> ```{r}
+> origBN <- originalNetwork
+> sim_data <- rbn(origBN, n = 100000)
+> ```
 
 ## Loop through the list of arcs, identifying parent and child, drop the arc and recreate and replace the CPT
 
-```{r}
-# arcArray = list()
-# arcs <- arcs(originalNetwork)  
-# arcBool <- if_else(in.degree(originalNetwork, arcs[,"to"]) >= 1, TRUE, FALSE)
-# arcs <- cbind(arcs,arcBool)
-
-# iterArc <- function(BN) {
-#     arcs <- arcs(BN)  
-#     for(arc in arcs) {
-#         
-#         }
-#     }
-i=1
-# for (i in 1:nrow) {
-
-  parent <- arcs[[i, "from"]]
-  child <- arcs[[i, "to"]]
-
-  # Clarify which arc we are working on 
-  print(glue("Arc between Parent: {parent} and Child: {child}"))
-
-  # get the underlying structure of the bn.fitted object
-  bn_structure <- bn.net(origBN)
-
-  #remove the arc
-  newBN <- drop.arc(bn_structure, parent, child)
-
-  # make new CPT
-  new_data <- cptable(child,
-    levels=levels(sim_data[, which(names(sim_data) == child)]),
-    values = table(sim_data[ , which(names(sim_data) == child)])/nrow(sim_data)
-  )
-
-  # replace the old CPT with the new
-  #replace_cpt(as.grain(origBN), new_data) 
-
-  # fit the new structure with some data
-  tempBN_fitted <- bn.fit(newBN, sim_data)
-
-# Determine new marginal distribution with Monte Carlo Sampling
-  tempBN_pred  <- predict(tempBN_fitted,
-    data = data.frame(Results7 = factor("Yes", levels = c("Yes", "No"))),
-    node = "HpHd",
-    method = "bayes-lw",
-    n = 10000,
-    prob = TRUE
-  ) # Generate 10,000 samples if results true
-
-  # Compute empirical marginal distributions
-  marginal_HpHd <- attributes(tempBN_pred)$prob
-
-  cat("Empirical Marginals via Monte Carlo Sampling:\n")
-  cat("P(HpHd):\n")
-  print(marginal_HpHd)
-
-  cat("LR:")
-  print(marginal_HpHd[1]/ marginal_HpHd[2])
-
-# }
-```
+> ```{r}
+> # arcArray = list()
+> # arcs <- arcs(originalNetwork)  
+> # arcBool <- if_else(in.degree(originalNetwork, arcs[,"to"]) >= 1, TRUE, FALSE)
+> # arcs <- cbind(arcs,arcBool)
+> >
+> # iterArc <- function(BN) {
+> #     arcs <- arcs(BN)  
+> #     for(arc in arcs) {
+> #         
+> #         }
+> #     }
+> i=1
+> # for (i in 1:nrow) {
+> >
+>   parent <- arcs[[i, "from"]]
+>   child <- arcs[[i, "to"]]
+> >
+>   # Clarify which arc we are working on 
+>   print(glue("Arc between Parent: {parent} and Child: {child}"))
+> >
+>   # get the underlying structure of the bn.fitted object
+>   bn_structure <- bn.net(origBN)
+> >
+>   #remove the arc
+>   newBN <- drop.arc(bn_structure, parent, child)
+> >
+>   # make new CPT
+>   new_data <- cptable(child,
+>     levels=levels(sim_data[, which(names(sim_data) == child)]),
+>     values = table(sim_data[ , which(names(sim_data) == child)])/nrow(sim_data)
+>   )
+> >
+>   # replace the old CPT with the new
+>   #replace_cpt(as.grain(origBN), new_data) 
+> >
+>   # fit the new structure with some data
+>   tempBN_fitted <- bn.fit(newBN, sim_data)
+> >
+> # Determine new marginal distribution with Monte Carlo Sampling
+>   tempBN_pred  <- predict(tempBN_fitted,
+>     data = data.frame(Results7 = factor("Yes", levels = c("Yes", "No"))),
+>     node = "HpHd",
+>     method = "bayes-lw",
+>     n = 10000,
+>     prob = TRUE
+>   ) # Generate 10,000 samples if results true
+> >
+>   # Compute empirical marginal distributions
+>   marginal_HpHd <- attributes(tempBN_pred)$prob
+> >
+>   cat("Empirical Marginals via Monte Carlo Sampling:\n")
+>   cat("P(HpHd):\n")
+>   print(marginal_HpHd)
+> >
+>   cat("LR:")
+>   print(marginal_HpHd[1]/ marginal_HpHd[2])
+> >
+> # }
+> ```
 
 Loop not working as replaceCPT needs values as a named list not a CPT (this doesnt make sense why it was made this way). I dont think Ive got the new data right yet anyway in terms of maintaining the conditionalality.
 
 Consider computation using maths to deal with multiple parents
 
-```{r}
-#bnlearn::BF(numerator, denom) computes bayes factor between two networks
-# P(Child∣Remaining Parents)= ∑ P(Child∣Parents,Remaining Parents)⋅P(Parents)
-
-new_prob <- querygrain(as.grain(origBN), nodes = child, type = "conditional")* querygrain(as.grain(origBN), nodes = parent, type = "conditional")
-
-``` -->
+> ```{r}
+> #bnlearn::BF(numerator, denom) computes bayes factor between two networks # P(Child∣Remaining Parents)= ∑ P(Child∣Parents,Remaining Parents)⋅P(Parents)
+> >
+> new_prob <- querygrain(as.grain(origBN), nodes = child, type = "conditional")* querygrain(as.grain(origBN), nodes = parent, type = "conditional")
+> >
+> ```
 
 # Content from Duncan's Thoughts Document
 
@@ -199,7 +202,7 @@ Node 4 just has the transfer probability for digital penetration, node 5 has the
 
 It is easy conceptually to remove some arcs, adjust the BN and show the effect. For example, we could remove the arc between node 5 and 7, and then adjust the probabilities in node 7 so they still function the same way (i.e. accumulation), but now three are only two possible soures of DNA (coming from node 4 or node 6). Similarly we could remove the arc from node 6 to 7, and again adjust the probabilities in node 7 to suit the new BN structure.
 
-The image @fig-hugin-arcsmoved below shows the behaviour of the BN under these three configurations: 
+The image @fig-hugin-arcsmoved below shows the behaviour of the BN under these three configurations:
 
 ![](HuginMoveArcs.png){#fig-hugin-arcsmoved}
 
