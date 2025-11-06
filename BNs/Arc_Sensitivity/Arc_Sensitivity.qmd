@@ -106,6 +106,77 @@ arcsOfInterest %>% kable(row.names = TRUE)
 ```
 
 The parent nodes of these remaining arcs would be candidates for having a gatekeeping boolean node added as an additional parent.
+Defining a new conditional table for the node of interest that becomes the new child node may be interesting. 
+Where this node has no other parents it is relatively straight forward with only a consideration for how many states exist. 
+Otherwise, this needs some thinking.  It may need an if statement with a check for existing parents to be included.
+
+I have tried to keep the incoroporation of the new parent into the node of interest as general as possible to account for existing parents.  
+I am not sure it will work for that, we might have to create a slightly more complex toy network that can test this. 
+The following code works when there is a binary child node (with negative response being the last value). 
+The value assigned to the P(child=No|parent=False) is 1 to ensure that the CPT sums to 1.
+
+```{r}
+nodeCount <- nrow(arcsOfInterest)
+new_net <- bn.net(originalNetwork)
+
+# Create a list of all CPTs
+all_cpts <- lapply(originalNetwork, "[[", "prob")
+
+for(row in  1:nrow(arcsOfInterest)) {
+  print(row)
+  nodeOfInterest <- arcsOfInterest[[row,"from"]]
+
+  # retrieve exisitng CPT of node of interest
+  origNodeCPT <- originalNetwork[nodeOfInterest][[1]]$prob
+  print(glue("Original CPT of {nodeOfInterest}"))
+  print(origNodeCPT)
+
+  # Clarify which node we are working on 
+  print(glue("Create new parent of {nodeOfInterest}"))
+
+  newName <- glue("{nodeOfInterest}a")
+  # Add a new node with newly created name above and set a new arc with original node as child
+  new_net <- add.node(new_net, newName)
+  new_net <- set.arc(new_net, from = newName, to = nodeOfInterest)
+
+  # Define the CPT for switch node with states "true" and "false"
+  newNodeCPT <- cpt(newName, levels = c("true", "false"), values=c(1,0))
+
+  # Redefine the CPT for the node of interest to add the switch node levels
+  interestCPT <- c(origNodeCPT, 0, 1)
+  dim(interestCPT) <- c(length(origNodeCPT),length(newNodeCPT))
+  dimnames(interestCPT)  <- list(names(origNodeCPT), names(newNodeCPT))
+  names(dimnames(interestCPT)) <- c(nodeOfInterest, newName)
+
+
+  all_cpts[[ newName ]] <- newNodeCPT
+  all_cpts[[ nodeOfInterest ]] <- interestCPT
+}
+```
+
+```{r}
+
+# Fit the network with the new CPTs
+updated_fitted_net <- custom.fit(new_net, dist = all_cpts)
+```
+
+```{r}
+par(bg="white")
+graphviz.chart(updated_fitted_net,
+                type = "barprob",
+                grid = TRUE, 
+                bar.col = "darkgreen",
+                strip.bg = "lightskyblue")
+```
+Current issue is that it appears that the marginal probabilities of TPPR6 have swapped from 1,0 to 0,1.  
+Must be during my setting of the CPT so need to think about it more.
+
+
+
+```{r}
+
+
+```
 
 # *Old code below set as block code to keep but not run*
 
