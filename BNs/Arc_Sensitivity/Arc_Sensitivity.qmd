@@ -43,8 +43,9 @@ A simple BN (shown in @fig-simpleBN) was created in Hugin Expert Software (Ander
 
 ```{r}
 # filepath for render 
+# setwd("./PhD/BNs/Arc_Sensitivity") #  file path when running manually
 originalNetwork  <- read.net("simpleBNexample.net")
-#  file path when running manually = "BNs/Arc_Sensitivity/simpleBNexample.net"
+
 #bn_grain <- loadHuginNet("BNs/Arc_Sensitivity/simpleBNexample.net")
 ```
 
@@ -111,9 +112,9 @@ Where this node has no other parents it is relatively straight forward with only
 Otherwise, this needs some thinking.  It may need an if statement with a check for existing parents to be included.
 
 I have tried to keep the incoroporation of the new parent into the node of interest as general as possible to account for existing parents.  
-I am not sure it will work for that, we might have to create a slightly more complex toy network that can test this. 
+While TPPR6 has no existing parents, TPPR5 has one (Activity3). This is a good test of the generalisation.
 The following code works when there is a binary child node (with negative response being the last value). 
-The value assigned to the P(child=No|parent=False) is 1 to ensure that the CPT sums to 1.
+The value assigned to the P(child=No|parent=False) is 1 to ensure that the CPT sums to 1. Fix needed for multiple parent nodes or >2 states.
 
 ```{r}
 nodeCount <- nrow(arcsOfInterest)
@@ -142,35 +143,40 @@ for(row in  1:nrow(arcsOfInterest)) {
   # Define the CPT for switch node with states "true" and "false"
   newNodeCPT <- cpt(newName, levels = c("true", "false"), values=c(1,0))
 
-  # Redefine the CPT for the node of interest to add the switch node levels
-  interestCPT <- c(origNodeCPT, 0, 1)
-  dim(interestCPT) <- c(length(origNodeCPT),length(newNodeCPT))
-  dimnames(interestCPT)  <- list(names(origNodeCPT), names(newNodeCPT))
-  names(dimnames(interestCPT)) <- c(nodeOfInterest, newName)
-
-
+  # Redefine the CPT for the node of interest to add the switch node levels for each level of child node states
+  interestCPT <- c(origNodeCPT, rep(0, length(origNodeCPT)-1), 1)
+  
+  # if the original node had no parents - it needs to be named witht he node name, if at least one parent - it is already named
+  if(dim(as.matrix(origNodeCPT))[2]>1){
+      dim(interestCPT) <- c(dim(as.matrix(origNodeCPT)),length(newNodeCPT))
+      dimnames(interestCPT)  <- c(dimnames(origNodeCPT), dimnames(newNodeCPT))
+    } else{
+      dim(interestCPT) <- c(dim(as.matrix(origNodeCPT))[1],length(newNodeCPT))
+      dimnames(interestCPT)  <- c(dimnames(origNodeCPT), dimnames(newNodeCPT))
+      names(dimnames(interestCPT)) <- c(nodeOfInterest, newName)
+    }
+  
+  
   all_cpts[[ newName ]] <- newNodeCPT
   all_cpts[[ nodeOfInterest ]] <- interestCPT
 }
 ```
 
+Fitting is commented until CPT of parented node is worked out (to allow rendering)
 ```{r}
 
 # Fit the network with the new CPTs
-updated_fitted_net <- custom.fit(new_net, dist = all_cpts)
+#updated_fitted_net <- custom.fit(new_net, dist = all_cpts)
 ```
 
 ```{r}
-par(bg="white")
-graphviz.chart(updated_fitted_net,
-                type = "barprob",
-                grid = TRUE, 
-                bar.col = "darkgreen",
-                strip.bg = "lightskyblue")
+# par(bg="white")
+# graphviz.chart(updated_fitted_net,
+#                 type = "barprob",
+#                 grid = TRUE, 
+#                 bar.col = "darkgreen",
+#                 strip.bg = "lightskyblue")
 ```
-Current issue is that it appears that the marginal probabilities of TPPR6 have swapped from 1,0 to 0,1.  
-Must be during my setting of the CPT so need to think about it more.
-
 
 
 ```{r}
