@@ -10,9 +10,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from bertopic.representation import KeyBERTInspired
 from sentence_transformers import SentenceTransformer, util
+from sklearn.feature_extraction import text 
 from sklearn.feature_extraction.text import CountVectorizer
 from util_functions import get_names, combine_group_rows, preprocess_string_columns, _extract_range, preprocess, _join_non_na
-
+import nltk
+from nltk.corpus import stopwords
 import plotly.io as pio
 pio.renderers.default = "browser"
 
@@ -44,27 +46,60 @@ combined['allData'] = combined[cols].apply(_join_non_na, axis=1)
 # The sentences to encode
 dataAsList = combined['allData'].to_list()
 
-#set domain specific stop words (ie forensic, bayesian etc)
-custom_stopwords = ['forensic', 'bayesian', 'analysis','samples', 'analyses', 'sampled', 'forensics',
-                    'evidence', 'examination', 'investigation', 'investigations', 'investigator','sample', 'examined'
-                    'crime', 'method', 'testing', 'probabilistic', 'probabilitiy', 'scene', 'scenes',
-                    'interpretation', 'likelihood', 'ratio','collected','analyze', 'experiments', 'laboratory',
-                    'analyse', 'experiment', 'analyzed','extracted','specimens', 'spectrometry', 'extraction', 
-                    'examiners','analyzing', 'findings', 'propositions', 'chromatography']
+#set domain specific stop words (ie forensic, bayesian etc) as too general. At the trace type level we dont care about methods,
+# within trace type we can look at these
+forensic_stopwords = ['forensic', 'bayesian', 'analysis','samples', 'analyses', 'sampled',
+                      'forensics', 'evidence', 'examination', 'investigation', 'investigations',
+                      'investigator','sample', 'examined', 'method', 'methods', 'methodology',
+                      'examination', 'investigated', 'investigate', 'laboratory', 'laboratories',
+                      'research', 'researches', 'case', 'cases', 'casework', 'caseworks', 'testing',
+                      'examining', 'evaluated', 'evaluation', 'evaluates', 'assessed', 'assessment',
+                      'crime', 'method', 'testing', 'probabilistic', 'probabilitiy', 'scene', 'scenes',
+                      'interpretation', 'likelihood', 'ratio','collected','analyze', 'experiments', 
+                      'analyse', 'experiment', 'analyzed','extracted','specimens', 
+                      'spectrometry', 'extraction', 'examiners','analyzing', 'findings', 'propositions', 
+                      'chromatography', 'study','analyzer', 'profiling', 'assay', 'assays', 'techniques',
+                      'technique', 'instrumentation', 'instruments', 'sampling', 'measurements', 
+                      'measurement', 'validation', 'validated', 'validating', 'swabs', 'swab', 
+                      'sequencing', 'sequenced', 'sequencer', 'amplification', 'amplified', 
+                    'amplify', 'loci', 'locus', 'electrophoresis', 'electrophoretic', 'replicates',
+                    'forensically', 'data', 'results', 'result', 'using', 'used', 'use', 'based', 
+                    'different', 'assess', 'test', 'tests', 'testing', 'well', 'metholodogies',
+                    'analysed', 'analyser', 'tested', 'detection', 'detected', 'detect', 'compare',
+                    'compared', 'comparison', 'comparisons', 'identified', 'identification', 
+                    'identify','identifies', 'reviewed', 'review', 'reviews', 'obtained', 'obtain',
+                    'assessing', 'investigations', 'conclusions', 'conclusion', 'concluded',
+                    'deposited', 'swabbing', 'swabbed', 'studies', 'investigative', 'examines',
+                    'profile', 'profiles', 'profiling', 'quantification', 'quantified', 'quantify', 
+                    'markers', 'marker', 'police', 'officer', 'officers', 'detecting', 'evaluate', 'determine',
+                    'determining', 'collecting', 'collection', 'analyzes', 'methodologies', 'examine',
+                    'screening','analysing', 'examinations','evaluating', 'evaluations', 'observations',
+                    'comparative', 'comparatively', 'detects', 'determined', 'determines', 'investigators',
+                    'investigates','measure', 'measured', 'measures', 'studied', 'analytical', 'differences'
+                    'validations', 'validates', 'utilized', 'utilize', 'utilizes', 'documented'
+                    'spectrometry','spectrometer', 'characteristics', 'recommendations','factors', 
+                    'consideration', 'considerations','investigaating', 'additionally','probative',
+                    'investigating', 'characteristic', 'lab', 'utilizing', 'usefulness', 'packaging',
+                    'characterisation', 'characterize', 'characterized', 'characterization']
+
+# Get the list of other language stop words
+multilingual_stop_words = stopwords.words()
+
+custom_stopwords = list(text.ENGLISH_STOP_WORDS.union(forensic_stopwords,multilingual_stop_words))
 
 preprocessed_docs = [preprocess(doc) for doc in dataAsList]
 
-
+# create vectorise method
 vectorizer_model = CountVectorizer(
     stop_words=custom_stopwords,
     ngram_range=(1, 2),
-    min_df=1,
-    max_df=0.9
+    min_df=0.1,
+    max_df=0.7
 )
 
 
 # 1. Load a pretrained Sentence Transformer model
-model = SentenceTransformer("all-MiniLM-L6-v2", 
+model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2", 
     prompts={
         "classification": "Classify the following text into topics relating to forensic sample types: ",
         "retrieval": "Retrieve semantically similar text, input is in multiple languages: ",
@@ -72,9 +107,9 @@ model = SentenceTransformer("all-MiniLM-L6-v2",
     })
 
 
-# 2. Calculate embeddings by calling model.encode()
-embeddings = model.encode(dataAsList)
-print(embeddings.shape)
+# 2. Calculate embeddings by calling model.encode() not needed as BERTopic will do this internally
+# embeddings = model.encode(dataAsList)
+# print(embeddings.shape)
 # should be same dims as data ie [2512, 384]
 
 
@@ -95,12 +130,12 @@ References:
 
 # sns.displot(cluster_model.outlier_scores_[np.isfinite(cluster_model.outlier_scores_)], rug=True)
 
-# Fine-tune your topic representations
+# Fine-tune the topic representations
 representation_model = KeyBERTInspired(
-    top_n_words=50,
-    nr_repr_docs=100,
-    nr_samples=1000,
-    nr_candidate_words=1000)
+    top_n_words=100,
+    nr_repr_docs=800,
+    nr_samples=2000,
+    nr_candidate_words=2000)
 
 # Clustering model: See [2] for more details
 cluster_model = HDBSCAN(min_cluster_size = 3, 
@@ -149,18 +184,13 @@ topic_list=[['paints', 'paint','pigments','pigment',
 ['corde','rope']]
 
 # macOS has a bug with matrix multiplication that causes runtime warnings of zero division. 
-# A recomended workaround is to standardise/scale the data before fitting the model.
-# from sklearn.preprocessing import StandardScaler
-
-# scaler = StandardScaler()
-# scaled_data = scaler.fit_transform(embeddings)
-# # Then fit your topic model on scaled_data
 
 # Bertopic model instantiation
 topic_model = BERTopic(vectorizer_model=vectorizer_model,
     representation_model=representation_model,
     embedding_model = model,
     hdbscan_model = cluster_model, 
+    # nr_topics='auto',
     seed_topic_list=topic_list)
 
 # Fit the model on a corpus
@@ -188,11 +218,11 @@ visualise_docs = topic_model.visualize_documents(docs=dataAsList, topics=topics)
 #.write_html("./PhD-Windows/TPPRDB_Analysis/projections.html")
 visualise_docs.show()
 
-# Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:
-reduced_embeddings = UMAP(n_neighbors=10, n_components=5, min_dist=0.0, metric='cosine').fit_transform(embeddings)
-reduced_topics = topic_model.visualize_documents(dataAsList, reduced_embeddings=np.array(reduced_embeddings))
-#.write_html("./PhD-Windows/TPPRDB_Analysis/reduced_projections.html")
-reduced_topics.show()
+# # Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:
+# reduced_embeddings = UMAP(n_neighbors=10, n_components=5, min_dist=0.0, metric='cosine').fit_transform(embeddings)
+# reduced_topics = topic_model.visualize_documents(dataAsList, reduced_embeddings=np.array(reduced_embeddings))
+# #.write_html("./PhD-Windows/TPPRDB_Analysis/reduced_projections.html")
+# reduced_topics.show()
 plt.hist(dataAsList, s=50, linewidth=0, c='b', alpha=0.25)
 
 
