@@ -1,3 +1,5 @@
+#! .venv/bin/python3
+ 
 import os
 os.chdir('./PhD/TPPRDB_Analysis')
 
@@ -12,13 +14,13 @@ from bertopic.representation import KeyBERTInspired
 from sentence_transformers import SentenceTransformer, util
 from sklearn.feature_extraction import text 
 from sklearn.feature_extraction.text import CountVectorizer
-from util_functions import get_names, combine_group_rows, preprocess_string_columns, _extract_range, preprocess, _join_non_na
+import util_functions as uf
 import nltk
 from nltk.corpus import stopwords
 import plotly.io as pio
 pio.renderers.default = "browser"
 
-combined = pd.read_csv("mergedDataSept.csv", encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
+combined = pd.read_csv("data/mergedDataSept.csv", encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
 
 # combine title, keywords, abstract, relevance and trace type columns if they are not nan or empty into a single column
 combined.index
@@ -41,7 +43,7 @@ cols = ['Title', 'Trace_Type','Study_Type', 'Keywords', 'Abstract', 'Exp_Conditi
     'Parameter used for comparison', 'Summary of results',
     'Raised questions (by authors)', 'Cautionary remarks', 'author_keywords']
 
-combined['allData'] = combined[cols].apply(_join_non_na, axis=1)
+combined['allData'] = combined[cols].apply(uf._join_non_na, axis=1)
 
 # The sentences to encode
 dataAsList = combined['allData'].to_list()
@@ -51,10 +53,10 @@ dataAsList = combined['allData'].to_list()
 forensic_stopwords = ['forensic', 'bayesian', 'analysis','samples', 'analyses', 'sampled',
                       'forensics', 'evidence', 'examination', 'investigation', 'investigations',
                       'investigator','sample', 'examined', 'method', 'methods', 'methodology',
-                      'examination', 'investigated', 'investigate', 'laboratory', 'laboratories',
+                      'investigated', 'investigate', 'laboratory', 'laboratories',
                       'research', 'researches', 'case', 'cases', 'casework', 'caseworks', 'testing',
                       'examining', 'evaluated', 'evaluation', 'evaluates', 'assessed', 'assessment',
-                      'crime', 'method', 'testing', 'probabilistic', 'probabilitiy', 'scene', 'scenes',
+                      'crime', 'probabilistic', 'probability', 'probabilities', 'scene', 'scenes',
                       'interpretation', 'likelihood', 'ratio','collected','analyze', 'experiments', 
                       'analyse', 'experiment', 'analyzed','extracted','specimens', 
                       'spectrometry', 'extraction', 'examiners','analyzing', 'findings', 'propositions', 
@@ -62,39 +64,55 @@ forensic_stopwords = ['forensic', 'bayesian', 'analysis','samples', 'analyses', 
                       'technique', 'instrumentation', 'instruments', 'sampling', 'measurements', 
                       'measurement', 'validation', 'validated', 'validating', 'swabs', 'swab', 
                       'sequencing', 'sequenced', 'sequencer', 'amplification', 'amplified', 
-                    'amplify', 'loci', 'locus', 'electrophoresis', 'electrophoretic', 'replicates',
-                    'forensically', 'data', 'results', 'result', 'using', 'used', 'use', 'based', 
-                    'different', 'assess', 'test', 'tests', 'testing', 'well', 'metholodogies',
+                      'amplify', 'loci', 'locus', 'electrophoresis', 'electrophoretic', 'replicates',
+                      'forensically', 'data', 'results', 'result', 'using', 'used', 'use', 'based', 
+                      'different', 'assess', 'test', 'tests', 'well', 'metholodogies',
                     'analysed', 'analyser', 'tested', 'detection', 'detected', 'detect', 'compare',
                     'compared', 'comparison', 'comparisons', 'identified', 'identification', 
                     'identify','identifies', 'reviewed', 'review', 'reviews', 'obtained', 'obtain',
                     'assessing', 'investigations', 'conclusions', 'conclusion', 'concluded',
                     'deposited', 'swabbing', 'swabbed', 'studies', 'investigative', 'examines',
-                    'profile', 'profiles', 'profiling', 'quantification', 'quantified', 'quantify', 
+                    'profile', 'profiles', 'quantification', 'quantified', 'quantify', 
                     'markers', 'marker', 'police', 'officer', 'officers', 'detecting', 'evaluate', 'determine',
                     'determining', 'collecting', 'collection', 'analyzes', 'methodologies', 'examine',
                     'screening','analysing', 'examinations','evaluating', 'evaluations', 'observations',
                     'comparative', 'comparatively', 'detects', 'determined', 'determines', 'investigators',
                     'investigates','measure', 'measured', 'measures', 'studied', 'analytical', 'differences'
                     'validations', 'validates', 'utilized', 'utilize', 'utilizes', 'documented'
-                    'spectrometry','spectrometer', 'characteristics', 'recommendations','factors', 
-                    'consideration', 'considerations','investigaating', 'additionally','probative',
+                    'spectrometer', 'characteristics', 'recommendations','factors', 
+                    'consideration', 'considerations','investigaating', 'probative',
                     'investigating', 'characteristic', 'lab', 'utilizing', 'usefulness', 'packaging',
-                    'characterisation', 'characterize', 'characterized', 'characterization']
+                    'characterisation', 'characterize', 'characterized', 'characterization', 'fbi', 
+                    'law enforcement', 'crimes', 'law', 'enforcement', 'practices', 'practice', 'caratristiques',
+                    'practise', 'practises', 'security', 'considered', 'consider', 'conducted', 'conduct', 'conducts',
+                    'conduction', 'derives', 'derived', 'deriving', 'employed', 'employs', 'employing', 'sciences', 'science'
+                    'implementation', 'implementing', 'implemented', 'implement', 'involving', 'involved', 'involves',
+                    'utilization', 'utilisations', 'labwork', 'laboratorywork', 'laboratoryworks', 'specialized',
+                    'specialise', 'specialises', 'specialised', 'practitioner', 'practitioners', 'practising', 'practised', 
+                    'authorities', 'authority', 'authoritarian', 'regarding', 'regard', 'regards', 'enfsi', 'interpol',
+                    'obtaining', 'obtains', 'hypothesis', 'hypotheses',
+                    'evidential', 'evidentially', 'evidences', 'operational', 'operations', 'operation',
+                    'operates', 'operate', 'operating', 'standards', 'standard', 'standardization', 'standardisations',
+                    'standardise', 'standardises', 'standardized', 'protocols', 'protocol', 'procedures', 'procedure',
+                    'procedural', 'procedurally', 'practiced', 'criminal', 'criminial', 'criminology', 'criminological', 
+                    'justice', 'search', 'seizure', 'admissibility', 'admissible', 'technology', 'exploitation', 'exploiting',
+                    'exploited', 'exploits', 'explored', 'normal', 'prepared', 'prepares', 'preparing', 'preparation', 
+                    'preparations'
+                      ]
 
 # Get the list of other language stop words
 multilingual_stop_words = stopwords.words()
 
 custom_stopwords = list(text.ENGLISH_STOP_WORDS.union(forensic_stopwords,multilingual_stop_words))
 
-preprocessed_docs = [preprocess(doc) for doc in dataAsList]
+preprocessed_docs = [uf.preprocess(doc) for doc in dataAsList]
 
 # create vectorise method
 vectorizer_model = CountVectorizer(
     stop_words=custom_stopwords,
     ngram_range=(1, 2),
-    min_df=0.1,
-    max_df=0.7
+    min_df=0.2,
+    max_df=0.6
 )
 
 
@@ -138,7 +156,7 @@ representation_model = KeyBERTInspired(
     nr_candidate_words=2000)
 
 # Clustering model: See [2] for more details
-cluster_model = HDBSCAN(min_cluster_size = 3, 
+cluster_model = HDBSCAN(min_cluster_size = 5, 
                         metric = 'euclidean', 
                         cluster_selection_method = 'eom', 
                         prediction_data = True)
@@ -190,20 +208,14 @@ topic_model = BERTopic(vectorizer_model=vectorizer_model,
     representation_model=representation_model,
     embedding_model = model,
     hdbscan_model = cluster_model, 
-    nr_topics='auto',
+    # nr_topics=30,
     seed_topic_list=topic_list)
 
 # Fit the model on a corpus
 topics, probs = topic_model.fit_transform(dataAsList)
 
-hierarchical_topics = topic_model.hierarchical_topics(dataAsList)
-
-# Save topics dendrogram as HTML file
-hierarch_fig = topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
-hierarch_fig.show()#.write_html("./PhD-Windows/TPPRDB_Analysis/hieararchy.html")
-
 topic_info = topic_model.get_topic_info()
-
+topic_info['Name']
 # Save intertopic distance map as HTML file
 dist_map = topic_model.visualize_topics(width =1000, height=800)
 #.write_html("./PhD-Windows/TPPRDB_Analysis/intertopic_dist_map.html")
@@ -213,6 +225,16 @@ dist_map.show()
 bar_fig = topic_model.visualize_barchart(top_n_topics = 100)
 #.write_html("./PhD-Windows/TPPRDB_Analysis/barchart.html")
 bar_fig.show()
+
+hierarchical_topics = topic_model.hierarchical_topics(dataAsList)
+
+# Save topics dendrogram as HTML file
+hierarch_fig = topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
+hierarch_fig.show()#.write_html("./PhD-Windows/TPPRDB_Analysis/hieararchy.html")
+
+
+
+
 # Save documents projection as HTML file
 visualise_docs = topic_model.visualize_documents(docs=dataAsList, topics=topics)
 #.write_html("./PhD-Windows/TPPRDB_Analysis/projections.html")
@@ -273,3 +295,14 @@ topics_over_time = topic_model.topics_over_time(dataAsDatedList, date.astype('st
 'Reference samples', 'Profile interpretation and mixture analysis', 'RNA data interpretation', 'DNA Quantitiy', 'Profile Quality',
 'Parameter used for comparison', 'Summary of results', 'Raised questions (by authors)', 'Cautionary remarks'
 '''
+
+# evaluate topic model for coherence and diversity
+coherence_score = uf.calculate_coherence_score(topic_model, dataAsList)
+
+diversity_score = uf.calculate_diversity_score(topic_model)
+
+print(f"Coherence Score: {coherence_score}")
+print(f"Diversity Score: {diversity_score}")
+
+# Save the model
+# topic_model.save("models/TPPRDB_BERTopic_Model")    

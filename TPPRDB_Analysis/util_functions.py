@@ -128,3 +128,60 @@ def _join_non_na(row):
     vals = [v for v in vals if v and v.lower() not in ('nan', 'none', 'na')]
     return '; '.join(vals) if vals else pd.NA
 
+# evaluate topic model
+from gensim.models.coherencemodel import CoherenceModel
+from gensim.corpora.dictionary import Dictionary
+from gensim import corpora
+
+# quantify topic coherence using normalised Pointwise Mutual Information coherence measure, 
+# which tests pairwise agreeement between every word in a topic
+# and their co-occurrence in the original documents 
+# (between -1 and 1, >0 is good, negaative value indicate incoherent topics (less semantically similar))
+def calculate_coherence_score(topic_model, docs):
+    # Preprocess documents
+    cleaned_docs = topic_model._preprocess_text(docs)
+
+    # Extract vectorizer and tokenizer from BERTopic
+    vectorizer = topic_model.vectorizer_model
+    tokenizer = vectorizer.build_tokenizer()
+
+    # Extract features for Topic Coherence evaluation
+    words = vectorizer.get_feature_names_out()
+    # depending on the version and if you get an error use commented out code below:
+    # words = vectorizer.get_feature_names()
+    tokens = [tokenizer(doc) for doc in cleaned_docs]
+    dictionary = corpora.Dictionary(tokens)
+    corpus = [dictionary.doc2bow(token) for token in tokens]
+    # Create topic words
+    topic_words = [[dictionary.token2id[w] for w in words if w in dictionary.token2id]
+    for _ in range(topic_model.nr_topics)]
+
+    # this creates a list of the token ids (in the format of integers) of the words in words that are also present in the 
+    # dictionary created from the preprocessed text. The topic_words list contains list of token ids for each 
+    # topic.
+
+    coherence_model = CoherenceModel(topics=topic_words,
+                                    texts=tokens,
+                                    corpus=corpus,
+                                    dictionary=dictionary,
+                                    coherence='c_npmi')
+    coherence = coherence_model.get_coherence()
+
+    return coherence
+
+# percentage of unique words across all topics (how distinct each topic is), between 0 and 1, higher is better.
+# Theis is equivalent to the inverse of Jaccard Similarity, which is the intersect set of words over the union 
+# set of words across all topics. Deng, F., Siersdorfer, S., Zerr, S.: Efficient jaccard-based diversity analysis of large
+# document collections. In: Proceedings CIKM. (2012) 1402–1411
+def calculate_diversity_score(topic_model):
+    topics = topic_model.get_topics()
+    unique_words = set()
+    total_words = 0
+
+    for topic_id, words_probs in topics.items():
+        words = [word for word, prob in words_probs]
+        unique_words.update(words)
+        total_words += len(words)
+
+    diversity_score = len(unique_words) / total_words if total_words > 0 else 0
+    return diversity_score
