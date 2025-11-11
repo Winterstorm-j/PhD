@@ -1,17 +1,16 @@
-# ...existing code...
-"""Utility helpers for the TPPRDB analysis project.
 
-Place this file next to your analysis script (or make the folder a package with an __init__.py)
-so you can import it as:
-    from util_functions import get_names, _extract_range, preprocess, combine_group_rows
-or, if you make the directory a package:
-    from TPPRDB_Analysis.util_functions import ...
+"""Utility helpers for the TPPRDB analysis project.
+Import as:
+    import util_functions
 """
 
 import ast
 import re
 import pandas as pd
 from typing import Any, List, Optional
+from gensim.models.coherencemodel import CoherenceModel
+from gensim.corpora.dictionary import Dictionary
+from gensim import corpora
 
 __all__ = [
     "get_names",
@@ -60,7 +59,13 @@ def combine_group_rows(df: pd.DataFrame, group_cols: List[str]) -> pd.DataFrame:
 def preprocess_string_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Uppercase and strip only object/string columns (in-place) and return the DataFrame."""
     for col in df.select_dtypes(include='object').columns:
-        df[col] = df[col].astype(str).str.upper().str.strip().replace({'NAN': pd.NA})
+        df[col] = (
+            df[col]
+            .astype(str)
+            .str.upper()
+            .str.strip()
+            .replace(r'^(NAN|NA|NONE|NULL)$', pd.NA, regex=True)
+        )
     return df
 
 
@@ -128,15 +133,15 @@ def _join_non_na(row):
     vals = [v for v in vals if v and v.lower() not in ('nan', 'none', 'na')]
     return '; '.join(vals) if vals else pd.NA
 
-# evaluate topic model
-from gensim.models.coherencemodel import CoherenceModel
-from gensim.corpora.dictionary import Dictionary
-from gensim import corpora
-
+# functions to evaluate topic model
 # quantify topic coherence using normalised Pointwise Mutual Information coherence measure, 
-# which tests pairwise agreeement between every word in a topic
+# which tests pairwise agreement between every word in a topic
 # and their co-occurrence in the original documents 
-# (between -1 and 1, >0 is good, negaative value indicate incoherent topics (less semantically similar))
+# (between -1 and 1, >0 is good, negative value indicate incoherent topics (less semantically similar))
+# Röder, M., Both, A., & Hinneburg, A. (2015). Exploring the space of topic coherence measures. 
+# In Proceedings of the eighth ACM international conference on Web search and data mining (pp. 399–408).
+# Gerlof Bouma. 2009. Normalized (pointwise) mutual information in collocation extraction. 
+# Proceedings of Global Summit on Computing and Linguistics (GSCL), 30:31–40
 def calculate_coherence_score(topic_model, docs):
     # Preprocess documents
     cleaned_docs = topic_model._preprocess_text(docs)
@@ -154,7 +159,7 @@ def calculate_coherence_score(topic_model, docs):
     corpus = [dictionary.doc2bow(token) for token in tokens]
     # Create topic words
     topic_words = [[dictionary.token2id[w] for w in words if w in dictionary.token2id]
-    for _ in range(topic_model.nr_topics)]
+    for _ in range(len(topic_model.get_topics()))]
 
     # this creates a list of the token ids (in the format of integers) of the words in words that are also present in the 
     # dictionary created from the preprocessed text. The topic_words list contains list of token ids for each 

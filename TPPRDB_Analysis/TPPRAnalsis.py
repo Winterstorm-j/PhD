@@ -15,7 +15,6 @@ from sentence_transformers import SentenceTransformer, util
 from sklearn.feature_extraction import text 
 from sklearn.feature_extraction.text import CountVectorizer
 import util_functions as uf
-import nltk
 from nltk.corpus import stopwords
 import plotly.io as pio
 pio.renderers.default = "browser"
