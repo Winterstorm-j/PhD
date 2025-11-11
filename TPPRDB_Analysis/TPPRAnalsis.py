@@ -190,7 +190,7 @@ topic_model = BERTopic(vectorizer_model=vectorizer_model,
     representation_model=representation_model,
     embedding_model = model,
     hdbscan_model = cluster_model, 
-    # nr_topics='auto',
+    nr_topics='auto',
     seed_topic_list=topic_list)
 
 # Fit the model on a corpus
@@ -223,7 +223,7 @@ visualise_docs.show()
 # reduced_topics = topic_model.visualize_documents(dataAsList, reduced_embeddings=np.array(reduced_embeddings))
 # #.write_html("./PhD-Windows/TPPRDB_Analysis/reduced_projections.html")
 # reduced_topics.show()
-plt.hist(dataAsList, s=50, linewidth=0, c='b', alpha=0.25)
+
 
 
 
