@@ -5,7 +5,6 @@ os.chdir('./PhD/TPPRDB_Analysis')
 
 import pandas as pd
 import numpy as np
-from bertopic import BERTopic
 from hdbscan import HDBSCAN
 from umap import UMAP
 import matplotlib.pyplot as plt
@@ -16,7 +15,10 @@ from sklearn.feature_extraction import text
 from sklearn.feature_extraction.text import CountVectorizer
 import util_functions as uf
 from nltk.corpus import stopwords
+from bertopic import BERTopic
+from sklearn.metrics import silhouette_score
 import plotly.io as pio
+import plotly.graph_objects as go
 pio.renderers.default = "browser"
 
 combined = pd.read_csv("data/mergedDataSept.csv", encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
@@ -120,13 +122,14 @@ model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2",
     prompts={
         "classification": "Classify the following text into topics relating to forensic sample types: ",
         "retrieval": "Retrieve semantically similar text, input is in multiple languages: ",
-        "clustering": "Identify the topic or theme of forensic sample type or discipline based on the text: ",
+        "clustering": "Identify the topic or theme of forensic sample type or discipline based on the provided \
+            text. Do not include law enforcement, justice, statistics or crime as themes. Label topic with trace type or originating location"
     })
 
 
-# 2. Calculate embeddings by calling model.encode() not needed as BERTopic will do this internally
-# embeddings = model.encode(dataAsList)
-# print(embeddings.shape)
+# 2. Calculate embeddings by calling model.encode() saves time later for BERTopic to avoid doing this internally
+embeddings = model.encode(dataAsList)
+print(embeddings.shape)
 # should be same dims as data ie [2512, 384]
 
 
@@ -155,10 +158,10 @@ representation_model = KeyBERTInspired(
     nr_candidate_words=2000)
 
 # Clustering model: See [2] for more details
-cluster_model = HDBSCAN(min_cluster_size = 5, 
-                        metric = 'euclidean', 
-                        cluster_selection_method = 'eom', 
-                        prediction_data = True)
+# cluster_model = HDBSCAN(min_cluster_size = 10, 
+#                         metric = 'euclidean', 
+#                         cluster_selection_method = 'eom', 
+#                         prediction_data = True)
 
 # create a seed topic list to grow from
 topic_list=[['paints', 'paint','pigments','pigment',
@@ -202,42 +205,213 @@ topic_list=[['paints', 'paint','pigments','pigment',
 
 # macOS has a bug with matrix multiplication that causes runtime warnings of zero division. 
 
-# Bertopic model instantiation
-topic_model = BERTopic(vectorizer_model=vectorizer_model,
-    representation_model=representation_model,
-    embedding_model = model,
-    hdbscan_model = cluster_model, 
-    # nr_topics=30,
-    seed_topic_list=topic_list)
 
-# Fit the model on a corpus
-topics, probs = topic_model.fit_transform(dataAsList)
+# Step 1: Define HDBSCAN parameter search space
+param_grid = [
+     {"min_cluster_size": 5, "min_samples": 1, "cluster_selection_epsilon": 0.0},
+    {"min_cluster_size": 10, "min_samples": 1, "cluster_selection_epsilon": 0.0},
+    {"min_cluster_size": 15, "min_samples": 5, "cluster_selection_epsilon": 0.1},
+    {"min_cluster_size": 20, "min_samples": 5, "cluster_selection_epsilon": 0.2},
+     {"min_cluster_size": 15, "min_samples": 5, "cluster_selection_epsilon": 0.3},
+]
 
-topic_info = topic_model.get_topic_info()
-topic_info['Name']
+results = []
+best_model = None
+best_results = []
+best_score = -np.inf
+
+
+# Evaluate each configuration
+for params in param_grid:
+    print(f"\nTraining with params: {params}")
+
+    # Create custom HDBSCAN model
+    hdbscan_model = HDBSCAN(
+        min_cluster_size=params["min_cluster_size"],
+        min_samples=params["min_samples"],
+        cluster_selection_epsilon=params["cluster_selection_epsilon"],
+        metric="euclidean",
+        cluster_selection_method="eom",
+        prediction_data=True
+    )
+
+    # Bertopic model instantiation
+    topic_model = BERTopic(
+        vectorizer_model=vectorizer_model,
+        representation_model=representation_model,
+        embedding_model = model,
+        calculate_probabilities=True,
+    
+        nr_topics='auto',
+        #seed_topic_list=topic_list
+        )
+
+    topics,probs = topic_model.fit_transform(dataAsList, embeddings=embeddings)
+    new_topics = topic_model.reduce_outliers(dataAsList,
+                                        topic_model.topics_, # type: ignore
+                                        strategy="probabilities",
+                                        probabilities=topic_model.probabilities_ ) # type: ignore
+
+    # Evaluate model
+    # Topic coherence
+    coherence = uf.calculate_coherence_score(topic_model, dataAsList)
+
+    # Topic diversity
+    topic_words = topic_model.get_topics()
+    diversity = uf.calculate_diversity_score(topic_model)
+
+    # Silhouette score (only on clustered docs)
+    valid_idx = [i for i, t in enumerate(topics) if t != -1]
+    if len(valid_idx) > 2:
+        sil_score = silhouette_score(
+            np.array(embeddings)[valid_idx],
+            np.array(topics)[valid_idx]
+        )
+    else:
+        sil_score = -1
+
+    score = coherence * 0.6 + diversity * 0.2 + sil_score * 0.2  # weighted scoring
+
+    print(f"Coherence={coherence:.4f}, Diversity={diversity:.4f}, Silhouette={sil_score:.4f}, Score={score:.4f}")
+
+    results.append((params, coherence, diversity, sil_score, score))
+
+    # Keep best model
+    if score > best_score:
+        best_results = [params, new_topics, coherence, diversity, sil_score, score]
+        best_score= score
+        best_model = topic_model
+
+
+# Report & use best model
+print("\nBest configuration:", best_model.hdbscan_model.get_params()) # type: ignore
+print("Best score:", best_score)
+
+# Save model
+# best_model.save("bertopic_optimized_hdbscan")
+# # Fit the model on a corpus
+# topics, probs = topic_model.fit_transform(dataAsList)
+
+# # evaluate topic model for coherence and diversity
+# coherence_score = uf.calculate_coherence_score(topic_model, dataAsList)
+# diversity_score = uf.calculate_diversity_score(topic_model)
+
+# print(f"Coherence Score: {coherence_score}")
+# print(f"Diversity Score: {diversity_score}")
+
+combined['T1_topic'] = best_results[1]
+
+combined['T1_probs'] = best_model.probabilities_ # type: ignore
+
+topic_info = best_model.get_topic_info() # type: ignore
+#topic_model.set_topic_labels(list(topic_info['Name']))
 # Save intertopic distance map as HTML file
-dist_map = topic_model.visualize_topics(width =1000, height=800)
-#.write_html("./PhD-Windows/TPPRDB_Analysis/intertopic_dist_map.html")
+
+dist_map = best_model.visualize_topics(topics=best_results[1],width =1200) # type: ignore
+
+# Exclude the -1 topic (outliers) for labeling the main topics
+topic_info = topic_info[topic_info['Topic'] != -1].reset_index(drop=True)
+
+# make coords for the annotations. Add offset to x placement to avoid overlap
+coords = np.column_stack((dist_map.data[0]['x'], dist_map.data[0]['y'])) # type: ignore
+
+# add random offset to extracted coords
+sizeref = dist_map.data[0]['marker']['sizeref'] # type: ignore
+offset_x = coords[:,0] + (sizeref * np.random.normal(0,3,len(coords[:,0]))) # type: ignore
+    # ( * sizeref * 2) + # type: ignore
+    # (np.random.binomial(1,0.5) * sizeref * -2) ) # type: ignore
+offset_y=coords[:,1] + (sizeref * np.random.normal(0,3,len(coords[:,1]))) # type: ignore
+    # (np.random.binomial(1,0.5) * sizeref* 6) + # type: ignore
+    # (np.random.binomial(1,0.5) * sizeref * -4) ) # type: ignore
+
+positions = np.column_stack([offset_x, offset_y])
+
+
+min_dist = 2.5  # minimum allowed distance between any label and any other object
+
+positions = uf.resolve_overlaps(positions, coords, min_dist, repulsion_strength=0.8,
+        marker_repulsion_strength=6, attraction_strength=0.08, max_step=3)
+
+offset_x, offset_y = positions[:, 0], positions[:, 1]
+
+# associate colours with the topics
+colours_list = [
+    '#d62728','#f3722c','#ffa15a','#fecb52','#f5f511',
+    '#b6e880','#2ca02c','#4d908e','#43aa8b','#00cc96','#4cddc9',
+    '#90dbf4','#19d3f3','#005073','#718591','#1f77b4','#a3c4f3','#cfbaf0',
+    '#6a19b5','#636efa','#ab63fa','#b9fbc0','#ff97ff','#ffcfd2'
+    ]
+
+colour_dict=dict(zip(topic_info['Representation'].astype(str).tolist(),colours_list))
+
+mapped_colours = topic_info['Representation'].astype(str).map(colour_dict).tolist() 
+
+# Add static labels as annotations to the Plotly figure
+annotations = []
+for index, row in topic_info.iterrows():
+
+    annotations.append(
+        dict(
+            ax=offset_x[index], # arrow tail pos # type: ignore
+            ay=offset_y[index], # type: ignore
+            text=f"Topic {index}", # Use topic name
+            showarrow=True,
+            x=coords[index][0], #arrow head pos
+            y=coords[index][1],
+            font=dict(size=10, color="black"),
+            # Position the text slightly offset from the marker
+            xanchor='left',
+            yanchor='middle',
+            xref="x",
+            yref="y",
+            arrowhead=1,
+            axref= 'x',
+            ayref='y'
+            )
+    )
+
+dist_map.update_traces(
+    marker=dict(color=mapped_colours ),
+    selector=dict(mode='markers'),
+    # name=topic_info['Name'].tolist()
+)
+
+dist_map.update_layout(
+    annotations=annotations,               
+    showlegend=True,
+    legend=dict(
+        orientation="v",
+        yanchor="bottom",
+        x=1.02,
+        xanchor="right",
+        y=1
+    ),
+    title={
+        'text': "Distance Map of Topics",
+        'y':0.99,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'
+    }
+    )
+#remove slider
+dist_map['layout'].pop('sliders')
+# Display the figure with static labels
 dist_map.show()
 
+
 # Save topic-terms barcharts as HTML file
-bar_fig = topic_model.visualize_barchart(top_n_topics = 100)
+bar_fig = best_model.visualize_barchart(top_n_topics=15, autoscale=True, width=350) # type: ignore
 #.write_html("./PhD-Windows/TPPRDB_Analysis/barchart.html")
 bar_fig.show()
 
-hierarchical_topics = topic_model.hierarchical_topics(dataAsList)
+hierarchical_topics = best_model.hierarchical_topics(dataAsList) # type: ignore
 
 # Save topics dendrogram as HTML file
-hierarch_fig = topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
+hierarch_fig = best_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics) # type: ignore
 hierarch_fig.show()#.write_html("./PhD-Windows/TPPRDB_Analysis/hieararchy.html")
 
 
-
-
-# Save documents projection as HTML file
-visualise_docs = topic_model.visualize_documents(docs=dataAsList, topics=topics)
-#.write_html("./PhD-Windows/TPPRDB_Analysis/projections.html")
-visualise_docs.show()
 
 # # Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:
 # reduced_embeddings = UMAP(n_neighbors=10, n_components=5, min_dist=0.0, metric='cosine').fit_transform(embeddings)
@@ -261,47 +435,7 @@ date[date=='s.d.'] = np.nan
 
 
 topics_over_time = topic_model.topics_over_time(dataAsDatedList, date.astype('str').to_list())
-# ßmodel.visualize_topics_over_time(topics_over_time, topics=[range(1,21)])
-
-
-
-''' 
-'Index', 'Doc_Type', 'Authors', 'Year', 'Title','Journal_Book_Institution_Meeting', 'Publishing_Details', 'Trace_Type',
-'Study_Type', 'Keywords', 'Abstract', 'Exp_Conditions_and_Results','Relevance_to_Canada'
-
-'Column1', 'source_title', 'publish_year', 'publish_month', 'volume', 'issue', 'supplement', 'special_issue', 'article_number', 'pages',
-'authors', 'inventors', 'book_corp', 'book_editors', 'books', 'additional_authors', 'anonymous', 'assignees', 'editors', 'record',
-'references', 'related', 'doi', 'issn', 'eissn', 'isbn', 'eisbn','pmid', 'author_keywords', 'unique_type', 'uid'
-
-'Authors', 'Year', 'Title', 'Journal', 'Addressed question','Activity context', 'Category', 'Specifications','Variables of interest',
-'stringency of control', 'No of individuals','Replicates per Individual and condition', 'Nucleic Acid','Bodily origin', 'depositor characteristics',
-'Criteria for shedder status', 'Previous activities','Contact scenario', 'Primary substrate type',
-'Primary substrate Material', 'Deposit', 'Delay (conditions)','Secondary substrate type', 'Secondary Substrate material',
-'Type of secondary contact', 'Further transfer','Background DNA on sampled surface', 'Sampling time','Persistance (conditions)', 
-'Sampling method', 'Sampling area','Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling',
-'Reference samples', 'Profile interpretation and mixture analysis','RNA data interpretation', 'DNA Quantitiy', 'Profile Quality',
-'Parameter used for comparison', 'Summary of results','Raised questions (by authors)', 'Cautionary remarks'
-
-
-'Title', 'Year', 'Index', 'Doc_Type', 'Authors', 'Journal_Book_Institution_Meeting', 'Publishing_Details', 'Trace_Type',
-'Study_Type', 'Keywords', 'Abstract', 'Exp_Conditions_and_Results', 'Relevance_to_Canada', 'Journal', 'Addressed question',
-'Activity context', 'Category', 'Specifications', 'Variables of interest', 'stringency of control', 'No of individuals',
-'Replicates per Individual and condition', 'Nucleic Acid', 'Bodily origin', 'depositor characteristics',
-'Criteria for shedder status', 'Previous activities', 'Contact scenario', 'Primary substrate type',
-'Primary substrate Material', 'Deposit', 'Delay (conditions)', 'Secondary substrate type', 'Secondary Substrate material',
-'Type of secondary contact', 'Further transfer', 'Background DNA on sampled surface', 'Sampling time',
-'Persistance (conditions)', 'Sampling method', 'Sampling area', 'Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling',
-'Reference samples', 'Profile interpretation and mixture analysis', 'RNA data interpretation', 'DNA Quantitiy', 'Profile Quality',
-'Parameter used for comparison', 'Summary of results', 'Raised questions (by authors)', 'Cautionary remarks'
-'''
-
-# evaluate topic model for coherence and diversity
-coherence_score = uf.calculate_coherence_score(topic_model, dataAsList)
-
-diversity_score = uf.calculate_diversity_score(topic_model)
-
-print(f"Coherence Score: {coherence_score}")
-print(f"Diversity Score: {diversity_score}")
+# model.visualize_topics_over_time(topics_over_time, topics=[range(1,21)])
 
 # Save the model
 # topic_model.save("models/TPPRDB_BERTopic_Model")    

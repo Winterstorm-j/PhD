@@ -7,6 +7,7 @@ Import as:
 import ast
 import re
 import pandas as pd
+import numpy as np
 from typing import Any, List, Optional
 from gensim.models.coherencemodel import CoherenceModel
 from gensim.corpora.dictionary import Dictionary
@@ -134,15 +135,17 @@ def _join_non_na(row):
     return '; '.join(vals) if vals else pd.NA
 
 # functions to evaluate topic model
-# quantify topic coherence using normalised Pointwise Mutual Information coherence measure, 
-# which tests pairwise agreement between every word in a topic
-# and their co-occurrence in the original documents 
-# (between -1 and 1, >0 is good, negative value indicate incoherent topics (less semantically similar))
-# Röder, M., Both, A., & Hinneburg, A. (2015). Exploring the space of topic coherence measures. 
-# In Proceedings of the eighth ACM international conference on Web search and data mining (pp. 399–408).
-# Gerlof Bouma. 2009. Normalized (pointwise) mutual information in collocation extraction. 
-# Proceedings of Global Summit on Computing and Linguistics (GSCL), 30:31–40
+
 def calculate_coherence_score(topic_model, docs):
+    ''' 
+    Quantifies topic coherence using normalised Pointwise Mutual Information coherence measure, which tests 
+    pairwise agreement between every word in a topic and their co-occurrence in the original documents
+    (between -1 and 1, >0 is good, negative value indicate incoherent topics (less semantically similar))
+    - Röder, M., Both, A., & Hinneburg, A. (2015). Exploring the space of topic coherence measures. 
+      In Proceedings of the eighth ACM international conference on Web search and data mining (pp. 399-408).
+    - Gerlof Bouma. 2009. Normalized (pointwise) mutual information in collocation extraction. 
+      Proceedings of Global Summit on Computing and Linguistics (GSCL), 30:31-40
+        '''
     # Preprocess documents
     cleaned_docs = topic_model._preprocess_text(docs)
 
@@ -152,19 +155,15 @@ def calculate_coherence_score(topic_model, docs):
 
     # Extract features for Topic Coherence evaluation
     words = vectorizer.get_feature_names_out()
-    # depending on the version and if you get an error use commented out code below:
-    # words = vectorizer.get_feature_names()
+    
     tokens = [tokenizer(doc) for doc in cleaned_docs]
     dictionary = corpora.Dictionary(tokens)
     corpus = [dictionary.doc2bow(token) for token in tokens]
-    # Create topic words
-    topic_words = [[dictionary.token2id[w] for w in words if w in dictionary.token2id]
-    for _ in range(len(topic_model.get_topics()))]
-
-    # this creates a list of the token ids (in the format of integers) of the words in words that are also present in the 
-    # dictionary created from the preprocessed text. The topic_words list contains list of token ids for each 
-    # topic.
-
+    
+    # create a list of the token ids (as integers) of the words in the vector called words that 
+    # are also present in the dictionary created from the preprocessed text. 
+    topic_words = [[dictionary.token2id[w] for w in words if w in dictionary.token2id]for _ in range(len(topic_model.get_topics()))]
+   
     coherence_model = CoherenceModel(topics=topic_words,
                                     texts=tokens,
                                     corpus=corpus,
@@ -174,11 +173,15 @@ def calculate_coherence_score(topic_model, docs):
 
     return coherence
 
-# percentage of unique words across all topics (how distinct each topic is), between 0 and 1, higher is better.
-# Theis is equivalent to the inverse of Jaccard Similarity, which is the intersect set of words over the union 
-# set of words across all topics. Deng, F., Siersdorfer, S., Zerr, S.: Efficient jaccard-based diversity analysis of large
-# document collections. In: Proceedings CIKM. (2012) 1402–1411
+
 def calculate_diversity_score(topic_model):
+    ''' 
+    Scores the model based on percentage of unique words across all topics (how distinct each topic is), between 0 and 1, 
+    higher is better. This is equivalent to the inverse of Jaccard Similarity, which is the intersect set of words over 
+    the union set of words across all topics. 
+    Deng, F., Siersdorfer, S., Zerr, S.: Efficient jaccard-based diversity analysis of large document collections. 
+    In: Proceedings CIKM. (2012) 1402-1411
+    '''
     topics = topic_model.get_topics()
     unique_words = set()
     total_words = 0
@@ -190,3 +193,66 @@ def calculate_diversity_score(topic_model):
 
     diversity_score = len(unique_words) / total_words if total_words > 0 else 0
     return diversity_score
+
+
+def resolve_overlaps(positions, markers, min_dist, steps=30, repulsion_strength=1.0,
+        marker_repulsion_strength=2.0, attraction_strength=0.05, max_step=0.5):
+    
+    '''
+    Resolve overlaps using a force-directed (physics simulation) method.
+    Fully vectorized with NumPy. Very fast.
+
+    positions: (N, 2) initial label positions
+    markers: (N, 2) anchor points
+    min_dist: minimum allowed distance between labels
+    steps: number of physics iterations (20–40 usually enough)
+    '''
+
+    N = len(positions)
+    pos = positions.astype(float)
+
+    for _ in range(steps):
+
+        ## Repulsion between labels
+        diff = pos[:, None, :] - pos[None, :, :]        # (N, N, 2)
+        dist = np.linalg.norm(diff, axis=2) + 1e-12     # avoid div/0
+
+        # Mask: only labels within min_dist, ignore self (dist=0)
+        mask = (dist < min_dist) & (dist > 0)
+
+        # Repulsion magnitude: linear penalty
+        overlap_amount = (min_dist - dist) * mask
+
+        # Normalize direction vectors
+        direction = diff / dist[..., None]
+
+        # Force = direction × overlap
+        repel_forces = (direction * overlap_amount[..., None]).sum(axis=1)
+
+        # Scale repulsion strength
+        repel_forces *= repulsion_strength
+
+        ## Repulsion from markers
+        m_diff = pos - markers
+        m_dist = np.linalg.norm(m_diff, axis=1) + 1e-12
+
+        too_close = m_dist < min_dist
+        m_overlap = (min_dist - m_dist) * too_close
+        m_direction = m_diff / m_dist[:, None]
+
+        marker_forces = m_direction * m_overlap[:, None] * marker_repulsion_strength
+
+        ## Attraction toward markers
+        # pulls labels back gently so they don't drift endlessly
+        attraction = (markers - pos) * attraction_strength
+
+
+        ## Total force & update positions
+        total_force = repel_forces + marker_forces + attraction
+
+        # Limit movement per step for stability
+        step_move = np.clip(total_force, -max_step, max_step)
+
+        pos += step_move
+
+    return pos
