@@ -14,16 +14,24 @@ from gensim.corpora.dictionary import Dictionary
 from gensim import corpora
 
 __all__ = [
-    "get_names",
-    "combine_group_rows",
-    "preprocess_string_columns",
-    "_extract_range",
-    "preprocess",
+'get_names',
+'combine_group_rows',
+'preprocess_string_columns',
+'_extract_range',
+'preprocess',
+'_join_non_na',
+'calculate_coherence_score',
+'calculate_diversity_score',
+'resolve_overlaps',
+'float_range'
 ]
 
 
 def get_names(val: Any, col: str):
-    """Parse a string representation of a list/dict and extract values for `col`."""
+    """
+    Parse a string representation of a list/dict and extract values for `col`.
+    """
+    
     if isinstance(val, str):
         try:
             data = ast.literal_eval(val)
@@ -44,6 +52,7 @@ def combine_group_rows(df: pd.DataFrame, group_cols: List[str]) -> pd.DataFrame:
     """
     Combine rows in a DataFrame by grouping on specified columns and aggregating other columns.
     """
+    
     def combine_series(series):
         unique_vals = series.dropna().unique()
         if len(unique_vals) == 0:
@@ -58,7 +67,10 @@ def combine_group_rows(df: pd.DataFrame, group_cols: List[str]) -> pd.DataFrame:
 
 
 def preprocess_string_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Uppercase and strip only object/string columns (in-place) and return the DataFrame."""
+    """
+    Uppercase and strip only object/string columns (in-place) and return the DataFrame.
+    """
+    
     for col in df.select_dtypes(include='object').columns:
         df[col] = (
             df[col]
@@ -117,7 +129,10 @@ def _extract_range(x: Any) -> Optional[str]:
 
 
 def preprocess(text: Any, custom_stopwords: Optional[set] = None) -> str:
-    """Minimal text preprocess: lowercase, keep words >=3 chars, remove custom stopwords."""
+    """
+    Minimal text preprocess: lowercase, keep words >=3 chars, remove custom stopwords.
+    """
+    
     if text is None or not isinstance(text, str):
         return ""
     if custom_stopwords is None:
@@ -145,7 +160,7 @@ def calculate_coherence_score(topic_model, docs):
       In Proceedings of the eighth ACM international conference on Web search and data mining (pp. 399-408).
     - Gerlof Bouma. 2009. Normalized (pointwise) mutual information in collocation extraction. 
       Proceedings of Global Summit on Computing and Linguistics (GSCL), 30:31-40
-        '''
+    '''
     # Preprocess documents
     cleaned_docs = topic_model._preprocess_text(docs)
 
@@ -195,9 +210,8 @@ def calculate_diversity_score(topic_model):
     return diversity_score
 
 
-def resolve_overlaps(positions, markers, min_dist, steps=30, repulsion_strength=1.0,
+def resolve_overlaps(positions, markers, min_dist, steps=40, repulsion_strength=1.0,
         marker_repulsion_strength=2.0, attraction_strength=0.05, max_step=0.5):
-    
     '''
     Resolve overlaps using a force-directed (physics simulation) method.
     Fully vectorized with NumPy. Very fast.
@@ -205,7 +219,7 @@ def resolve_overlaps(positions, markers, min_dist, steps=30, repulsion_strength=
     positions: (N, 2) initial label positions
     markers: (N, 2) anchor points
     min_dist: minimum allowed distance between labels
-    steps: number of physics iterations (20–40 usually enough)
+    steps: number of physics iterations (20-40 usually enough)
     '''
 
     N = len(positions)
@@ -256,3 +270,13 @@ def resolve_overlaps(positions, markers, min_dist, steps=30, repulsion_strength=
         pos += step_move
 
     return pos
+
+def float_range(start, stop, step):
+    """
+    Create a range generator for a float (normal range function is integer only)
+    """
+    
+    current = start
+    while current < stop:
+        yield current
+        current += step

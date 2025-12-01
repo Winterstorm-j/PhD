@@ -5,12 +5,11 @@ os.chdir('./PhD/TPPRDB_Analysis')
 import pandas as pd
 import numpy as np
 import re
-import ast
-from util_functions import get_names, combine_group_rows, preprocess_string_columns, _extract_range, preprocess, _join_non_na
+from util_functions import get_names, combine_group_rows, preprocess_string_columns, _extract_range
 
 ####### TTADB
 # IMPORT TTADB removing any trailing whitespace
-TPPR_db = pd.read_csv("TTADB-Aug2025.csv", encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
+TPPR_db = pd.read_csv("data/TTADB-Aug2025.csv", encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
 
 # remove empty columns and rename last column
 TPPR_db = TPPR_db.drop(['Unnamed: 13','Unnamed: 14', 'Unnamed: 15'], axis=1)
@@ -72,7 +71,7 @@ newTTADB = combine_group_rows(TPPR_db, ['Title','Authors','Year'])
 
 ####### DNA-TrAC
 # IMPORT DNA-TRAC removing any trailing whitespace
-dnaTrac = pd.read_csv('DNA-TrAC_Ver-2019-12-16.csv', dtype=str, encoding='utf-8')
+dnaTrac = pd.read_csv('data/DNA-TrAC_Ver-2019-12-16.csv', dtype=str, encoding='utf-8')
 
 dnaTrac = dnaTrac.map(str).map(str.strip).reset_index(drop=True)
 
@@ -85,10 +84,10 @@ dnaTrac['Journal'] = dnaTrac['Journal'].str.replace(r"FSI[:]* ", "FORENSIC SCIEN
 dnaTrac['Journal'] = dnaTrac['Journal'].str.replace("FSI", "FORENSIC SCIENCE INTERNATIONAL")
 dnaTrac['Journal'] = dnaTrac['Journal'].str.replace("Science and Justice", "SCIENCE & JUSTICE")
 
-newDnaTrac = combine_group_rows(dnaTrac, ['Title', 'Authors', 'Year'])
+newDnaTrac = combine_group_rows(dnaTrac, ['Title', 'Authors','Year'])
 
 # find duplicated rows in newDnaTrac in title, authors, and year
-duplicates = newDnaTrac[newDnaTrac.duplicated(subset=['Title', 'Authors', 'Year'], keep=False)]
+duplicates = newDnaTrac[newDnaTrac.duplicated(subset=['Title', 'Authors','Year'], keep=False)]
 
 newTTADB.shape
 newTTADB.head(1)
@@ -109,7 +108,7 @@ print(dnatrac_dupes[['Title', 'Authors', 'Year']])
 
 combined = preprocessed_ttadb.merge(
     preprocessed_dnatrac,
-    on=['Title', 'Authors', 'Year'],
+    on=['Title','Authors','Year'],
     suffixes=['_dnatrac', '_ttadb'],
     validate='one_to_one',
     how="outer"
@@ -133,37 +132,46 @@ combined.loc[(combined['Journal_Book_Institution_Meeting'] != combined['Journal'
 
 ###### Web of Science results
 #IMPORT WoS SEARCH RESULTS removing any trailing whitespace
-searchResults = pd.read_csv('articleList.csv', encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
+searchResults = pd.read_csv('data/articleListFull.csv', encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
 
 #remove duplicates
-searchResults = searchResults.loc[~searchResults.duplicated(subset='uid'),:]
+searchResults = (
+    searchResults.assign(_priority=searchResults['types'].str.contains("Book"))
+      .sort_values("_priority", ascending=False)
+      .drop_duplicates(subset='uid')
+      .drop(columns="_priority")
+)
 
 # change results so all dictionary columns contain flat data
-searchResults = searchResults.replace({"nan": np.nan })
+searchResults = searchResults.map(lambda x: np.nan if isinstance(x, str) and x == "nan" else x)
 
 searchResults['authors'] = (
-    searchResults.iloc[:, 10]
-    .apply(lambda x: str(x) if isinstance(x, float) else x)
-    .apply(lambda x: get_names(x, 'wos_standard'))
-    .apply(lambda x: " ".join(x) if isinstance(x, list) else x)
-    .str.replace(r"[;,]", " ", regex=True)
-    .str.replace(r"\.", "", regex=True)
-    .str.replace(r"  ", " ", regex=True)
+    searchResults['authors']
+        .astype(str)
+        .apply(lambda x: get_names(x, 'wos_standard'))
+        .apply(lambda x: " ".join(x) if isinstance(x, list) else x)
+        .str.replace(r"[;,]", " ", regex=True)
+        .str.replace(r"\.", "", regex=True)
+        .str.replace(r"  ", " ", regex=True)
 )
 searchResults['book_editors'] = (
-    searchResults.iloc[:,13]
-    .apply(lambda x: str(x) if isinstance(x, float) else x)
-    .apply(lambda x: get_names(x,'display_name'))
-    .apply(lambda x: " ".join(x) if isinstance(x,list) else x )
-    .str.replace(r"[;,]", " ", regex=True)
-    .str.replace(r"\.", "", regex=True)
-    .str.replace(r"  ", " ", regex=True)
+    searchResults['book_editors']
+        .astype(str)
+        .apply(lambda x: get_names(x,'display_name'))
+        .apply(lambda x: " ".join(x) if isinstance(x,list) else x )
+        .str.replace(r"[;,]", " ", regex=True)
+        .str.replace(r"\.", "", regex=True)
+        .str.replace(r"  ", " ", regex=True)
 )
 searchResults['editors'] = (
-    searchResults.iloc[:,17]
-    .apply(lambda x: str(x) if isinstance(x, float) else x)
+    searchResults.loc[:,'editors']
+    .astype(str)
     .apply(lambda x: get_names(x,'display_name'))
     .apply(lambda x: " ".join(x) if isinstance(x,list) else x ) 
+)
+searchResults['editors'] = ( #split so that mask can have up tp date Series in its condition
+    searchResults['editors']
+    .mask(searchResults['editors']=="nan", searchResults['book_editors'])
     .str.replace(r"[;,]", " ", regex=True)
     .str.replace(r"\.", "", regex=True)
     .str.replace(r"  ", " ", regex=True)
@@ -172,11 +180,13 @@ searchResults['editors'] = (
 searchResults['pages'] = searchResults.iloc[:, 9].apply(_extract_range)
 
 # rename columns in searchResults to match the other datasets
-searchResults.columns = ['Title', 'source_title', 'Year', 'Month', 'Volume', 'Issue', 'Supplement', 
-                         'special_issue', 'article_number', 'pages', 'Authors', 'inventors', 'book_corp',
-                         'book_editors', 'books', 'additional_authors', 'anonymous', 'assignees', 
-                         'Editors', 'record', 'references', 'related', 'doi', 'issn', 'eissn', 'isbn', 
-                         'eisbn','pmid', 'author_keywords', 'unique_type', 'uid']
+searchResults.columns = ['uid', 'Title', 'types', 'source_types', 'source_title', 'Year',
+       'Month', 'Volume', 'Issue', 'Supplement', 'special_issue',
+       'article_number', 'pages', 'Authors', 'inventors', 'book_corp',
+       'book_editors', 'books', 'additional_authors', 'anonymous', 'assignees',
+       'corp', 'Editors', 'investigators', 'sponsors', 'issuing_organizations',
+       'record', 'citing_articles', 'references', 'related', 'citations',
+       'doi', 'issn', 'eissn', 'isbn', 'eisbn', 'pmid', 'author_keywords']
 
 searchResults['Year'] = searchResults['Year'].str.replace(r",", "", regex=True)
 
@@ -184,12 +194,14 @@ searchResults = searchResults.reset_index(drop=True)
 searchResults.shape
 
 # check for duplicated rows
-searchResults[searchResults.duplicated(subset=['Title','Authors','Year'], keep=False)].sort_values(by=['Title','Authors','Year'])
+searchResults[searchResults.duplicated(subset=['Title','Authors','Editors','Year'], keep=False)]\
+.sort_values(by=['Title','Authors','Year', 'Editors'])
 
 # combine WoS search reaults to combined
 combined = combined.map(str).map(str.upper).merge(
     searchResults.map(str).map(str.upper),
-          on=['Title','Authors','Year'],
+          left_on=['Title','Authors','Journal_Book_Institution_Meeting','Year'],
+          right_on=['Title','Authors','source_title','Year'],
           suffixes =['_comb', '_wos'], 
           validate='one_to_one', 
           how="outer").reset_index(drop=True)
@@ -222,10 +234,14 @@ combined = combined.loc[:, ['index', 'Title', 'Authors', 'Year', 'Index', 'Doc_T
        'Parameter used for comparison', 'Summary of results',
        'Raised questions (by authors)', 'Cautionary remarks', 
        'Month', 'Volume', 'Issue', 'Supplement', 'special_issue',
-       'article_number', 'pages', 'inventors', 'book_corp', 'book_editors',
+       'article_number', 'pages', 'inventors', 'book_corp',
        'books', 'additional_authors', 'anonymous', 'assignees', 'Editors',
-       'record', 'references', 'related', 'doi', 'issn', 'eissn', 'isbn',
-       'eisbn', 'pmid', 'author_keywords', 'unique_type', 'uid']]
+       'record', 'references', 'related', 'types','source_types','corp', 
+       'investigators', 'sponsors','issuing_organizations', 'citing_articles',
+       'citations','doi', 'issn', 'eissn', 'isbn','eisbn', 'pmid', 
+       'author_keywords','uid']]
+
+
 
 combined.shape
 combined.columns
@@ -239,4 +255,4 @@ for col in combined.select_dtypes(include='object').columns:
 
 combined = combined.replace({r"[nN]a[Nn]": pd.NA})
 
-combined.to_csv('mergedDataSept.csv', encoding='utf-8', index=False)
+combined.to_csv('data/mergedDataDec.csv', encoding='utf-8', index=False)
