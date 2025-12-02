@@ -1,7 +1,7 @@
 #! .venv/bin/python3
  
 import os
-os.chdir('./PhD/TPPRDB_Analysis')
+# os.chdir('./PhD/TPPRDB_Analysis')
 # BERTopic uses tokenisation so throws warnings if multiprocessing after
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -128,7 +128,7 @@ vectorizer_model = CountVectorizer(
 )
 
 
-# 1. Load a pretrained Sentence Transformer model
+# Load a pretrained Sentence Transformer model
 model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2", 
     prompts={
         "classification": "Classify the following text into topics relating to forensic sample types: ",
@@ -138,7 +138,7 @@ model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2",
     })
 
 
-# 2. Calculate embeddings by calling model.encode() saves time later for BERTopic to avoid doing this internally
+# Calculate embeddings by calling model.encode() saves time later for BERTopic to avoid doing this internally
 embeddings = model.encode(dataAsList)
 print(embeddings.shape)
 # should be same rows as data ie [3279, 384]
@@ -274,7 +274,7 @@ offset_y=coords[:,1] + (sizeref * np.random.normal(0,1.5,len(coords[:,1]))) # ty
 positions = np.column_stack([offset_x, offset_y])
 
 
-min_dist = 2 # minimum allowed distance between any label and any other object
+min_dist = 2.5 # minimum allowed distance between any label and any other object
 
 positions = uf.resolve_overlaps(positions, coords, min_dist, repulsion_strength=0.5,
         marker_repulsion_strength=1, attraction_strength=0.08, max_step=2)
@@ -337,17 +337,18 @@ dist_map.update_layout(
 # Display the figure
 dist_map.show()
 
+displayTable = topic_info[['Topic','Name','Count']]
+displayTable.to_html(index=False)
 
-# Save topic-terms barcharts as HTML file
-bar_fig = best_model.visualize_barchart(top_n_topics=15, autoscale=True, width=350) # type: ignore
-#.write_html("./PhD-Windows/TPPRDB_Analysis/barchart.html")
+# topic-terms barcharts
+bar_fig = topic_model.visualize_barchart(top_n_topics=26, autoscale=True, width=350) # type: ignore
 bar_fig.show()
 
-hierarchical_topics = best_model.hierarchical_topics(dataAsList) # type: ignore
+hierarchical_topics = topic_model.hierarchical_topics(dataAsList) # type: ignore
 
-# Save topics dendrogram as HTML file
-hierarch_fig = best_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics) # type: ignore
-hierarch_fig.show()#.write_html("./PhD-Windows/TPPRDB_Analysis/hieararchy.html")
+# topics dendrogram
+hierarch_fig = topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics) # type: ignore
+hierarch_fig.show()
 
 
 
