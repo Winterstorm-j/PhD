@@ -8,7 +8,7 @@ import ast
 import re
 import pandas as pd
 import numpy as np
-from typing import Any, List, Optional
+from typing import Any
 from gensim.models.coherencemodel import CoherenceModel
 from gensim.corpora.dictionary import Dictionary
 from gensim import corpora
@@ -48,7 +48,7 @@ def get_names(val: Any, col: str):
     return val
 
 
-def combine_group_rows(df: pd.DataFrame, group_cols: List[str]) -> pd.DataFrame:
+def combine_group_rows(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
     """
     Combine rows in a DataFrame by grouping on specified columns and aggregating other columns.
     """
@@ -82,7 +82,7 @@ def preprocess_string_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _extract_range(x: Any) -> Optional[str]:
+def _extract_range(x: Any) -> str|None:
     """
     Extract a page/range string from a variety of inputs:
     - If input is a dict-like string, try to literal_eval and get 'range'
@@ -128,15 +128,17 @@ def _extract_range(x: Any) -> Optional[str]:
     return s if s else None
 
 
-def preprocess(text: Any, custom_stopwords: Optional[set] = None) -> str:
+def preprocess(text: Any, stopwords: list[Any]|None) -> str:
     """
     Minimal text preprocess: lowercase, keep words >=3 chars, remove custom stopwords.
     """
     
     if text is None or not isinstance(text, str):
         return ""
-    if custom_stopwords is None:
+    if stopwords is None:
         custom_stopwords = set()
+    else:
+        custom_stopwords = set(stopwords)
     words = re.findall(r'\b[a-z]{3,}\b', text.lower())
     return ' '.join([w for w in words if w not in custom_stopwords])
 
