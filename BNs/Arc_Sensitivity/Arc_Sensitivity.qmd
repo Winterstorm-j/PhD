@@ -164,9 +164,9 @@ for(row in  1:nrow(arcsOfInterest)) {
 
 Fitting is commented until CPT of parented node is worked out (to allow rendering)
 ```{r}
-
+originalNetwork
 # Fit the network with the new CPTs
-#updated_fitted_net <- custom.fit(new_net, dist = all_cpts)
+# updated_fitted_net <- custom.fit(new_net, dist = all_cpts)
 ```
 
 ```{r}

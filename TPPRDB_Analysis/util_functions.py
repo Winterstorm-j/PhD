@@ -282,3 +282,11 @@ def float_range(start, stop, step):
     while current < stop:
         yield current
         current += step
+        
+# Apply the logic only where Trace_Type is empty, with a default value of 'NA' for no matches
+def find_and_replace(df, findColumn, replaceColumn, conditions, choices):
+    if replaceColumn not in df.columns:
+        df[replaceColumn] = ''
+    
+    mask = df[replaceColumn] == ''
+    df.loc[mask, replaceColumn] = np.select(conditions, choices, default='NA')

@@ -1,6 +1,6 @@
 #! /Users/jbuc045/Projects/.venv/bin/python
 import os
-os.chdir('./PhD/TPPRDB_Analysis')
+# os.chdir('./PhD/TPPRDB_Analysis')
 
 import pandas as pd
 import numpy as np
@@ -9,14 +9,15 @@ from util_functions import get_names, combine_group_rows, preprocess_string_colu
 
 ####### TTADB
 # IMPORT TTADB removing any trailing whitespace
-TPPR_db = pd.read_csv("data/TTADB-Aug2025.csv", encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
+TPPR_db = pd.read_table("TTADB_Mar2026.txt", encoding='utf-8',header=None).map(str).map(str.strip).reset_index(drop=True)
 
 # remove empty columns and rename last column
-TPPR_db = TPPR_db.drop(['Unnamed: 13','Unnamed: 14', 'Unnamed: 15'], axis=1)
-TPPR_db.rename(columns={'Unnamed: 16': 'Citation'}, inplace=True)
+TPPR_db = TPPR_db.drop(TPPR_db.columns[8:11], axis=1)
+TPPR_db.columns=['Study_Type','Keywords','Trace_Type','Exp_Conditions_and_Results','Relevance_to_Canada',
+                 'Authors_Year_Title_Journal_Book_Institution_Meeting','Abstract','Doc_Type','Study_Type2','Trace_Type2','Citation','Index']
 
 # split full citationin into Authors (words before the date, Year numbers between brackets, Title everything after) 
-searchTerm = [re.search(r'(.+)\(([0-9sd\.]{4})\)(.*)',row) if row else () for row in TPPR_db['Authors']]
+searchTerm = [re.search(r'(.+)\(([0-9sd\.]{4})\)(.*)',row) if row else () for row in TPPR_db['Authors_Year_Title_Journal_Book_Institution_Meeting']]
 TPPR_db['Authors'] = [row.groups()[0] if row else None for row in searchTerm]
 TPPR_db['Year'] = [row.groups()[1] if row else None for row in searchTerm]
 TPPR_db['Title'] = [row.groups()[2] if row else None for row in searchTerm]
@@ -213,33 +214,18 @@ combined['Journal_Book_Institution_Meeting'] = [
                 else combined.loc[record,'Journal_Book_Institution_Meeting'] for record in combined.index
                 ]
 
-combined = combined.loc[:, ['index', 'Title', 'Authors', 'Year', 'Index', 'Doc_Type',
-       'Journal_Book_Institution_Meeting', 'Publishing_Details', 'Trace_Type',
-       'Study_Type', 'Keywords', 'Abstract', 'Exp_Conditions_and_Results',
-       'Relevance_to_Canada', 'Citation', 'Addressed question',
-       'Activity context', 'Category', 'Specifications',
-       'Variables of interest', 'stringency of control', 'No of individuals',
-       'Replicates per Individual and condition', 'Nucleic Acid',
-       'Bodily origin', 'depositor characteristics',
-       'Criteria for shedder status', 'Previous activities',
-       'Contact scenario', 'Primary substrate type',
-       'Primary substrate Material', 'Deposit', 'Delay (conditions)',
-       'Secondary substrate type', 'Secondary Substrate material',
-       'Type of secondary contact', 'Further transfer',
-       'Background DNA on sampled surface', 'Sampling time',
-       'Persistance (conditions)', 'Sampling method', 'Sampling area',
-       'Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling',
-       'Reference samples', 'Profile interpretation and mixture analysis',
-       'RNA data interpretation', 'DNA Quantitiy', 'Profile Quality',
-       'Parameter used for comparison', 'Summary of results',
-       'Raised questions (by authors)', 'Cautionary remarks', 
-       'Month', 'Volume', 'Issue', 'Supplement', 'special_issue',
-       'article_number', 'pages', 'inventors', 'book_corp',
-       'books', 'additional_authors', 'anonymous', 'assignees', 'Editors',
-       'record', 'references', 'related', 'types','source_types','corp', 
-       'investigators', 'sponsors','issuing_organizations', 'citing_articles',
-       'citations','doi', 'issn', 'eissn', 'isbn','eisbn', 'pmid', 
-       'author_keywords','uid']]
+listOfCols = ["index", "Title", "Authors", "Year", "Index", "Doc_Type","Journal_Book_Institution_Meeting", "Publishing_Details", "Trace_Type","Study_Type", "Keywords", "Abstract", "Exp_Conditions_and_Results",
+              "Relevance_to_Canada", "Citation", "Addressed question","Activity context", "Category", "Specifications","Variables of interest", "stringency of control", "No of individuals",
+              "Replicates per Individual and condition", "Nucleic Acid","Bodily origin", "depositor characteristics","Criteria for shedder status", "Previous activities","Contact scenario", 
+              "Primary substrate type","Primary substrate Material", "Deposit", "Delay (conditions)","Secondary substrate type", "Secondary Substrate material","Type of secondary contact", 
+              "Further transfer","Background DNA on sampled surface", "Sampling time","Persistance (conditions)", "Sampling method", "Sampling area","Extraction", "DNA Quantification", "Input for Profiling", 
+              "Profiling","Reference samples", "Profile interpretation and mixture analysis","RNA data interpretation", "DNA Quantitiy", "Profile Quality","Parameter used for comparison", "Summary of results",
+              "Raised questions (by authors)", "Cautionary remarks", "Month", "Volume", "Issue", "Supplement", "special_issue","article_number", "pages", "inventors", "book_corp", "books", "additional_authors",
+              "anonymous", "assignees", "Editors","record", "references", "related", "types","source_types","corp", "investigators", "sponsors","issuing_organizations", "citing_articles","citations","doi", "issn", 
+              "eissn", "isbn","eisbn", "pmid", "author_keywords","uid"]
+
+
+combined = combined.loc[:, listOfCols]
 
 
 
@@ -255,4 +241,4 @@ for col in combined.select_dtypes(include='object').columns:
 
 combined = combined.replace({r"[nN]a[Nn]": pd.NA})
 
-combined.to_csv('data/mergedDataDec.csv', encoding='utf-8', index=False)
+combined.to_csv('data/mergedDataMar.csv', encoding='utf-8', index=False)

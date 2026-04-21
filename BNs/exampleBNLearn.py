@@ -62,7 +62,7 @@ exampleData = exampleData.select(pl.all().exclude('horsepower'))
 dfNames = exampleData.columns
 exampleData.head()
     
-exampleData = pd.DataFrame(exampleData)
+# exampleData = pd.DataFrame(exampleData)
 exampleData.columns = dfNames
 
 model = bn.structure_learning.fit(exampleData, methodtype='hc')
