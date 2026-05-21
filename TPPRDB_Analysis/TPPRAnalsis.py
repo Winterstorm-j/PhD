@@ -24,24 +24,16 @@ combined = pd.read_csv("data/mergedDataDec.csv", encoding='utf-8').map(str).map(
 
 # combine title, keywords, abstract, relevance and trace type columns if they are not nan or empty into a single column
 combined.index
-cols = ['Title', 'Trace_Type','Study_Type', 'Keywords', 'Abstract', 'Exp_Conditions_and_Results',
-    'Relevance_to_Canada', 'Addressed question',
-    'Activity context', 'Category', 'Specifications',
-    'Variables of interest', 'stringency of control', 'No of individuals',
-    'Replicates per Individual and condition', 'Nucleic Acid',
-    'Bodily origin', 'depositor characteristics',
-    'Criteria for shedder status', 'Previous activities',
-    'Contact scenario', 'Primary substrate type',
-    'Primary substrate Material', 'Deposit', 'Delay (conditions)',
-    'Secondary substrate type', 'Secondary Substrate material',
-    'Type of secondary contact', 'Further transfer',
-    'Background DNA on sampled surface', 'Sampling time',
-    'Persistance (conditions)', 'Sampling method', 'Sampling area',
-    'Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling',
-    'Reference samples', 'Profile interpretation and mixture analysis',
-    'RNA data interpretation', 'DNA Quantitiy', 'Profile Quality',
-    'Parameter used for comparison', 'Summary of results',
-    'Raised questions (by authors)', 'Cautionary remarks', 'author_keywords']
+cols = ['Title','Trace_Type', 'Study_Type', 'Keywords', 'Abstract', 'Exp_Conditions_and_Results',
+       'Relevance_to_Canada', 'Addressed question', 'Activity context', 'Category', 'Specifications',
+       'Variables of interest', 'stringency of control', 'No of individuals', 'Replicates per Individual and condition', 
+       'Nucleic Acid', 'Bodily origin', 'depositor characteristics','Criteria for shedder status', 'Previous activities', 
+       'Contact scenario', 'Primary substrate type', 'Primary substrate Material', 'Deposit', 'Delay (conditions)', 
+       'Secondary substrate type', 'Secondary Substrate material', 'Type of secondary contact', 'Further transfer', 
+       'Background DNA on sampled surface', 'Sampling time', 'Persistance (conditions)', 'Sampling method', 'Sampling area',
+       'Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling', 'Reference samples', 
+       'Profile interpretation and mixture analysis','RNA data interpretation', 'DNA Quantitiy', 'Profile Quality', 
+       'Parameter used for comparison', 'Summary of results','Raised questions (by authors)', 'Cautionary remarks']
 
 combined['allData'] = combined[cols].apply(uf._join_non_na, axis=1)
 
@@ -106,23 +98,23 @@ extra_forensic_stopwords = [
     'marker', 'spectrometer', 'sequencing', 'sequenced', 'sequencer', 'amplification', 
     'amplified', 'packaging', 'amplify', 'loci', 'locus', 'electrophoresis', 
     'electrophoretic'
-                            ]
+]
                       
 # Get the list of other language stop words
 multilingual_stop_words = stopwords.words()
 
 custom_stopwords = list(text.ENGLISH_STOP_WORDS.union(
     forensic_stopwords,
-    # extra_forensic_stopwords,
+    extra_forensic_stopwords,
     multilingual_stop_words)
                         )
 
-preprocessed_docs = [uf.preprocess(doc) for doc in dataAsList]
+preprocessed_docs = [uf.preprocess(doc, custom_stopwords) for doc in dataAsList]
 
 # create vectorise method
 vectorizer_model = CountVectorizer(
     stop_words=custom_stopwords,
-    ngram_range=(1, 2),
+    ngram_range=(1,5),
     min_df=0.2,
     max_df=0.6
 )
@@ -153,7 +145,7 @@ References:
 
 # Fine-tune the topic representations
 representation_model = KeyBERTInspired(
-    top_n_words=100,
+    top_n_words=250,
     nr_repr_docs=800,
     nr_samples=2000,
     nr_candidate_words=2000)
@@ -234,7 +226,7 @@ new_topics = topic_model.reduce_outliers(dataAsList,
 with open("best_model_params.json", "r") as f:
     best_results = json.load(f)
 
-combined['T1_topic'] = new_topics #best_results[1]
+combined['T1_topic'] = topics #best_results[1]
 
 #combined['T1_probs'] = best_results[2] # type: ignore
 
@@ -242,7 +234,9 @@ topic_info = topic_model.get_topic_info() # type: ignore
 #topic_model.set_topic_labels(list(topic_info['Name']))
 
 # Exclude the -1 topic (outliers) for labeling the main topics
-topic_info = topic_info[topic_info['Topic'] != -1].reset_index(drop=True)
+topic_info['Topic'] = topic_info['Topic'].astype(int) + 1
+# topic_info = topic_info[topic_info['Topic'] != -1].reset_index(drop=True)
+topic_info = topic_info.reset_index(drop=True)
 
 # associate colours with the topics
 colours_list = [

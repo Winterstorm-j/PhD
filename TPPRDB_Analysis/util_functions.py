@@ -23,7 +23,9 @@ __all__ = [
 'calculate_coherence_score',
 'calculate_diversity_score',
 'resolve_overlaps',
-'float_range'
+'float_range',
+'find_and_replace',
+'fill_missing_values'
 ]
 
 
@@ -290,3 +292,26 @@ def find_and_replace(df, findColumn, replaceColumn, conditions, choices):
     
     mask = df[replaceColumn] == ''
     df.loc[mask, replaceColumn] = np.select(conditions, choices, default='NA')
+    
+    
+def fill_missing_values(df, primary_cols, alternate_cols):
+    """
+    Fill missing values in primary columns from alternate columns.
+    
+    Args:
+        df: DataFrame to modify
+        primary_cols: List of primary column names
+        alternate_cols: List of alternate column names (same order as primary_cols)
+    
+    Returns:
+        Modified DataFrame
+    """
+    for primary, alternate in zip(primary_cols, alternate_cols):
+        df[primary] = np.where(
+            df[primary].isna() & ~df[alternate].isna(), 
+            df[alternate], 
+            df[primary]
+        )
+    
+        df.drop(columns=alternate, inplace=True)
+    return df

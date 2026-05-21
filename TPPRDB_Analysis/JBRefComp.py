@@ -75,29 +75,7 @@ combinedData = modelledData_norm.merge(
 )
 
 # Merge back original columns from modelledData and zotero_refs where available, prioritizing modelledData values
-def fill_missing_values(df, primary_cols, alternate_cols):
-    """
-    Fill missing values in primary columns from alternate columns.
-    
-    Args:
-        df: DataFrame to modify
-        primary_cols: List of primary column names
-        alternate_cols: List of alternate column names (same order as primary_cols)
-    
-    Returns:
-        Modified DataFrame
-    """
-    for primary, alternate in zip(primary_cols, alternate_cols):
-        df[primary] = np.where(
-            df[primary].isna() & ~df[alternate].isna(), 
-            df[alternate], 
-            df[primary]
-        )
-    
-        df.drop(columns=alternate, inplace=True)
-    return df
-
-combinedData = fill_missing_values(
+combinedData = uf.fill_missing_values(
     combinedData,
     primary_cols=['Title', 'Authors', 'Year', 'Doc_Type', 'Journal_Book_Institution_Meeting', 'Abstract', 'doi_model','isbn_model','Keywords', 'Keywords'],
     alternate_cols=['title', 'author', 'date', 'ENTRYTYPE','journaltitle', 'abstract', 'doi_zotero', 'isbn_zotero','keywords', 'author_keywords']
@@ -254,3 +232,32 @@ refs['Authors'] = refs['Authors'].apply(fix_and_join)
 refs = refs[~refs['Trace_Type'].isin(['Fibres', 'Digital', 'Dental', 'Others', 'Hair; Others', 'Pathology', 'Anthropology', 'Trace', 'Documents', 'Bone', 'Firearms', 'Cosmetics', 'GSR', 'Shoeprint', 'Geotraces (Dust, Pollen, Soil)', 'Bloodstain', 'Fingermarks', 'Environmental'])]
 
 refs.to_csv("data/bioRefs_cleaned.csv", index=False, encoding='utf-8')
+
+
+
+combind = pd.read_csv('comparisonDataCheck.csv', encoding='utf-8').reset_index(drop=True)
+
+combind =uf.fill_missing_values(combind, 
+            ['Title','Title', 'Authors', 'Authors', 'Year','Journal_Book_Institution_Meeting','DOI', 'DOI', 'edition_modelledData','Volume',  'Volume', 'Issue', 'Issue','number','pages', 'pages', 'type', 'type', 'type','issn_zotero'], 
+            ['title', 'original-title', 'authors', 'author', 'year','container_title', 'doi', 'doi_model','edition_jbRefs','volume_orig', 'volume', 'issue_orig', 'issue', 'article_number','pages_model', 'pages_zotero','types', 'type_orig','source_types','issn_model'])
+
+combind['Year'] = pd.to_numeric(combind['Year'], errors='coerce').astype('Int64').astype(str).str.strip()
+refs['Year'] = pd.to_numeric(refs['Year'], errors='coerce').astype('Int64').astype(str).str.strip()
+cleanedRefs = refs.reset_index(drop=True)
+newRefs = combind.merge(cleanedRefs, left_on=['Title', 'Authors', 'Year', 'Journal_Book_Institution_Meeting'], right_on=['Title', 'Authors','Year', 'Journal_Book_Institution_Meeting'], how='outer')
+
+newRefs =uf.fill_missing_values(newRefs, 
+            ['Doc_Type_x', 'Publishing_Details_x', 'Trace_Type_x', 'Study_Type_x', 'Keywords_x','Abstract_x', 'eissn_x', 'issn', 'isbn',
+       'eisbn_x', 'pmid_x', 'uid_x', 'publisher',  'url_x', 'DOI'], 
+            ['Doc_Type_y', 'Publishing_Details_y', 'Trace_Type_y', 'Study_Type_y', 'Keywords_y', 'Abstract_y', 'eissn_y', 'issn_zotero', 'isbn_model',
+       'eisbn_y', 'pmid_y', 'uid_y', 'publisher_orig', 'url_y', 'doi'])
+
+newRefs.columns = ['index', 'Title', 'Authors', 'Year', 'Doc_Type', 'Journal_Book_Institution_Meeting', 'Publishing_Details','Trace_Type', 'Study_Type', 'Keywords', 'Abstract',
+                   'Exp_Conditions_and_Results', 'Relevance_to_Canada', 'Citation','Addressed question', 'Activity context', 'Category', 'Specifications','Variables of interest', 
+                   'stringency of control', 'No of individuals','Replicates per Individual and condition', 'Nucleic Acid','Bodily origin', 'depositor characteristics',
+                   'Criteria for shedder status', 'Previous activities', 'Contact scenario', 'Primary substrate type', 'Primary substrate Material', 'Deposit', 'Delay (conditions)', 
+                   'Secondary substrate type', 'Secondary Substrate material','Type of secondary contact', 'Further transfer', 'Background DNA on sampled surface', 'Sampling time', 
+                   'Persistance (conditions)', 'Sampling method', 'Sampling area','Extraction', 'DNA Quantification', 'Input for Profiling', 'Profiling','Reference samples', 
+                   'Profile interpretation and mixture analysis','RNA data interpretation', 'DNA Quantitiy', 'Profile Quality','Parameter used for comparison', 'Summary of results',
+                   'Raised questions (by authors)', 'Cautionary remarks', 'Month','Volume', 'Issue', 'issuing_organizations', 'eissn', 'eisbn','pmid', 'uid', 'url', 'number', 
+                   'institution','edition', 'issued', 'container-title', 'alternative-id', 'raw', 'DOI', 'pages', 'type', 'editors', 'issn', 'isbn', 'publisher']
