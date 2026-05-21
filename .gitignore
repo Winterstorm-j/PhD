@@ -30,3 +30,7 @@ PhD-Windows/LLM/models/*
 *.txt
 *.rtf
 *.pptx
+*.json
+*.png
+*.bib
+
