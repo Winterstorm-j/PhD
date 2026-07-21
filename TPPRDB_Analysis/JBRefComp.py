@@ -107,7 +107,7 @@ combinedData = combinedData.merge(
 # remove duplicated rows in combinedData
 combinedData = combinedData.drop_duplicates(subset=['Title', 'Authors', 'Year', 'Journal_Book_Institution_Meeting'], keep='first')
 
-combinedData = fill_missing_values(
+combinedData = uf.fill_missing_values(
     combinedData,
     primary_cols=['Title','doi_model', 'Issue', 'pages_model', 'Volume', 'publisher_orig', 'type_orig', 'issn_model'],
     alternate_cols=['title','DOI', 'issue_retrieved', 'page', 'volume_retrieved', 'publisher_retrieved', 'type_retrieved', 'ISSN']
