@@ -1,0 +1,11 @@
+# Download and install npm and Node.js
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh | bash
+\. "$HOME/.nvm/nvm.sh"
+nvm install 24
+
+# Install OpenClaw and Ollama
+npm install -g openclaw
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.1 && openclaw config set model ollama/llama3.1
+openclaw onboard
+

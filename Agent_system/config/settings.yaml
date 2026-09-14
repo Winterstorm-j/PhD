@@ -1,0 +1,11 @@
+# Application Configuration Settings
+# Model and Path Constants
+# ----------------------------------------------------------------------------
+
+paths:
+  # Base path for local models, managed by Ollama
+  gemma_model_directory: /Users/jbuc045/.ollama/models/
+
+llm_providers:
+  # The model to use for Gemma-4 inference
+  primary_gemma_model: gemma-4
