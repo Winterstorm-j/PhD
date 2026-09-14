@@ -16,6 +16,7 @@ from bertopic import BERTopic
 from sklearn.model_selection import KFold
 from sklearn.metrics.pairwise import cosine_similarity
 import json
+from umap import UMAP
 
 combined = pd.read_csv("data/modelReadyData.csv", encoding='utf-8').map(str).map(str.strip).reset_index(drop=True)
 dataAsList = combined['allData'].to_list()

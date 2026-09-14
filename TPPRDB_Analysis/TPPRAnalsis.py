@@ -152,9 +152,10 @@ topic_model = BERTopic(
     zeroshot_topic_list=candidate_topics,
     zeroshot_min_similarity=0.8,
     embedding_model = model,
+    min_topic_size=10,
    #hdbscan_model=hdbscan_model,
     #calculate_probabilities=True,
-    nr_topics=32,
+    nr_topics=28,
     #seed_topic_list=topic_list
     )
 
@@ -166,8 +167,8 @@ topics,probs = best_model.transform(dataAsList)#, embeddings=embeddings)
 topics,probs = topic_model.fit_transform(dataAsList)#, embeddings=embeddings)
 new_topics = topic_model.reduce_outliers(dataAsList,
                                         topic_model.topics_, # type: ignore
-                                        strategy="probabilities",
-                                        probabilities=probs ) # type: ignore
+                                        strategy="embeddings", threshold=0.65, embeddings=embeddings
+                                        ) # type: ignore
 
 topic_model.update_topics(dataAsList, topics=new_topics, vectorizer_model=vectorizer_model) # type: ignore
 
@@ -301,13 +302,14 @@ print(displayTable.to_latex(index=False))
 # topic-terms barcharts
 bar_fig = topic_model.visualize_barchart(top_n_topics=33, autoscale=True, width=350) # type: ignore
 bar_fig.write_html("bar.html", auto_open=True)
-hierarchical_topics = topic_model.hierarchical_topics(dataAsList) # type: ignore
+
 
 # topics dendrogram
-hierarch_fig = topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics) # type: ignore
+hierarchical_topics = topic_model.hierarchical_topics(dataAsList) # type: ignore
+hierarch_fig = topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics, color_threshold=10) # type: ignore
 hierarch_fig.write_html("hierarchy.html", auto_open=True)
 
-hier_doc_fig = topic_model.visualize_hierarchical_documents(dataAsList, hierarchical_topics, embeddings=embeddings)
+hier_doc_fig = topic_model.visualize_hierarchical_documents(dataAsList, hierarchical_topics, embeddings=embeddings) 
 hier_doc_fig.write_html("hier_docs.html", auto_open=True)
 
 heatmap_fig = topic_model.visualize_heatmap()
@@ -315,6 +317,11 @@ heatmap_fig.write_html("heatmap.html", auto_open=True)
 
 rank = topic_model.visualize_term_rank(custom_labels=topic_info['Topic'].tolist()) # type: ignore
 rank.write_html("rank.html", auto_open=True)
+
+doc_fig = topic_model.visualize_documents(dataAsList, topic_model.topics_, embeddings=embeddings,
+                        hide_document_hover=True, hide_annotation=True)
+doc_fig.write_html("docs.html", auto_open=True)
+
 
 
 # # Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:

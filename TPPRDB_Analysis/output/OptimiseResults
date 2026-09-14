@@ -1,0 +1,611 @@
+Default {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x1202838c0>, 
+'hdbscan_model': HDBSCAN(min_cluster_size=10, prediction_data=True), 'language': 'english', 'nr_topics': 'auto', 
+'representation_model': None, 'seed_topic_list': None, 'top_n_words': 10, 
+'umap_model': UMAP(angular_rp_forest=True, low_memory=False, metric='cosine', min_dist=0.0, n_components=5), 
+'vectorizer_model': CountVectorizer(), 'verbose': False, 'zeroshot_min_similarity': 0.7, 'zeroshot_topic_list': None}
+Coherence=-0.1752, Diversity=82.1194, Silhouette=0.0635, Score=12.2048
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_the_of_and_dna & 785 \\
+# 0 & 0_dna_of_the_and & 833 \\
+# 1 & 1_the_of_and_gsr & 575 \\
+# 2 & 2_fibres_fibre_the_of & 227 \\
+# 3 & 3_pollen_soil_the_of & 139 \\
+# 4 & 4_glass_fragments_the_of & 108 \\
+# 5 & 5_cocaine_drug_drugs_in & 103 \\
+# 6 & 6_semen_spermatozoa_sexual_the & 88 \\
+# 7 & 7_disorder_personality_forensic_intellectual & 66 \\
+# 8 & 8_lipstick_lipsticks_glitter_cosmetic & 58 \\
+# 9 & 9_assault_sexual_evidence_children & 51 \\
+# 10 & 10_hair_hairs_of_the & 50 \\
+# 11 & 11_bloodstain_bpa_pattern_abstract & 35 \\
+# 12 & 12_bayesian_the_evidence_of & 30 \\
+# 13 & 13_condom_lubricant_lubricants_the & 27 \\
+# 14 & 14_latent_fingerprint_nanophosphors_fluorescent & 21 \\
+# 15 & 15_latent_fingermarks_recovery_submerged & 18 \\
+# 16 & 16_prey_bird_outside_carcasses & 18 \\
+# 17 & 17_digital_forensics_computer_networks & 16 \\
+# 18 & 18_death_sudden_autopsy_syndrome & 16 \\
+# 19 & 19_raman_drugs_drug_spectra & 15 \\
+# \bottomrule
+# \end{tabular}
+
+Vec_only {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+ 'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x15e1c5370>, 
+ 'hdbscan_model': HDBSCAN(cluster_selection_epsilon=0.1, min_samples=5, prediction_data=True), 'language': 'english', 'nr_topics': 'auto', 
+ 'representation_model': None, 
+ 'umap_model': UMAP(angular_rp_forest=True, low_memory=False, metric='cosine', min_dist=0.0, n_components=5), 
+ 'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5),stop_words), 'zeroshot_min_similarity': 0.7, 
+  'zeroshot_topic_list': None}
+[({'min_cluster_size': 5, 'min_samples': 5, 'cluster_selection_epsilon': 0.1}, np.float64(-0.1656727498970495), 416.0666666666667, 
+  0.003927504178136587, np.float64(62.294618200698785))] 37
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_dna_skin_blood_residue & 662 \\
+# 0 & 0_dna_paint_blood_saliva & 818 \\
+# 1 & 1_residue_particles_residues_hands & 609 \\
+# 2 & 2_fibres_fibre_fibers_fiber & 188 \\
+# 3 & 3_drugs_contamination_illicit_hair & 112 \\
+# 4 & 4_soil_dust_footwear_clothing & 112 \\
+# 5 & 5_glass_fragments_index_clothing & 98 \\
+# 6 & 6_semen_sexual_vaginal_assault & 89 \\
+# 7 & 7_trauma_adult_offenders_validity & 60 \\
+# 8 & 8_cosmetics_brands_spectroscopy_layer & 51 \\
+# 9 & 9_hair_hairs_human_interested & 50 \\
+# 10 & 10_assault_sexual_sexual assault_children & 50 \\
+# 11 & 11_body_blood_fluids_fluid & 38 \\
+# 12 & 12_pattern_abstract_classification_information & 35 \\
+# 13 & 13_sexual_personal_sexual assault_assault & 29 \\
+# 14 & 14_latent_fingermarks_fingerprint_development & 24 \\
+# 15 & 15_paint_vehicles_colour_survey & 22 \\
+# 16 & 16_latent_fingerprint_fluorescent_applications & 22 \\
+# 17 & 17_digital_computer_networks_dynamic & 21 \\
+# 18 & 18_clothing_water_species_site & 18 \\
+# 19 & 19_remains_medical_estimation_imaging & 17 \\
+# 20 & 20_computed_postmortem_aspects_fatal & 14 \\
+# 21 & 21_noninvasive_animal_substrates_genetic & 13 \\
+# 22 & 22_lr_value_trial_principle & 10 \\
+# 23 & 23_death_molecular_cell_severe & 10 \\
+# 24 & 24_marks_discriminant_brands_lda & 9 \\
+# 25 & 25_water_immersion_blood_degradation & 9 \\
+# 26 & 26_compounds_fabric_transferred_piece & 9 \\
+# 27 & 27_urine_plants_bags_growing & 8 \\
+# 28 & 28_autopsy_death_statistics_alcohol & 8 \\
+# 29 & 29_cell_single_cells_material & 8 \\
+# 30 & 30_hair_exposure_black_brown & 8 \\
+# 31 & 31_wrapped_species_survival_affects & 8 \\
+# 32 & 32_fingermark_mass_drugs_chemical & 7 \\
+# 33 & 33_footwear_contact surfaces_particles_shoes & 7 \\
+# 34 & 34_particles_semeds_potential_shape & 7 \\
+# 35 & 35_dust_users_levels_constituents & 7 \\
+# 36 & 36_fibres_fibers_contacts_fibre & 7 \\
+# 37 & 37_cars_alternative_composition_car & 5 \\
+# \bottomrule
+# \end{tabular}
+
+ZS(Default)_Vec {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x15ef2e930>, 
+'hdbscan_model': <bertopic.cluster._base.BaseCluster object at 0x1118a1c70>, 'language': 'english', 'nr_topics': 'auto', 
+'representation_model': None, 'seed_topic_list': None, 'top_n_words': 10, 
+'umap_model': UMAP(angular_rp_forest=True, low_memory=False, metric='cosine', min_dist=0.0, n_components=5), 
+'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5),stop_words, 'zeroshot_min_similarity': 0.7, 
+'zeroshot_topic_list': ['paints and pigments', 'glass and refractive materials', 'arson and ignitable liquids', 
+'drugs and metabolites', 'cosmetics', 'pollen and vegetation', 'fingerprints', 'body fluids and biomarkers', 
+'bloodstain patterns', 'hairs', 'trace touch dna', 'remains and skeletal', 'sperm and seminal', 
+'soils and mineralogy', 'condoms and lubricants', 'tape and adhesives', 'fingernails and nails', 
+'saliva and mouth', 'fibres and fabrics', 'cartridge and ammunition', 'laundry and washing', 
+'touch dna and trace dna', 'gsr and gunshot residue', 'explosives and bombs', 'firearms and guns', 'cords and rope']}
+[({'min_cluster_size': 5, 'min_samples': 5, 'cluster_selection_epsilon': 0.1}, np.float64(-0.1215173905630826), 315.3591312764563, 
+  0.034661538898944855, np.float64(47.224006748909126))] 47
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_dna_skin_blood_cotton & 865 \\
+# 0 & 0_residue_particles_residues_lead & 482 \\
+# 1 & 1_dna_dna transfer_alleles_fingerprints & 287 \\
+# 2 & 2_fibres_fibre_fibers_fiber & 169 \\
+# 3 & 3_dna_saliva_str_remains & 168 \\
+# 4 & 4_paint_infrared_spectroscopy_ftir & 140 \\
+# 5 & 5_glass_fragments_window_index & 108 \\
+# 6 & 6_soil_dust_clothing_species & 107 \\
+# 7 & 7_debris_liquid_carpet_gas & 104 \\
+# 8 & 8_drugs_contamination_hair_mass & 94 \\
+# 9 & 9_semen_sexual_stains_vaginal & 70 \\
+# 10 & 10_assault_sexual_sexual assault_children & 52 \\
+# 11 & 11_hair_hairs_interested_interested contact bdatt manager & 50 \\
+# 12 & 12_injury_adult_offenders_validity & 46 \\
+# 13 & 13_spectroscopy_layer_pca_red & 45 \\
+# 14 & 14_dna_pcr_str_dna recovery & 43 \\
+# 15 & 15_bloodstain_pattern_abstract_classification & 35 \\
+# 16 & 16_body_blood_body fluids_fluids & 34 \\
+# 17 & 17_lr_model_peak_mixture & 29 \\
+# 18 & 18_sexual_personal_sexual assault_assault & 27 \\
+# 19 & 19_model_models_statistical_network & 23 \\
+# 20 & 20_blood_water_bloodstains_washing & 23 \\
+# 21 & 21_blood_bloodstains_bloodstain_presumptive & 22 \\
+# 22 & 22_latent_fingerprint_fluorescent_applications & 22 \\
+# 23 & 23_latent_development_fingerprints_environments & 19 \\
+# 24 & 24_clothing_water_species_site & 16 \\
+# 25 & 25_digital_computer_algorithm_students & 16 \\
+# 26 & 26_remains_victims_estimation_age & 15 \\
+# 27 & 27_blood_bloodstain_stains_age & 14 \\
+# 28 & 28_drugs_spectra_bands_fibres & 13 \\
+# 29 & 29_noninvasive_genetic_advances_molecular & 12 \\
+# 30 & 30_sexual_male_vaginal_penetration & 11 \\
+# 31 & 31_car_vehicle_vehicles_prevalence & 11 \\
+# 32 & 32_marks_discriminant_principal_mark & 10 \\
+# 33 & 33_hair_exposure_black_brown & 9 \\
+# 34 & 34_compounds_fabric_transferred_piece & 9 \\
+# 35 & 35_death_molecular_severe_cell & 9 \\
+# 36 & 36_species_affects_artifacts_decay & 8 \\
+# 37 & 37_particles_shape_gold_university & 7 \\
+# 38 & 38_perspectives_england_settings_dynamics & 7 \\
+# 39 & 39_cell_single_cells_tube & 7 \\
+# 40 & 40_fibres_fibers_contacts_fibre & 7 \\
+# 41 & 41_storage_ethanol_temperatures_ambient & 6 \\
+# 42 & 42_longterm_unexpected_management_injuries & 6 \\
+# 43 & 43_saliva_stain_stains_fluorescence & 6 \\
+# 44 & 44_typing_ends_bloodstains_filter & 5 \\
+# 45 & 45_death_language_covering_deaths & 5 \\
+# 46 & 46_dust_levels_users_constituents & 5 \\
+# 47 & 47_soil___ & 1 \\
+# \bottomrule
+# \end{tabular}
+
+
+ZS_Vec {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x1339a84d0>, 
+'hdbscan_model': <bertopic.cluster._base.BaseCluster object at 0x133c81f90>, 'language': 'english', 'nr_topics': 'auto', 
+'representation_model': None, 'seed_topic_list': None, 'top_n_words': 10, 
+'umap_model': UMAP(angular_rp_forest=True, low_memory=False, metric='cosine', min_dist=0.0, n_components=5,  
+'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5), stop_words, 'zeroshot_min_similarity': 0.8, 
+'zeroshot_topic_list': ['paints and pigments', 'glass and refractive materials', 'arson and ignitable liquids', 'drugs and metabolites', 
+'cosmetics', 'pollen and vegetation', 'fingerprints', 'body fluids and biomarkers', 'bloodstain patterns', 'hairs', 'trace touch dna', 
+'remains and skeletal', 'sperm and seminal', 'soils and mineralogy', 'condoms and lubricants', 'tape and adhesives', 'fingernails and nails', 
+'saliva and mouth', 'fibres and fabrics', 'cartridge and ammunition', 'laundry and washing', 'touch dna and trace dna', 
+'gsr and gunshot residue', 'explosives and bombs', 'firearms and guns', 'cords and rope']}
+[({'min_cluster_size': 5, 'min_samples': 4, 'cluster_selection_epsilon': 0.2}, np.float64(-0.20167787790623226), 422.84000000000003, 
+  0.01777501404285431, np.float64(63.28749173757207))] 32
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_dna_gsr_gunshot_blood & 482 \\
+# 0 & 0_dna_blood_pcr_str & 808 \\
+# 1 & 1_gsr_residue_gunshot_residues & 678 \\
+# 2 & 2_fibres_fibre_fibers_fiber & 229 \\
+# 3 & 3_paint_infrared_raman_spectroscopy & 141 \\
+# 4 & 4_assault_sexual_sexual assault_children & 109 \\
+# 5 & 5_drugs_hair_illicit_urine & 108 \\
+# 6 & 6_glass_fragments_window_index & 108 \\
+# 7 & 7_semen_sexual_vaginal_intercourse & 94 \\
+# 8 & 8_pollen_soil_plant_dust & 63 \\
+# 9 & 9_soil_soils_size_dust & 60 \\
+# 10 & 10_hair_hair hair_hairs_pubic & 50 \\
+# 11 & 11_cosmetic_cosmetics_brands_spectroscopy & 45 \\
+# 12 & 12_drugs_contamination_contaminated_general & 36 \\
+# 13 & 13_body_blood_fluids_semen & 35 \\
+# 14 & 14_pattern_abstract_book_chapter & 35 \\
+# 15 & 15_sexual_personal_sexual assault_assault & 28 \\
+# 16 & 16_latent_fingerprint_fluorescent_visualization & 21 \\
+# 17 & 17_digital_computer_networks_updated & 20 \\
+# 18 & 18_remains_victims_uk_imaging & 16 \\
+# 19 & 19_clothing_water_species_site & 12 \\
+# 20 & 20_sexual_male_vaginal_sexual assault & 11 \\
+# 21 & 21_autopsy_alcohol_death_statistics & 10 \\
+# 22 & 22_death_molecular_variants_cell & 10 \\
+# 23 & 23_rubber_marks_discriminant_brands & 9 \\
+# 24 & 24_compounds_fabric_transferred_piece & 9 \\
+# 25 & 25_noninvasive_genetic_advances_molecular & 8 \\
+# 26 & 26_wrapped_species_blow_affects & 8 \\
+# 27 & 27_particles_cosmetic_semeds_shape & 7 \\
+# 28 & 28_cell_single_cells_tube & 7 \\
+# 29 & 29_homicides_death_suicide_location & 6 \\
+# 30 & 30_purification_loss_kit_16 & 6 \\
+# 31 & 31_gloves_team_substances_powder & 5 \\
+# 32 & 32_inter_postmortem_oil_change & 5 \\
+# \bottomrule
+# \end{tabular}
+
+
+ZS_Vec_UMAP {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x15f226360>, 
+'hdbscan_model': <bertopic.cluster._base.BaseCluster object at 0x15f224470>, 'language': 'english', 'nr_topics': 'auto', 
+'representation_model': None, 'seed_topic_list': None, 'top_n_words': 10, 
+'umap_model': UMAP(angular_rp_forest=True, metric='cosine', n_neighbors=20)
+'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5), stop_words, 
+'zeroshot_min_similarity': 0.8, 'zeroshot_topic_list': ['paints and pigments', 'glass and refractive materials', 'arson and ignitable liquids',
+'drugs and metabolites', 'cosmetics', 'pollen and vegetation', 'fingerprints','body fluids and biomarkers', 'bloodstain patterns', 'hairs', 
+'trace touch dna', 'remains and skeletal', 'sperm and seminal', 'soils and mineralogy', 'condoms and lubricants', 'tape and adhesives', 
+'fingernails and nails', 'saliva and mouth', 'fibres and fabrics', 'cartridge and ammunition', 'laundry and washing', 'touch dna and trace dna', 
+'gsr and gunshot residue', 'explosives and bombs', 'firearms and guns', 'cords and rope']}
+[({'min_cluster_size': 10, 'min_samples': 2, 'cluster_selection_epsilon': 0.1}, np.float64(-0.33011854968832577), 306.84301886792457, 
+  0.06351939588785172, np.float64(45.804897754790034))] 21
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_dna_soil_gsr_clothing & 561 \\
+# 0 & 0_dna_blood_pcr_saliva & 897 \\
+# 1 & 1_gsr_gunshot_residue_residues & 697 \\
+# 2 & 2_fibres_fibre_fibers_transferred & 207 \\
+# 3 & 3_paint_paints_automotive_raman & 139 \\
+# 4 & 4_glass_fragments_refractive_refractive index & 108 \\
+# 5 & 5_cocaine_drugs_contamination_hair & 107 \\
+# 6 & 6_pollen_soil_dust_plant & 103 \\
+# 7 & 7_semen_spermatozoa_sperm_phosphatase & 69 \\
+# 8 & 8_assault_sexual_sexual assault_children & 57 \\
+# 9 & 9_hair_hair hair_hairs_pubic & 49 \\
+# 10 & 10_cosmetic_spectroscopy_cosmetics_brands & 45 \\
+# 11 & 11_latent_fingerprint_latent fingerprints_fingerprints & 44 \\
+# 12 & 12_bloodstain_abstract_book_chapter & 35 \\
+# 13 & 13_condom_sexual_condoms_personal & 29 \\
+# 14 & 14_disorder_offenders_stress_hospital & 26 \\
+# 15 & 15_sexual_male_vaginal_intercourse & 21 \\
+# 16 & 16_digital_computer_networks_updated & 18 \\
+# 17 & 17_death_autopsy_molecular_pathological & 15 \\
+# 18 & 18_noninvasive_genetic_conservation_advances & 14 \\
+# 19 & 19_clothing_species_site_empirical & 14 \\
+# 20 & 20_trauma_injury_issues_financial & 13 \\
+# 21 & 21_young_children_stress_validity & 11 \\
+# \bottomrule
+# \end{tabular}
+
+ZS_Vec_Rep_UMAP {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x160a08050>, 
+'hdbscan_model': <bertopic.cluster._base.BaseCluster object at 0x160a0b750>, 'language': 'english', 'nr_topics': 'auto', 
+'representation_model': KeyBERTInspired(nr_candidate_words=2000, nr_repr_docs=500, nr_samples=1000, top_n_words=20),
+'umap_model': UMAP(angular_rp_forest=True, metric='cosine', n_neighbors=20), 
+'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5), stop_words), 'zeroshot_min_similarity': 0.8,
+'zeroshot_topic_list': ['paints and pigments', 'glass and refractive materials', 'arson and ignitable liquids',
+                        'drugs and metabolites', 'cosmetics', 'pollen and vegetation', 'fingerprints', 
+                        'body fluids and biomarkers', 'bloodstain patterns', 'hairs', 'trace touch dna', 
+                        'remains and skeletal', 'sperm and seminal', 'soils and mineralogy', 'condoms and lubricants', 
+                        'tape and adhesives', 'fingernails and nails', 'saliva and mouth', 'fibres and fabrics', 
+                        'cartridge and ammunition', 'laundry and washing', 'touch dna and trace dna', 
+                        'gsr and gunshot residue', 'explosives and bombs', 'firearms and guns', 'cords and rope']}=
+[({'min_cluster_size': 5, 'min_samples': 1, 'cluster_selection_epsilon': 0.2}, np.float64(-0.16422162534056076), 96.40727982807006, 
+  -0.03649276867508888, np.float64(14.340662921170852))] 21
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_contamination_fingerprints_evidentiary_evidentiary value & 68 \\
+# 0 & 0_dna_fingerprints_contamination_fingerprint & 1383 \\
+# 1 & 1_improvised explosive devices_gunshot_explosive devices_gas chromatographymass & 910 \\
+# 2 & 2_fabrics_textile_textiles_trace material & 409 \\
+# 3 & 3_contamination_evidentiary_soil_evidentiary value & 143 \\
+# 4 & 4_glass transfer_glass_glasses_visual inspection & 108 \\
+# 5 & 5_hair population_hairs_hair_head hair & 41 \\
+# 6 & 6_bloodstains_blood_bodily fluids_patterns & 35 \\
+# 7 & 7_illicit drugs_cocaine_liquid chromatographymass_trace amounts & 35 \\
+# 8 & 8_chromatographymass gcms_chromatographymass_gas chromatographymass gcms_gas chromatographymass & 25 \\
+# 9 & 9_improvised explosive devices_artifacts_improvised explosive_explosive devices & 22 \\
+# 10 & 10_autopsy_death_homicides_postmortem & 14 \\
+# 11 & 11_species_dna_microbial_fingerprinting & 13 \\
+# 12 & 12_textiles_textile_fabrics_transfer clothing & 12 \\
+# 13 & 13_paint_textile_fabrics_textiles & 10 \\
+# 14 & 14_exposure_pollution_photography_film & 9 \\
+# 15 & 15_gas chromatographymass_rubber_traces_chemometrics & 9 \\
+# 16 & 16_cosmetics_cosmetic_particles_microscopic & 7 \\
+# 17 & 17_patients_body_human_blood & 6 \\
+# 18 & 18_trial_courts_homicide_testimony & 5 \\
+# 19 & 19_alcohol_drinking_autopsy_fatal & 5 \\
+# 20 & 20_gunshot_firearms_gsr_residue & 5 \\
+# 21 & 21_violence_history_victim_individuals & 5 \\
+# \bottomrule
+# \end{tabular}
+
+MLbase_Vec {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x3f5533110>, 
+'hdbscan_model': HDBSCAN(cluster_selection_epsilon=0.2, min_samples=2, prediction_data=True), 'language': None, 'nr_topics': 'auto', 
+'representation_model': None, 'seed_topic_list': None, 'top_n_words': 10, 
+'umap_model': UMAP(angular_rp_forest=True, low_memory=False, metric='cosine', min_dist=0.0, n_components=5), 
+'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5),stop_words), 'zeroshot_min_similarity': 0.7, 
+'zeroshot_topic_list': None}
+[({'min_cluster_size': 5, 'min_samples': 2, 'cluster_selection_epsilon': 0.2}, np.float64(-0.1508191207593953), 419.423908045977,
+  0.013728944584727287, np.float64(62.810072164052684))] 33
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_skin_pcr_cell_str & 169 \\
+# 0 & 0_blood_saliva_pcr_skin & 738 \\
+# 1 & 1_gsr_gunshot_residue_particles & 702 \\
+# 2 & 2_cocaine_hair_drugs_contamination & 239 \\
+# 3 & 3_fibres_fibre_fibers_fiber & 212 \\
+# 4 & 4_sexual_semen_assault_sexual assault & 186 \\
+# 5 & 5_paint_raman_paints_automotive & 145 \\
+# 6 & 6_pollen_soil_dust_soils & 138 \\
+# 7 & 7_glass_fragments_window_index & 110 \\
+# 8 & 8_injury_colour_death_trauma & 90 \\
+# 9 & 9_latent_fingerprint_fingermarks_fingerprints & 89 \\
+# 10 & 10_liquids_debris_liquid_carpet & 89 \\
+# 11 & 11_biological_trace dna_storage conditions_storage & 44 \\
+# 12 & 12_live_dynamic_intelligence_mobile & 44 \\
+# 13 & 13_cosmetic_cosmetics_ftir_brands & 35 \\
+# 14 & 14_pattern_abstract_chapter_classification & 32 \\
+# 15 & 15_sexual_sexual assault_assault_personal & 29 \\
+# 16 & 16_carcasses_substrates_human dna_weather conditions & 28 \\
+# 17 & 17_rubber_pyrolysis_gc_gc ms & 18 \\
+# 18 & 18_remains_mass_bodies_missing & 15 \\
+# 19 & 19_wrapped_microbial_species_survival & 14 \\
+# 20 & 20_water_river_immersion_blood & 12 \\
+# 21 & 21_clothing_water_species_materials & 11 \\
+# 22 & 22_populations_strs_male_short tandem & 10 \\
+# 23 & 23_autopsy_alcohol_death_statistics & 9 \\
+# 24 & 24_attributed_murder_errors_led & 9 \\
+# 25 & 25_particles_cosmetic_particules_eds & 8 \\
+# 26 & 26_raman_gsr_raman spectroscopy_spectroscopy & 8 \\
+# 27 & 27_building_air_star_modeling & 8 \\
+# 28 & 28_cell_cells_available_tube & 8 \\
+# 29 & 29_estimation_age_computed_eastern & 7 \\
+# 30 & 30_fabric_compounds_transferred_piece & 7 \\
+# 31 & 31_knife_blade_fibres_fibers & 6 \\
+# 32 & 32_cigarette_ends_pls_trials & 5 \\
+# 33 & 33_driver_passenger_accident_drivers & 5 \\
+# \bottomrule
+# \end{tabular}
+
+MLbase_Vec_UMAP {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x1663aeed0>, 
+'hdbscan_model': HDBSCAN(cluster_selection_epsilon=0.1, min_samples=5, prediction_data=True), 'language': None, 'nr_topics': 'auto', 
+'representation_model': None, 'seed_topic_list': None, 'top_n_words': 10, 
+'umap_model': UMAP(angular_rp_forest=True, metric='cosine', n_neighbors=20),
+'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5),stop_words), 
+'zeroshot_min_similarity': 0.7, 'zeroshot_topic_list': None}
+[({'min_cluster_size': 5, 'min_samples': 5, 'cluster_selection_epsilon': 0.1}, np.float64(-0.12977960030522362), 383.42953271028045, 
+  0.037892650812864304, np.float64(57.42926808395034))] 
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_skin_blood_gsr_saliva & 704 \\
+# 0 & 0_blood_pcr_dna transfer_saliva & 666 \\
+# 1 & 1_gsr_gunshot_residue_particles & 457 \\
+# 2 & 2_fibres_fibre_fibers_fiber & 216 \\
+# 3 & 3_residues_devices_materials_ion & 122 \\
+# 4 & 4_glass_fragments_window_index & 110 \\
+# 5 & 5_semen_sexual_vaginal_male & 106 \\
+# 6 & 6_drugs_contamination_seized_ms & 105 \\
+# 7 & 7_debris_liquid_carpet_gas & 102 \\
+# 8 & 8_pollen_soil_dust_soils & 73 \\
+# 9 & 9_paint_raman_automotive_paints & 66 \\
+# 10 & 10_paint_paints_spray_infrared & 59 \\
+# 11 & 11_remains_bodies_species_attack & 58 \\
+# 12 & 12_violence_offenders_risk_staff & 46 \\
+# 13 & 13_sexual_assault_sexual assault_children & 43 \\
+# 14 & 14_latent_fingerprint_fingerprints_applications & 40 \\
+# 15 & 15_cosmetics_ftir_brands_atr & 37 \\
+# 16 & 16_sexual_sexual assault_assault_personal & 29 \\
+# 17 & 17_live_dynamic_intelligence_mobile & 29 \\
+# 18 & 18_death_trauma_unexpected_aspects & 26 \\
+# 19 & 19_records_sex_tissues_weeks & 24 \\
+# 20 & 20_soil_decomposition_soils_concrete & 21 \\
+# 21 & 21_lr_networks_sensitivity_murder & 18 \\
+# 22 & 22_footwear_shoe_polish_shoes & 14 \\
+# 23 & 23_mitochondrial_species_determination_dna present & 13 \\
+# 24 & 24_determination_liquid_ms_residual & 13 \\
+# 25 & 25_rubber_pyrolysis_marks_traces & 11 \\
+# 26 & 26_assault_damage_sexual assault_sexual & 11 \\
+# 27 & 27_compound_solid phase_estimation_gc & 8 \\
+# 28 & 28_fabric_compounds_transferred_ageing & 8 \\
+# 29 & 29_colour_photography_force_appearance & 7 \\
+# 30 & 30_particles_particules_shape_gold & 7 \\
+# 31 & 31_gsr_scanning electron_scanning_electron & 6 \\
+# 32 & 32_death_homicides_manner_range & 6 \\
+# 33 & 33_driver_passenger_drivers_accident & 6 \\
+# 34 & 34_deep_feature_images_similarity & 6 \\
+# 35 & 35_clothing_species_materials_footwear & 6 \\
+# \bottomrule
+# \end{tabular}
+
+
+SBERT_Vec {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x15e0e7dd0>, 
+'hdbscan_model': HDBSCAN(cluster_selection_epsilon=0.2, min_samples=4, prediction_data=True), 'language': None,  'nr_topics': 'auto', 
+'representation_model': None, 'seed_topic_list': None, 'top_n_words': 10, 
+'umap_model': UMAP(angular_rp_forest=True, low_memory=False, metric='cosine', min_dist=0.0, n_components=5), 
+'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5),stop_words), 'zeroshot_min_similarity': 0.7, 
+'zeroshot_topic_list': None}
+[({'min_cluster_size': 5, 'min_samples': 4, 'cluster_selection_epsilon': 0.2}, np.float64(-0.1548635762543987), 412.042985074627, 
+  0.02001328393816948, np.float64(61.701045250406686))] 28
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_saliva_skin_blood_cell & 310 \\
+# 0 & 0_blood_paint_pcr_saliva & 979 \\
+# 1 & 1_gsr_gunshot_residue_residues & 788 \\
+# 2 & 2_fibres_fibre_pollen_fibers & 276 \\
+# 3 & 3_hair_drugs_contamination_mass & 206 \\
+# 4 & 4_glass_fragments_window_index & 110 \\
+# 5 & 5_latent_fingerprint_fingermarks_fingerprints & 79 \\
+# 6 & 6_assault_sexual_sexual assault_children & 68 \\
+# 7 & 7_soil_soils_size_pollen soil & 66 \\
+# 8 & 8_stress_hospital_offenders_services & 45 \\
+# 9 & 9_pattern_blood_abstract_patterns & 45 \\
+# 10 & 10_dynamic_intelligence_establishing_mobile & 41 \\
+# 11 & 11_death_injury_trauma_post mortem & 36 \\
+# 12 & 12_carcasses_substrates_human dna_human & 35 \\
+# 13 & 13_trace dna_biological_automated_prepfiler & 32 \\
+# 14 & 14_hair_hairs_root_typing & 31 \\
+# 15 & 15_sexual_sexual assault_assault_personal & 28 \\
+# 16 & 16_remains_mass_human_bodies & 14 \\
+# 17 & 17_attributed_murder_errors_led & 12 \\
+# 18 & 18_water_river_immersion_blood & 10 \\
+# 19 & 19_alcohol_death_statistics_suicide & 9 \\
+# 20 & 20_cell_single_cells_available & 8 \\
+# 21 & 21_fabric_compounds_transferred_piece & 8 \\
+# 22 & 22_clothing_species_materials_empirical & 8 \\
+# 23 & 23_estimation_age_sectional_cross sectional & 7 \\
+# 24 & 24_particles_particules_shape_university & 7 \\
+# 25 & 25_knife_blade_fibres_fibers & 6 \\
+# 26 & 26_driver_passenger_accident_drivers & 5 \\
+# 27 & 27_algorithm_images_pdf_file & 5 \\
+# 28 & 28_wrapped_species_blow_affects & 5 \\
+# \bottomrule
+# \end{tabular}
+
+SBERT_Vec_UMAP {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x15db14cb0>, 
+'hdbscan_model': HDBSCAN(cluster_selection_epsilon=0.1, min_samples=1, prediction_data=True), 'language': None,  'nr_topics': 'auto', 
+'representation_model': None, 'seed_topic_list': None, 'top_n_words': 10, 
+'umap_model': UMAP(angular_rp_forest=True, metric='cosine', n_neighbors=20), 
+'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5), stop_words),'verbose': False,
+'zeroshot_min_similarity': 0.7, 'zeroshot_topic_list': None}
+[({'min_cluster_size': 5, 'min_samples': 1, 'cluster_selection_epsilon': 0.1}, np.float64(-0.1452986620643328), 323.1663744143319,
+0.017561445012688637, np.float64(48.37588131545665))] 46
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_washing_water_hair_hairs & 250 \\
+# 0 & 0_blood_saliva_pcr_skin & 750 \\
+# 1 & 1_gunshot_residue_particles_residues & 658 \\
+# 2 & 2_fibres_fibre_fibers_fiber & 187 \\
+# 3 & 3_raman_spectroscopy_infrared_spectra & 167 \\
+# 4 & 4_hair_drugs_hairs_ms & 164 \\
+# 5 & 5_sexual_semen_assault_sexual assault & 133 \\
+# 6 & 6_soil_dust_plant_size & 115 \\
+# 7 & 7_glass_fragments_index_clothing & 112 \\
+# 8 & 8_debris_liquid_gas_gc & 96 \\
+# 9 & 9_sexual_assault_sexual assault_children & 53 \\
+# 10 & 10_offenders_adult_services_staff & 50 \\
+# 11 & 11_pattern_blood_abstract_patterns & 43 \\
+# 12 & 12_drugs_contamination_contaminated_general & 41 \\
+# 13 & 13_brands_ftir_pca_layer & 38 \\
+# 14 & 14_dynamic_intelligence_framework_trace dna & 38 \\
+# 15 & 15_remains_human_mass_bodies & 34 \\
+# 16 & 16_latent_fingerprint_applications_fingerprints & 33 \\
+# 17 & 17_remains_mitochondrial_human_mitochondrial dna & 32 \\
+# 18 & 18_death_trauma_post_cell & 29 \\
+# 19 & 19_human_tissues_bodies_remains & 25 \\
+# 20 & 20_networks_lr_sensitivity_network & 21 \\
+# 21 & 21_model_networks_lr_statistical & 14 \\
+# 22 & 22_drugs_urban_treatment_water & 14 \\
+# 23 & 23_particles_surfaces_stains_prior & 13 \\
+# 24 & 24_rubber_marks_gc ms_gc & 12 \\
+# 25 & 25_hair_hairs_fibres_wool & 12 \\
+# 26 & 26_deep_algorithm_feature_images & 11 \\
+# 27 & 27_injury_trauma_perspective_occurring & 10 \\
+# 28 & 28_populations_male_short tandem_short & 9 \\
+# 29 & 29_touch_performance_dna recovery_storage & 9 \\
+# 30 & 30_change_exposed_environmental_2015 & 8 \\
+# 31 & 31_compound_estimation_gc_solid & 7 \\
+# 32 & 32_species_producing_life_stability & 7 \\
+# 33 & 33_fabric_compounds_transferred_piece & 7 \\
+# 34 & 34_clothing_species_empirical_environments & 7 \\
+# 35 & 35_medical_estimation_age_donors & 7 \\
+# 36 & 36_particles_shape_university_building & 7 \\
+# 37 & 37_driver_vehicles_vehicle_saliva & 6 \\
+# 38 & 38_soaked_distinguish_pca_72 & 6 \\
+# 39 & 39_colour_force_appearance_injury & 6 \\
+# 40 & 40_pcr_direct_str_typing & 6 \\
+# 41 & 41_common_recognition_crucial_aid & 6 \\
+# 42 & 42_trial_scientific_matter_mock & 6 \\
+# 43 & 43_force_ranges_powder_contact & 5 \\
+# 44 & 44_cells_separation_laser_cell & 5 \\
+# 45 & 45_species_mitochondrial_growth_material & 5 \\
+# 46 & 46_marks_mark_nuclear_outdoors & 5 \\
+# \bottomrule
+# \end{tabular}
+
+
+
+SBERT_Vec_UMAP_Rep {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 
+'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x142d25550>, 
+'hdbscan_model': HDBSCAN(cluster_selection_epsilon=0.1, min_samples=1, prediction_data=True), 'language': None, 'nr_topics': 'auto', 
+'representation_model': KeyBERTInspired(nr_candidate_words=2000, nr_repr_docs=500, nr_samples=1000,top_n_words=20), 'seed_topic_list': None, 'top_n_words': 10, 
+'umap_model': UMAP(angular_rp_forest=True, metric='cosine', n_neighbors=20
+'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5),stop_words, 'verbose': False, 'zeroshot_min_similarity': 0.7, 'zeroshot_topic_list': None}
+[({'min_cluster_size': 5, 'min_samples': 1, 'cluster_selection_epsilon': 0.1}, np.float64(-0.0902277998060395), 113.11753650763467, 
+  0.010614901781082153, np.float64(16.906063251548133))] 53
+
+# \begin{tabular}{rlr}
+# \toprule
+# Topic & Name & Count \\
+# \midrule
+# -1 & -1_trace dna_residues_residue_contamination & 220 \\
+# 0 & 0_trace dna_recovery dna_dna recovery_fingerprints & 753 \\
+# 1 & 1_residues_residue_substances_tools & 666 \\
+# 2 & 2_fibers_fibres_fibre_textile & 204 \\
+# 3 & 3_substances_drugs_methanol_substance & 143 \\
+# 4 & 4_glass_fragments_experimental_pieces & 112 \\
+# 5 & 5_sexual_bodily fluids dna_rape_sex & 106 \\
+# 6 & 6_paint_stains_coated_spray & 103 \\
+# 7 & 7_brand_residues_gas_residue & 101 \\
+# 8 & 8_fingerprints_fingerprint_trace dna_microscopy & 77 \\
+# 9 & 9_soil_soils_pollen_residues & 74 \\
+# 10 & 10_sexual assault_rape_assault_perpetrators & 63 \\
+# 11 & 11_offenders_treatment_victims_assault & 47 \\
+# 12 & 12_bloodstains_blood_types_description & 44 \\
+# 13 & 13_raman spectroscopy_infrared spectroscopy_spectroscopy_fourier transform infrared spectroscopy & 43 \\
+# 14 & 14_drugs_substances_illicit_substance & 40 \\
+# 15 & 15_staining_stains_stain_dna skin & 40 \\
+# 16 & 16_monitoring_fingerprints_statistical_empirical & 31 \\
+# 17 & 17_oral_saliva_recovery dna_dna recovery & 31 \\
+# 18 & 18_injuries_death_blood_imaging & 29 \\
+# 19 & 19_soil_soils_trace amounts_ground & 29 \\
+# 20 & 20_sexual_sexual assault_sex_usage & 29 \\
+# 21 & 21_bloodstains_blood_staining_compares & 26 \\
+# 22 & 22_contamination_contaminated_species_environmental & 22 \\
+# 23 & 23_chemical_residues_inorganic_substances & 19 \\
+# 24 & 24_remains_bodies_victims_human dna & 17 \\
+# 25 & 25_substances_drugs_residues_contaminated & 14 \\
+# 26 & 26_shoes_wear_clothing_traces & 13 \\
+# 27 & 27_vehicles_traces_car_vehicle & 13 \\
+# 28 & 28_transfers_transfer transfer_dna transfer_transferred & 12 \\
+# 29 & 29_recovery dna_traces_automated_micro & 12 \\
+# 30 & 30_genetic_populations_population_species & 11 \\
+# 31 & 31_medical_donors_blood_hand & 8 \\
+# 32 & 32_violent_victims_incidents_children & 8 \\
+# 33 & 33_light microscopy_spectroscopy ftir_microscopy_microscope & 7 \\
+# 34 & 34_human dna_traces_biological_remains & 7 \\
+# 35 & 35_gas gc_previous_residues_residue & 7 \\
+# 36 & 36_residues_residue_textiles_textile & 7 \\
+# 37 & 37_fabric types_items clothing_textile_clothing & 7 \\
+# 38 & 38_residues_hair_chemical_contaminated & 6 \\
+# 39 & 39_murder_death_violent_reporting & 6 \\
+# 40 & 40_vehicles_accidents_vehicle_bag & 6 \\
+# 41 & 41_dna persistence_persist_persistence_transfer persistence & 6 \\
+# 42 & 42_homicide_traces_trace amounts_transfer persistence & 5 \\
+# 43 & 43_species_microscope_scanning_genetic & 5 \\
+# 44 & 44_contamination_death_degradation_soil & 5 \\
+# 45 & 45_microscope_sterile_recovery dna_biological & 5 \\
+# 46 & 46_species_remains_molecular_variation & 5 \\
+# 47 & 47_species_extract_producing_degradation & 5 \\
+# 48 & 48_alcohol_prevalence_death_statistics & 5 \\
+# 49 & 49_pollen_shoes_soil_dust & 5 \\
+# 50 & 50_brand_ftir_experimental_destructive & 5 \\
+# 51 & 51_trace dna_databases_applications_images & 5 \\
+# 52 & 52_dna recovery_human dna_trace dna_touch dna & 5 \\
+# 53 & 53_washing_wash_washed_water & 5 \\
+# \bottomrule
+# \end{tabular}
+
+
+ZS_MLbase_Vec {'calculate_probabilities': True, 'ctfidf_model': ClassTfidfTransformer(), 'embedding_model': <bertopic.backend._sentencetransformers.SentenceTransformerBackend object at 0x13f7b2c10>, 'hdbscan_model': <bertopic.cluster._base.BaseCluster object at 0x13f7b3b10>, 'language': None, 'low_memory': False, 'min_topic_size': 10, 'n_gram_range': (1, 1), 'nr_topics': 32, 'representation_model': None, 'seed_topic_list': None, 'top_n_words': 10, 'umap_model': UMAP(angular_rp_forest=True, low_memory=False, metric='cosine', min_dist=0.0, n_components=5, tqdm_kwds={'bar_format': '{desc}: {percentage:3.0f}%| {bar} {n_fmt}/{total_fmt} [{elapsed}]', 'desc': 'Epochs completed', 'disable': True}), 'vectorizer_model': CountVectorizer(max_df=0.6, min_df=0.2, ngram_range=(1, 5),
+                stop_words=['át', 'hər', 'desetih', 'гар ', 'beginilah',
+                            'katerakoli', 'إنما', 'unui', 'ein', 'esan', 'bolo',
+                            'kahi', 'سبتمبر', 'هي', 'enim', 'дык', 'haatik',
+                            'vaali', 'serei', 'هَاتِي', 'elsõ', 'incit',
+                            'stava', 'चाहनुहुन्छ', 'keissä', 'איתו', 'primul',
+                            'jotka', '之类', 'آهاً', ...]), 'verbose': False, 'zeroshot_min_similarity': 0.8, 'zeroshot_topic_list': ['paint, pigment, colour, color, coating, coatings', 'glass, refractive material, glasses, refractive, windshields', 'drugs, metabolite, precursor, narcotic, controlled substance, illicit, pharmaceutical, drug, drugs, metabolites', 'cosmetics, skincare, lotions, lipstick, glitter', 'pollen, vegetation, botany, spores, palynological, palynology, plants', 'fingerprint, fingermark, latent, enhancement', 'rna, body fluid, biomarker', 'bloodstain, blood, pattern, arterial, bpa', 'hair, hairs', 'skin,trace dna, touch dna, wearer, scalp, trace, touch, skin, hands, touched', 'blood, haemoglobin', 'remains, skeletal, bones, cadavers, teeth, dental, tooth, dentine, dentistry, dentin, tissue, bone', 'sperm, seminal, semen, postcoital, vaginal', 'soils, soil, mineralogy, dust, geology, geoscience', 'condom, lubricant', 'tape, adhesive, glue', 'fingernail, nail', 'saliva, mouth', 'fibre, fiber, fabric, textile, cotton, garments, nylon, wool, dyed, polyester, shirt, garment, cloth, clothing, clothes, material', 'cartridge, ammunition, ammunitions, bullet, cartridges', 'laundry, washing', 'dna', 'protein, proteomic', 'gsr, gunshot residue, gunpowder, elemental, residues, compounds', 'explosive device, bomb, explosives', 'arson, ignitable liquid, accelerant, petrol, gasoline, fires,hydrocarbons', 'firearm, handgun, rifle, pistol, shotgun, gun, weapon', 'cord, rope', 'digital forensics, mobile phone, computer, device, file, data', 'psychology, mental trauma, psychiatry', 'postmortem,autopsy, injury, wound']}
+[({'min_cluster_size': 5, 'min_samples': 1, 'cluster_selection_epsilon': 0.2}, np.float64(-0.23536723986615615), 449.44000000000017, 0.0593859925866127, np.float64(67.26015083098171))]
