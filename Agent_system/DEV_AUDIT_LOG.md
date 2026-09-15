@@ -1,5 +1,10 @@
 # 📜 Development Audit and Architectural Decisions Log
 
+## Audit Constraint
+All functional requirements, architectural decisions, and iterative development steps must be explicitly remembered and logged here to serve as compliance evidence for the final audit report. Transparency of process is a mandatory project constraint. This log is updated as work is completed.
+
+---
+
 [Date of Reconstruction]: September 09, 2026
 
 ## ⚠️ Critical Infrastructure Note (Environment Setup):
@@ -37,3 +42,23 @@
 ---
 ### 🗓️ [Current System Checkpoint]:
 *Audit Log Update*: The system architecture was reviewed and a diagram was requested. The best practice for logging and recovery protocols was confirmed. The file is now marked as the authoritative source for development audit history.
+
+## Log Entry: September 15, 2026 - Dependency Investigation Phase
+**Scope:** Attempted installation of dependencies for core services.
+
+**[Architecture Decision]**
+Initial investigation identified two servers: `semanticscholar-MCP-Server` (Python) and `mcp-ragdocs mcp server` (Node.js).
+
+**[Progress Log]**
+1. **Python Server:** Dependencies (`requests`, `bs4`, `mcp`, `semanticscholar`) were successfully installed using `pip3` in the project environment.
+2. **Node.js Server:** Dependencies were found to be JavaScript/Node.js based, presenting a non-Python dependency blocker.
+
+**[Resolution]**
+**[Current Action]** The user has explicitly instructed to abandon the effort to install dependencies for the `mcp-ragdocs mcp server`. The focus must now return to the core Python components or an entirely new area of the project. The environment is cleared of pending dependency tasks.
+
+---
+
+## Memory/Architectural Decisions (Summary)
+*   **Critical Infrastructure Note:** The package manager must use 'pip3' instead of 'pip'.
+*   **Orchestrator Agent:** The architecture is designed around a dedicated `LocalGemma4Provider` to abstract decision logic from the underlying LLM framework for increased testability.
+*   **Logging Protocol:** A log entry must be created or updated in this file (`DEV_AUDIT_LOG.md`) at the start/completion of every major phase.
