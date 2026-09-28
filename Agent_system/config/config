@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "semanticscholar": {
+      "command": "python",
+      "args": ["-m", "semanticscholar_mcp_server"]
+      }
+  }
+}

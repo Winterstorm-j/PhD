@@ -9,3 +9,4 @@ curl -fsSL https://ollama.com/install.sh | sh
 ollama pull llama3.1 && openclaw config set model ollama/llama3.1
 openclaw onboard
 
+the mcp server daemons need to be started in their own terminals before starting the hermes agent chat or else they can not be seen.
