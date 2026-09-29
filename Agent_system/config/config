@@ -3,6 +3,33 @@
     "semanticscholar": {
       "command": "python",
       "args": ["-m", "semanticscholar_mcp_server"]
-      }
+      },
+      "rag-docs": {
+      "command": "node",
+      "args": ["/path/to/your/mcp-ragdocs/build/index.js"],
+      "env": {
+        "EMBEDDING_PROVIDER": "ollama", 
+        "EMBEDDING_MODEL": "nomic-embed-text", 
+        "FALLBACK_PROVIDER": "ollama",
+        "FALLBACK_MODEL": "nomic-embed-text", 
+        "QDRANT_URL": "http://localhost:6333"
+      },
+      "autoApprove": [
+        "search_documentation",
+        "list_sources",
+        "extract_urls",
+        "remove_documentation",
+        "list_queue",
+        "run_queue",
+        "clear_queue",
+        "add_documentation",
+        "add_repository",
+        "list_repositories",
+        "update_repository",
+        "remove_repository",
+        "watch_repository",
+        "get_indexing_status"
+      ]
+    }
   }
 }

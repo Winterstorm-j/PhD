@@ -33,3 +33,10 @@ PhD-Windows/LLM/models/*
 *.json
 *.png
 *.bib
+Agent_system/src/scripts/run_semantic_scholar_search.py
+Agent_system/config/.env.template
+Agent_system/config/.env
+Agent_system/data/models/gemma4:latest
+Agent_system/data/models/ITER-Qwen3-Embedding-0.6B.Q8_0.gguf
+Agent_system/info/Generative Artificial Intelligence in Doctoral Research Guidelines – University of Auckland.mhtml
+Agent_system/info/Initial_setup_reqs.yaml
