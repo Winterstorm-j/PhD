@@ -13,18 +13,18 @@ AUDIT_LOG_PATH = "Agent_system/DEV_AUDIT_LOG.md"
 
 # --- Utility Functions ---
 def get_env_variable(key: str) -> str:
-    \"\"\"Safely reads a variable from the environment, or raises an error if vital.'''\"\"\"
+    '''Safely reads a variable from the environment, or raises an error if vital.'''
     value = os.getenv(key)
     if not value:
         raise EnvironmentError(f"Mandatory environment variable '{key}' not found in the environment.")
     return value
 
 def simulate_sem_search(query: str, output_file: str) -> List[Dict[str, Any]]:
-    \"\"\"
+    '''
     Attempts to process a bulk search for academic papers, implementing exponential backoff 
     and rate-limit recovery logic to retrieve maximum possible data by calling 
     the live Semantic Scholar API via requests.
-    \"\"\"
+    '''
     all_results = []
     
     try:
@@ -52,25 +52,27 @@ def simulate_sem_search(query: str, output_file: str) -> List[Dict[str, Any]]:
         try:
             print(f"--- Attempt {attempt + 1}/{MAX_RETRIES} ---")
             
-            headers = {"Authorization": f"Bearer {SCHOLAR_API_KEY}", "Content-Type": "application/json"}
+            headers = {"x-api-key": SCHOLAR_API_KEY, "Content-Type": "application/json"}
             payload = {"query": query, "limit": 50} # Payload structure assumed for a real API call
             
-            # **Attempting the live network request**
-            response = requests.post(SCHOLAR_API_URL, headers=headers, json=payload, timeout=30)
+            # 1. Construct the correct search URI based on documentation
+            search_url = f"{SCHOLAR_API_URL}"
+            # 2. Use a GET request and pass parameters via 'params' argument
+            response = requests.get(search_url, headers=headers, params=payload, timeout=30)
             response.raise_for_status() # Raises HTTPError for 4xx/5xx status codes
-            
-            data = response.json()
-            
+   
             # Assuming the actual response data is a list of records
-            if 'results' in data and isinstance(data['results'], list):
-                for r in data['results']:
-                    all_results.append(r)
-                print(f"API SUCCESS: Successfully retrieved {len(data['results'])} real records.")
-                break # Success, exit retry loop
-
-            else:
-                print("API SUCCESS: Connection succeeded but expected 'results' field was missing or empty in the response payload.")
-                break
+            with open(f"{OUTPUT_FILE}", "a") as file:
+                while True:
+                    if "data" in response:
+                        retrieved += len(response["data"])
+                        print(f"Retrieved {retrieved} papers...")
+                        for paper in response["data"]:
+                            print(json.dumps(paper), file=file)
+                    # checks for continuation token to get next batch of results
+                    if "token" not in response:
+                        break
+                    response = requests.get(f"{SCHOLAR_API_URL}&token={response['token']}").json()
                 
         except requests.exceptions.HTTPError as e:
             status_code = e.response.status_code
