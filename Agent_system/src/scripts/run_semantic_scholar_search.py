@@ -15,7 +15,7 @@ INITIAL_QUERY = "DNA transfer" # Defining the constant globally
 SEARCH_API_URL = "https://api.semanticscholar.org/graph/v1/paper/search/bulk"
 
 OUTPUT_FILE = "Agent_system/data/dna_transfer_records.json"
-AUDIT_LOG_PATH = "Agent_system/DEV_AUDIT_LOG.md"
+AUDIT_LOG_PATH = "/Users/jbuc045/Projects/PhD/Agent_system/DEV_AUDIT_LOG.md"
 
 # --- Utility Functions ---
 def get_env_variable(key: str) -> str:
@@ -101,11 +101,11 @@ def search_papers_bulk(api_key: str, api_url: str, query: str) -> List[Dict[str,
     
         all_papers = []
         initial_papers = search_data.get('data')
+        initial_count = len(initial_papers)
+        print(f"[API Call 1] Initial search retrieved {initial_count} records.")
+        all_papers.extend(initial_papers)
     
-        if initial_papers:
-            all_papers.extend(initial_papers)
-    
-        current_token = search_data.get('nextPageToken')
+        current_token = search_data.get('token')
     
         # 2. Collect all results, handling pagination
         while current_token:
@@ -114,13 +114,21 @@ def search_papers_bulk(api_key: str, api_url: str, query: str) -> List[Dict[str,
             url_parts[5] = urlencode({"token": current_token})
             
             new_url = urlunparse(url_parts)
+            time.sleep(1.1)  # Guaranteed delay to enforce a minimum 1.1s gap between page requests
             token_response = requests.get(new_url, headers=headers, timeout=30)
             token_response.raise_for_status()
             token_data = token_response.json()
         
-            if 'data' in token_data:
-                all_papers.extend(token_data['data'])
-                current_token = token_data.get('nextPageToken')
+            new_records = token_data.get('data')
+            new_count = len(new_records)
+            print(f"[API Call N] Subsequent page retrieved {new_count} records.")
+
+            if new_records:
+                all_papers.extend(new_records)
+                current_token = token_data.get('token')
+                
+                if len(all_papers) > 10000:
+                    break
             else:
                 break # Stop if token structure is unexpected
 
@@ -144,11 +152,12 @@ def simulate_sem_search(query: str, output_file: str, api_key: str, api_url: str
     
     print("STEP 1/3: Preparing environment and logging audit trail.")
     try:
+        length_of_query = len(all_results) if all_results else 0
+        
         # Using 'a' (append) mode to ensure audit log persists across subsequent runs
         with open(AUDIT_LOG_PATH, "a") as f: 
             f.write(f"\n### [Search Run - {datetime.now().strftime('%Y-%m-%d %H:%M')}] Query: {query}\\n")
-            f.write("Attempting scalable bulk retrieval via Semantic Scholar Bulk API endpoint.\\n")
-            f.write("Rate-limit handling (Exponential Backoff) is implemented for maximum yield.\\n")
+            f.write(f"{length_of_query} records retrieved.\\n")
         print(f"SUCCESS: Audit log updated at {AUDIT_LOG_PATH}")
     except Exception as e:
         print(f"Warning: Could not write to audit log: {e}")
@@ -185,9 +194,11 @@ def simulate_sem_search(query: str, output_file: str, api_key: str, api_url: str
         print(f"FINAL SUCCESS: Saved {len(all_results)} records to {os.path.basename(output_file)}.")
         return all_results
     except Exception as e:
-        print(f"CRITICAL FAILURE: Could not write final output file: {e}")
-        return []
-
+        #  CRITICAL MANUAL DEBUGGING POINT START 
+        print(f"CRITICAL FAILURE: File write I/O error occurred: {e}")
+        # Force an exception to halt the process and expose the true nature of the failure.
+        raise IOError(f"Failed to write output file for manual investigation: {e}") # Re-raise the error
+        #  CRITICAL MANUAL DEBUGGING POINT END 
 
 def main():
     parser = ArgumentParser(description="Searches for academic papers using the Semantic Scholar Bulk API.")

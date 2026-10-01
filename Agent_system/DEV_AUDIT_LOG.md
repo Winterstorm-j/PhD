@@ -134,3 +134,13 @@ FINAL BLOCKED STATE: The script is fully robust and achieves all required archit
 
 **[INFRASTRUCTURE/SETUP: Continuous State]**
 *   The project state is clean: The virtual environment is active, all necessary API endpoints are loaded, and the canonical log file (`DEV_AUDIT_LOG.md`) is used for all mandatory recording of decisions and failures, ensuring maximum academic transparency for future review.
+### [Search Run - 2026-10-02 08:26] Query: DNA transfer\nAttempting scalable bulk retrieval via Semantic Scholar Bulk API endpoint.\nRate-limit handling (Exponential Backoff) is implemented for maximum yield.\n
+### [Search Run - 2026-10-02 09:01] Query: DNA transfer\nAttempting scalable bulk retrieval via Semantic Scholar Bulk API endpoint.\nRate-limit handling (Exponential Backoff) is implemented for maximum yield.\n
+### [Search Run - 2026-10-02 09:07] Query: DNA transfer\nAttempting scalable bulk retrieval via Semantic Scholar Bulk API endpoint.\nRate-limit handling (Exponential Backoff) is implemented for maximum yield.\n
+### [Search Run - 2026-10-02 09:09] Query: DNA transfer\nAttempting scalable bulk retrieval via Semantic Scholar Bulk API endpoint.\nRate-limit handling (Exponential Backoff) is implemented for maximum yield.\n
+### [Search Run - 2026-10-02 09:34] Query: DNA transfer\n0 records retrieved.\n
+### [Search Run - 2026-10-02 09:38] Query: DNA transfer\n0 records retrieved.\n
+### [Search Run - 2026-10-02 10:04] Query: DNA transfer\n0 records retrieved.\n
+### [Search Run - 2026-10-02 10:08] Query: DNA transfer\n0 records retrieved.\n
+### [Search Run - 2026-10-02 10:11] Query: DNA transfer\n0 records retrieved.\n
+### [Search Run - 2026-10-02 10:18] Query: DNA transfer\n0 records retrieved.\n

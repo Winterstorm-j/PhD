@@ -4,32 +4,20 @@
       "command": "python",
       "args": ["-m", "semanticscholar_mcp_server"]
       },
-    "rag-docs": {
-      "command": "node",
-      "args": ["/path/to/your/mcp-ragdocs/build/index.js"],
+    "neo4j": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "neo4j_mcp_server"],
       "env": {
-        "EMBEDDING_PROVIDER": "ollama", 
-        "EMBEDDING_MODEL": "nomic-embed-text", 
-        "FALLBACK_PROVIDER": "ollama",
-        "FALLBACK_MODEL": "nomic-embed-text", 
-        "QDRANT_URL": "http://localhost:6333"
-      },
-      "autoApprove": [
-        "search_documentation",
-        "list_sources",
-        "extract_urls",
-        "remove_documentation",
-        "list_queue",
-        "run_queue",
-        "clear_queue",
-        "add_documentation",
-        "add_repository",
-        "list_repositories",
-        "update_repository",
-        "remove_repository",
-        "watch_repository",
-        "get_indexing_status"
-      ]
+        "NEO4J_MCP_URI": "neo4j://127.0.0.1:7687",
+        "NEO4J_MCP_USERNAME": "neo4j",
+        "NEO4J_MCP_DATABASE": "neo4j",
+        "NEO4J_MCP_READ_ONLY": "true",
+        "NEO4J_MCP_TELEMETRY": "false",
+        "NEO4J_MCP_LOG_LEVEL": "info",
+        "NEO4J_MCP_LOG_FORMAT": "text",
+        "NEO4J_MCP_SCHEMA_SAMPLE_SIZE": "100"
+      }
     }
   }
 }
