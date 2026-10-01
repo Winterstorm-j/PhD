@@ -5,6 +5,7 @@
 paths:
   # Base path for local models, managed by Ollama
   gemma_model_directory: /Users/jbuc045/.ollama/models/
+  virtual_environment_path: /Users/jbuc045/Projects/PhD/TPPRDB_Analysis/.venv/bin/activate
 
 llm_providers:
   # The model to use for Gemma-4 inference

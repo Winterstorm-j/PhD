@@ -4,7 +4,7 @@
       "command": "python",
       "args": ["-m", "semanticscholar_mcp_server"]
       },
-      "rag-docs": {
+    "rag-docs": {
       "command": "node",
       "args": ["/path/to/your/mcp-ragdocs/build/index.js"],
       "env": {

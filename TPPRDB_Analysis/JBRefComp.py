@@ -5,7 +5,7 @@ import re
 import numpy as np
 import util_functions as uf
 import bibtexparser
-from bibtexparser.bparser import BibTexParser
+import bibtexparser 
 import datetime
 
 # Load refs from John
@@ -15,11 +15,11 @@ with open('JBRefs.json', 'r', encoding='utf-8') as f:
 jb_refs = pd.DataFrame.from_dict(jb_refs)
 
 #Load zotero refs
-parser = BibTexParser()
-parser.ignore_nonstandard_types = False
+# parser = bibtexparser.
+# parser.ignore_nonstandard_types = False
 
 with open('data/TPPR-total.bib', 'r', encoding='utf-8') as bibfile:
-    bib_db = bibtexparser.load(bibfile, parser=parser)
+    bib_db = bibtexparser.parse_file(bibfile)
 
 zotero_refs = pd.DataFrame(bib_db.entries)
 zotero_refs = zotero_refs.loc[:, ['title', 'date', 'author', 'journaltitle', 'keywords', 'publisher',

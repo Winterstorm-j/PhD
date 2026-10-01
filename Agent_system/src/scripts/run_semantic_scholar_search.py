@@ -2,8 +2,10 @@ import os
 import requests
 import time
 import json
-from datetime import datetime
+from argparse import ArgumentParser
 from typing import Dict, List, Any
+from datetime import datetime
+from urllib.parse import urlparse, urlunparse, urlencode
 
 # --- Configuration and Constants ---
 MAX_RETRIES = 5
@@ -55,73 +57,90 @@ def retry_api_call(api_func, *args, max_retries=MAX_RETRIES, initial_delay=INITI
             
     return None # Return None after all retries fail
 
-def search_papers_bulk(api_key: str, api_url: str, query: str, limit: int) -> List[Dict[str, Any]]:
+def search_papers_bulk(api_key: str, api_url: str, query: str) -> List[Dict[str, Any]]:
     """
     Searches for papers using the Semantic Scholar Bulk API, incorporating retry logic.
-    Handles initial POST search and subsequent pagination GET requests.
+    Handles initial GET search and subsequent pagination GET requests.
     """
     headers = {"x-api-key": api_key, "Content-Type": "application/json"}
     
     def perform_search():
-        # 1. Initial POST call to initiate the search and get the first page token
-        payload = { 
-            "query": query, "publicationTypes": "Review,JournalArticle,CaseReport,Conference,Dataset,Editorial,LettersAndComments,Study,Book,BookSection", 
+        """
+        Searches for papers using the Semantic Scholar Bulk API, incorporating retry logic.
+        Handles initial GET search and subsequent pagination GET requests.
+        """
+        print("--- Initializing Search URL Construction ---")
+        
+        # Define the required parameters that should be passed via the URL as GET parameters
+        # These are based on a successful Postman GET call.
+        initial_params = {"query": query, 
+            "publicationTypes": "Review,JournalArticle,CaseReport,Conference,Dataset,Editorial,LettersAndComments,Study,Book,BookSection", 
             "fieldsOfStudy": "Computer Science,Medicine,Chemistry,Biology,Materials Science,Physics,Geology,Engineering,Environmental Science,Law",
-            "fields": 
-                "paperId,corpusId,externalIds,url,title,abstract,venue,publicationVenue,year,citationCount,influentialCitationCount,isOpenAccess,openAccessPdf,fieldsOfStudy,s2FieldsOfStudy,publicationTypes,publicationDate,journal,citationStyles,authors"} 
-        response = requests.get(api_url, headers=headers, json=payload, timeout=30)
+            "fields": "paperId,corpusId,externalIds,url,title,abstract,venue,publicationVenue,year,citationCount,influentialCitationCount,isOpenAccess,openAccessPdf,fieldsOfStudy,s2FieldsOfStudy,publicationTypes,publicationDate,journal,citationStyles,authors"
+        }
+
+        # Build the initial URL with query parameters to avoid whitespace issues
+        url_parts = list(urlparse(api_url.strip()))
+        url_parts[4] = urlencode(initial_params)
+
+        # Rebuild it perfectly
+        initial_url = urlunparse(url_parts)
+
+        headers = {"x-api-key": api_key, "Content-Type": "application/json", 
+            "Host": "api.semanticscholar.org",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive"}
+    
+        # 1. Initial GET call to initiate the search and get the first page token
+        print(f"Attempting initial search GET to: {initial_url[:100]}...")
+        response = requests.get(initial_url, headers=headers, timeout=30)
         response.raise_for_status()
         search_data = response.json()
-        
-        if 'papers' not in search_data:
-            print(f"API response lacks 'papers' key or failed: {search_data}")
-            return [], None
-
+    
         all_papers = []
-        initial_papers = search_data['papers']
-        
-        # 2. Collect all results, handling pagination
-        all_papers.extend(initial_papers)
+        initial_papers = search_data.get('data')
+    
+        if initial_papers:
+            all_papers.extend(initial_papers)
+    
         current_token = search_data.get('nextPageToken')
-        
+    
+        # 2. Collect all results, handling pagination
         while current_token:
             # Subsequent calls use GET with the token
-            token_response = requests.get(f"{api_url}?token={current_token}", headers=headers, timeout=30)
+            print(f"Fetching next page using token: {current_token[:50]}...")
+            url_parts[5] = urlencode({"token": current_token})
+            
+            new_url = urlunparse(url_parts)
+            token_response = requests.get(new_url, headers=headers, timeout=30)
             token_response.raise_for_status()
             token_data = token_response.json()
-
-            if 'papers' in token_data:
-                all_papers.extend(token_data['papers'])
+        
+            if 'data' in token_data:
+                all_papers.extend(token_data['data'])
                 current_token = token_data.get('nextPageToken')
             else:
                 break # Stop if token structure is unexpected
 
         # 3. Re-structure the retrieved data from the bulk response format
-        structured_results = []
-        for paper in all_papers:
-            structured_results.append({
-                paper
-            })
+        structured_results = [
+            paper for paper in all_papers
+        ]
         return structured_results
 
     # Execute the search with the retry wrapper
     return retry_api_call(perform_search)
 
 
-def simulate_sem_search(query: str, output_file: str) -> List[Dict[str, Any]]:
+def simulate_sem_search(query: str, output_file: str, api_key: str, api_url: str) -> List[Dict[str, Any]]:
     '''
     Attempts to process a bulk search for academic papers, implementing exponential backoff 
     and rate-limit recovery logic to retrieve maximum possible data by calling 
     the live Semantic Scholar API via requests.
     '''
     all_results = []
-    # Get credentials and URLs from the environment
-    try:
-        SCHOLAR_API_KEY = get_env_variable("SCHOLAR_API_KEY")
-        SCHOLAR_API_URL = get_env_variable("SCHOLAR_API_URL")
-    except EnvironmentError as e:
-        print(e)
-        return []
     
     print("STEP 1/3: Preparing environment and logging audit trail.")
     try:
@@ -140,10 +159,9 @@ def simulate_sem_search(query: str, output_file: str) -> List[Dict[str, Any]]:
     
     # Call the new, robust search function
     scientific_papers = search_papers_bulk(
-        api_key=SCHOLAR_API_KEY, 
-        api_url=SCHOLAR_API_URL, 
-        query=query, 
-        limit=50
+        api_key=api_key, 
+        api_url=api_url, 
+        query=query
     )
     
     # Store results
@@ -172,11 +190,18 @@ def simulate_sem_search(query: str, output_file: str) -> List[Dict[str, Any]]:
 
 
 def main():
-    # Ensure directory for output exists
-    os.makedirs(os.path.dirname(OUTPUT_FILE) or '.', exist_ok=True)
+    parser = ArgumentParser(description="Searches for academic papers using the Semantic Scholar Bulk API.")
+    parser.add_argument("--query", type=str, required=True, help="The search query (e.g., 'DNA transfer').")
+    parser.add_argument("--api-key", type=str, required=True, help="The Semantic Scholar API Key (x-api-key header).")
+    parser.add_argument("--api-url", type=str, required=True, help="The Semantic Scholar Bulk API URL.")
+    parser.add_argument("--output-file", type=str, default="data/search_results.json", help="Path to save the JSON output.")
+    
+    args = parser.parse_args()
+
+    os.makedirs(os.path.dirname(args.output_file) or '.', exist_ok=True)
     
     # Run the advanced search now that the environment is ready.
-    simulate_sem_search(INITIAL_QUERY, OUTPUT_FILE)
+    simulate_sem_search(args.query, args.output_file, args.api_key, args.api_url)
 
 if __name__ == "__main__":
     main()
