@@ -1,51 +1,91 @@
 import pandas as pd
 import os
+
+os.chdir('TPPRDB_Analysis')
+
 import json
 import re
 import numpy as np
 import util_functions as uf
-import bibtexparser
 import bibtexparser 
+import bibtexparser.middlewares as m
+from bibtexparser.model import Entry, Field
 import datetime
+from namematcher import NameMatcher as nm
 
 # Load refs from John
-with open('JBRefs.json', 'r', encoding='utf-8') as f:
+with open('data/TPPRsearchResults.json', 'r', encoding='utf-8') as f:
     jb_refs = json.load(f)
 
-jb_refs = pd.DataFrame.from_dict(jb_refs)
+jb_refs_raw = jb_refs['data']
+jbrefs_list = []
+for ref in jb_refs_raw:
+    ref_data = pd.DataFrame.from_dict(ref, orient='index').T
+    jbrefs_list.append(ref_data)
+    
+jb_refs = pd.concat(jbrefs_list, ignore_index=True)
+
+jb_refs['doi'] = [ref.get('DOI') if isinstance(ref, dict) else pd.NA for ref in jb_refs['externalIds']]
 
 #Load zotero refs
-# parser = bibtexparser.
-# parser.ignore_nonstandard_types = False
+bib_db = bibtexparser.parse_file('./data/TPPR.bib', append_middleware=[m.SeparateCoAuthors()])
 
-with open('data/TPPR-total.bib', 'r', encoding='utf-8') as bibfile:
-    bib_db = bibtexparser.parse_file(bibfile)
+def lib_to_dict(entry: Entry) -> dict:
+    # Convert a bibtexparser Entry to a dictionary, including core attributes and fields
+    entry_data = {
+        "ID": entry.key,
+        "ENTRYTYPE": entry.entry_type,
+        **entry.fields_dict
+    }
+    return entry_data
+    
 
-zotero_refs = pd.DataFrame(bib_db.entries)
+entry_list = []
+for entry in bib_db.entries:
+    # Blend core attributes (key, entry_type) with the rest of the fields
+    entry_data = lib_to_dict(entry)
+    entry_list.append(entry_data)
+
+
+zotero_refs = pd.DataFrame(entry_list)
 zotero_refs = zotero_refs.loc[:, ['title', 'date', 'author', 'journaltitle', 'keywords', 'publisher',
        'pages', 'abstract', 'doi', 'issn', 'volume','ENTRYTYPE', 'url','number',
        'type', 'institution','issue','isbn', 'edition']]
 
 #Load combined DBs
-modelledData = pd.read_csv('data/cleaned_modelReady_Apr.csv', encoding='utf-8')
+modelledData = pd.read_csv('./data/cleaned_modelReady_Apr.csv', encoding='utf-8')
+
+def convert_fields(data: pd.Series) -> list:
+    newContent = [field.value if isinstance(field, bibtexparser.model.Field) else pd.NA for field in data]
+    return newContent
+
+zotero_refs.loc[:,['title', 'date', 'author', 'journaltitle', 'keywords', 'publisher',
+       'pages', 'abstract', 'doi', 'issn', 'volume']] = zotero_refs.loc[:,['title', 'date', 'author', 'journaltitle', 'keywords', 'publisher',
+       'pages', 'abstract', 'doi', 'issn', 'volume']].apply(lambda x: 
+    convert_fields(x) )
+
+zotero_refs['abstract'] = zotero_refs['abstract'].str.replace(r'\n', ' ', regex=True)
 
 #Prepare zotero refs for joining
-zotero_refs['author'] = zotero_refs['author'].apply(lambda x: ', '.join(map(str, x)) if isinstance(x, list) else x)
-zotero_refs['author'] = zotero_refs['author'].apply(
-    lambda x: re.sub(r"\s*\.\s*", "", str(x)).upper().strip()
-    )
-zotero_refs['author'] = zotero_refs['author'].apply(lambda x: re.sub(r",*", "", str(x)))
+nm = nm()
+
+zotero_refs['Authors_str'] = zotero_refs['author'].apply(lambda x: ', '.join(map(str, x)) if isinstance(x, list) else x)
+zotero_refs['Authors_dict'] = [[nm.parse_name(author) for author in entry.split(', ')] if pd.notna(entry) else None for entry in zotero_refs['Authors_str']]
+zotero_refs['Authors_str'] = zotero_refs['Authors_dict'].apply(lambda x: ', '.join([f"{author.get('last_name', '')} {author.get('first_names', '')}" for author in x]) if isinstance(x, list) else x)
+zotero_refs['Authors_str'] = zotero_refs['Authors_str'].apply(lambda x: re.sub(r"[\[\]']", "", str(x)).upper().strip())
+# zotero_refs['Authors_str'] = zotero_refs['Authors_str'].apply(
+#     lambda x: re.sub(r"\s*\.\s*", "", str(x)).upper().strip()
+#     )
+# zotero_refs['Authors_str'] = zotero_refs['Authors_str'].apply(lambda x: re.sub(r",*", "", str(x)))
 zotero_refs = zotero_refs.reset_index(drop=True)
 
-# fix date column to extract year only
-zotero_refs['date'] = pd.to_datetime(zotero_refs['date'], format = 'mixed').dt.year
+zotero_refs['date'] = pd.to_datetime(zotero_refs['date'], format='mixed').dt.year.astype('Int64').astype(str).str.strip()
 
 # Standardize column formatting for join keys
 # Create normalized versions for joining
 zotero_refs_norm = zotero_refs.copy()
-zotero_refs_norm['title'] = zotero_refs_norm['title'].str.upper().str.strip()
-zotero_refs_norm['date'] = zotero_refs_norm['date'].astype(str).str.strip()
-zotero_refs_norm['journaltitle'] = zotero_refs_norm['journaltitle'].str.upper().str.strip()
+zotero_refs_norm['title'] = zotero_refs_norm['title'].apply(lambda x: re.sub(r"[\{\}']", "", str(x)).upper().strip())
+zotero_refs_norm['journaltitle'] = zotero_refs_norm['journaltitle'].apply(lambda x: re.sub(r"[\{\}']", "", str(x)).upper().strip())
 
 # Encode string columns to bytes for joining to ensure special characters are handled correctly
 zotero_refs_norm = zotero_refs_norm.apply(lambda x: x.str.encode('utf-8') if x.dtype == 'object' else x)
@@ -57,10 +97,13 @@ modelledData = modelledData.drop(columns=['citing_articles', 'citations', 'corp'
 
 # Standardize column formatting for join keys in modelledData
 modelledData_norm = modelledData.copy()
-modelledData_norm['Title'] = modelledData_norm['Title'].str.upper().str.strip()
-modelledData_norm['Authors'] = modelledData_norm['Authors'].str.upper().str.strip()
+modelledData_norm['Title'] = modelledData_norm['Title'].apply(lambda x: re.sub(r"[\{\}']", "", str(x)).upper().strip())
+modelledData_norm['Authors_dict'] = [[nm.parse_name(author) for author in entry.split(', ')] if pd.notna(entry) else None for entry in modelledData_norm['Authors']]
+modelledData_norm['Authors_str'] = modelledData_norm['Authors_dict'].apply(lambda x: ', '.join([f"{author.get('last_name', '')} {author.get('first_names', '')}" for author in x]) if isinstance(x, list) else x)
+modelledData_norm['Authors_str'] = modelledData_norm['Authors_str'].apply(lambda x: re.sub(r"[\[\]']", "", str(x)).upper().strip())
+
 modelledData_norm['Year'] = pd.to_numeric(modelledData_norm['Year'], errors='coerce').astype('Int64').astype(str).str.strip()
-modelledData_norm['Journal_Book_Institution_Meeting'] = modelledData_norm['Journal_Book_Institution_Meeting'].str.upper().str.strip()
+modelledData_norm['Journal_Book_Institution_Meeting'] = modelledData_norm['Journal_Book_Institution_Meeting'].apply(lambda x: re.sub(r"[\{\}']", "", str(x)).upper().strip())
 
 # Encode string columns to bytes for joining to ensure special characters are handled correctly
 modelledData_norm = modelledData_norm.apply(lambda x: x.str.encode('utf-8') if x.dtype == 'object' else x)
@@ -69,20 +112,20 @@ modelledData_norm = modelledData_norm.apply(lambda x: x.str.encode('utf-8') if x
 combinedData = modelledData_norm.merge(
     zotero_refs_norm, 
     how='outer', 
-    left_on=['Title', 'Authors', 'Year', 'Journal_Book_Institution_Meeting'], 
-    right_on=['title', 'author', 'date', 'journaltitle'],
+    left_on=['Title', 'Authors', 'Year', 'Journal_Book_Institution_Meeting','doi'], 
+    right_on=['title', 'Authors_str', 'date', 'journaltitle','doi'],
     suffixes=('_model', '_zotero')
 )
 
 # Merge back original columns from modelledData and zotero_refs where available, prioritizing modelledData values
 combinedData = uf.fill_missing_values(
     combinedData,
-    primary_cols=['Title', 'Authors', 'Year', 'Doc_Type', 'Journal_Book_Institution_Meeting', 'Abstract', 'doi_model','isbn_model','Keywords', 'Keywords'],
-    alternate_cols=['title', 'author', 'date', 'ENTRYTYPE','journaltitle', 'abstract', 'doi_zotero', 'isbn_zotero','keywords', 'author_keywords']
+    primary_cols=['Title', 'Authors', 'Year', 'Doc_Type', 'Journal_Book_Institution_Meeting', 'Abstract','Volume','Issue','pages_model','types','isbn_model','issn_model','Keywords', 'Keywords'],
+    alternate_cols=['title', 'Authors_str', 'date', 'ENTRYTYPE','journaltitle', 'abstract', 'volume','issue','pages_zotero','type','isbn_zotero','issn_zotero','keywords', 'author_keywords']
 )
 
 retrieved_dois = pd.read_csv(
-    'crossref_responses.csv',
+    'data/crossref_responses.csv',
     encoding='utf-8',
     usecols=[
         'title', 'issued', 'author', 'container-title', 'DOI', 'issue', 'page',
@@ -104,22 +147,27 @@ combinedData = combinedData.merge(
     suffixes=('_orig', '_retrieved')
 )
 
-# remove duplicated rows in combinedData
-combinedData = combinedData.drop_duplicates(subset=['Title', 'Authors', 'Year', 'Journal_Book_Institution_Meeting'], keep='first')
-
 combinedData = uf.fill_missing_values(
     combinedData,
-    primary_cols=['Title','doi_model', 'Issue', 'pages_model', 'Volume', 'publisher_orig', 'type_orig', 'issn_model'],
-    alternate_cols=['title','DOI', 'issue_retrieved', 'page', 'volume_retrieved', 'publisher_retrieved', 'type_retrieved', 'ISSN']
+    primary_cols=['Title','doi', 'Issue', 'pages_model', 'Volume', 'publisher_orig', 'types', 'issn_model', 'Journal_Book_Institution_Meeting'],
+    alternate_cols=['title','DOI', 'issue', 'page', 'volume', 'publisher_retrieved', 'type', 'ISSN', 'container-title']
 )
 
+# remove duplicated rows in combinedData
+# combinedData = combinedData.drop_duplicates(subset=['Title', 'Authors', 'Year', 'Journal_Book_Institution_Meeting'], keep='first')
 
 # Standardize JB refs data
-jb_refs['authors'] = jb_refs['authors'].apply(lambda x: ', '.join(map(str, x)) if isinstance(x, list) else x)
-jb_refs['authors'] = jb_refs['authors'].apply(
-    lambda x: re.sub(r"\s*\.\s*", "", str(x)).upper().strip()
+jb_refs['Authors_str'] = jb_refs['authors'].apply(lambda x: ', '.join(map(str, [author.get('name') for author in x])) if isinstance(x, list) else x)
+jb_refs['Authors_str'] = jb_refs['Authors_str'].apply(
+    lambda x: re.sub(r"\s*\.\s*", " ", str(x)).upper().strip()
     )
-jb_refs['authors'] = jb_refs['authors'].apply(lambda x: re.sub(r",*", "", str(x)))
+
+nm = nm()
+
+jb_refs['Authors_dict'] = [[nm.parse_name(author) for author in entry.split(', ')] if pd.notna(entry) else None for entry in jb_refs['Authors_str']]
+
+jb_refs['Authors_str'] = jb_refs['Authors_dict'].apply(lambda x: ', '.join([f"{author.get('last_name', '')} {author.get('first_names', '')}" for author in x]) if isinstance(x, list) else x)
+jb_refs['Authors_str'] = jb_refs['Authors_str'].apply(lambda x: re.sub(r"[\[\]']", "", str(x)).upper().strip())
 jb_refs = jb_refs.reset_index(drop=True)
 
 # Standardize column formatting for join keys
@@ -127,43 +175,51 @@ jb_refs = jb_refs.reset_index(drop=True)
 jb_refs_norm = jb_refs.copy()
 jb_refs_norm['title'] = jb_refs_norm['title'].str.upper().str.strip()
 jb_refs_norm['year'] = jb_refs_norm['year'].astype(str).str.strip()
-jb_refs_norm['container_title'] = jb_refs_norm['container_title'].str.upper().str.strip()
+jb_refs_norm['journal'] = [journal.get('name') if isinstance(journal, dict) else journal for journal in jb_refs_norm['journal']]
+jb_refs_norm['journal'] = jb_refs_norm['journal'].str.upper().str.strip()
 
 # Encode string columns to bytes for joining to ensure special characters are handled correctly
-jb_refs_norm = jb_refs_norm.apply(lambda x: x.str.encode('utf-8') if x.dtype == 'object' else x)
+jb_refs_norm = jb_refs_norm.apply(lambda x: x.astype(str).str.encode('utf-8') if x.dtype == 'object' else x)
 
 # Perform outer join using normalized data 
 combinedData = combinedData.merge(
     jb_refs_norm, 
     how='outer', 
     left_on=['Title', 'Authors', 'Year', 'Journal_Book_Institution_Meeting'], 
-    right_on=['title', 'authors', 'year', 'container_title'],
+    right_on=['title', 'Authors_str', 'year', 'journal'],
     suffixes=('_modelledData', '_jbRefs')
 )
 
 # Decode byte columns back to strings for readability
 combinedData = combinedData.apply(lambda x: x.str.decode('utf-8') if x.dtype == 'object' else x)
 
-
-# Extract DOI from Publishing_Details or use existing DOI column
-combinedData['doi'] = (combinedData['doi_model']
-    .fillna(combinedData['DOI'])
-    .fillna(
-        combinedData['Publishing_Details']
-        .str.extract(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', flags=re.IGNORECASE)[0]
-    )
-    .fillna(
-        combinedData['Publishing_Details']
-        .str.extract(r'(https?://[-._=?&;()/:A-Z0-9]+)(?=\s|$)', flags=re.IGNORECASE)[0]
-    )
+combinedData = uf.fill_missing_values(
+    combinedData,
+    primary_cols=['doi_modelledData', 'url_modelledData', 'Year', 'Journal_Book_Institution_Meeting', 'Abstract', 'Authors'],
+    alternate_cols=['doi_jbRefs', 'url_jbRefs', 'year', 'journal', 'abstract', 'Authors_str']
 )
 
-combinedData.drop(columns=['doi_model', 'title', 'author', 'container_title_jbRefs'], inplace=True)
+# # Extract DOI from Publishing_Details or use existing DOI column
+# combinedData['doi'] = (combinedData['doi_model']
+#     .fillna(combinedData['DOI'])
+#     .fillna(
+#         combinedData['Publishing_Details']
+#         .str.extract(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', flags=re.IGNORECASE)[0]
+#     )
+#     .fillna(
+#         combinedData['Publishing_Details']
+#         .str.extract(r'(https?://[-._=?&;()/:A-Z0-9]+)(?=\s|$)', flags=re.IGNORECASE)[0]
+#     )
+# )
 
+combinedData = combinedData.groupby(['doi_modelledData', 'Year', 'Journal_Book_Institution_Meeting']).agg(lambda x: x.ffill().bfill().iloc[0] if x.notna().any() else pd.NA).reset_index()
+
+# combinedData.drop(columns=['doi_model', 'title', 'author', 'container_title_jbRefs'], inplace=True)
+# combinedData = combinedData.apply(lambda x: x.str.replace(r'\t', ' ', regex=True) if x.dtype == 'object' else x)
 # Export combined data
-combinedData.to_csv('comparisonData.csv', index=False, encoding='utf-8')
+combinedData.to_csv('comparisonData_0826.csv', index=False, encoding='utf-8', sep='\t')
 # Export combined data
-combinedData.to_csv('comparisonDataCheck.csv', index=False, encoding='utf-8')
+combinedData.to_csv('comparisonDataCheck.csv', index=False, encoding='utf-8', sep='\t')
 
 
 import requests
@@ -179,7 +235,7 @@ def get_doi_by_title(title):
 
 
 
-response = [get_doi_by_title(row['Title']) for index, row in combinedData.iterrows() if pd.isna(row['doi'])]
+response = [get_doi_by_title(row['Title']) for index, row in combinedData.iterrows() if pd.isna(row['doi_modelledData'])]
 pd.DataFrame(response).to_json('crossref_responses.json', orient='records', lines=True)
 rawRefs = pd.read_json('crossref_responses.json', orient='records', lines=True)
 
@@ -235,7 +291,7 @@ refs.to_csv("data/bioRefs_cleaned.csv", index=False, encoding='utf-8')
 
 
 
-combind = pd.read_csv('comparisonDataCheck.csv', encoding='utf-8').reset_index(drop=True)
+combind = pd.read_csv('comparisonData_0826.csv', encoding='utf-8',  sep='\t').reset_index(drop=True)
 
 combind =uf.fill_missing_values(combind, 
             ['Title','Title', 'Authors', 'Authors', 'Year','Journal_Book_Institution_Meeting','DOI', 'DOI', 'edition_modelledData','Volume',  'Volume', 'Issue', 'Issue','number','pages', 'pages', 'type', 'type', 'type','issn_zotero'], 
