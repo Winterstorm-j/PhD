@@ -91,6 +91,79 @@ class NameMatcher:
 			else: name_dict['first_names'].append(part)
 		return name_dict
 
+	def parse_names_list(self, names_string):
+		"""
+		Accepts your regex-cleaned string (e.g., "Hughes Da, Szkuta B, Biermann Tw,")
+		and flawlessly parses each person into first/last name chunks.
+		"""
+		# 1. Split on your newly added commas
+		raw_names = [n.strip() for n in names_string.split(',') if n.strip()]
+		parsed_results = []
+		
+		for name in raw_names:
+			name = " ".join(name.split()).strip()
+			if not name:
+				continue
+				
+			name_dict = {'first_names': [], 'last_name': '', 'nicknames': [], 'suffix': ''}
+			
+			# 2. Extract Suffixes
+			last_tok = re.split(r'[\s,]', name)[-1]
+			if last_tok.lower().replace('.', '') in self.suffixes:
+				name_dict['suffix'] = last_tok
+				name = name[:-len(last_tok)].strip().rstrip(',')
+
+			# 3. Explicit "Last, First" check (if any internal commas exist)
+			if ',' in name:
+				parts = re.split(r',', name, maxsplit=1)
+				name_dict['last_name'] = parts[0].strip()
+				name = parts[1].strip()
+
+			# 4. Tokenise into name elements
+			tokens = re.findall(r'(?:\w+\.+\w*|[\w\"\'\(\[\]\)-]+)', name)
+			if not tokens:
+				if name_dict['last_name']:
+					parsed_results.append(name_dict)
+				continue
+
+			# 5. Extract Last Name (Tailored for "Last First" with mixed-case initials)
+			if not name_dict['last_name']:
+				ln_prefixes = {'van', 'von', 'de', 'di', 'da', 'le', 'del', 'du', 'st.', 'st'}
+				
+				# --- CRITICAL TWEAK FOR YOUR DATA ---
+				# If the LAST token looks like an initial/short name (1-3 chars), 
+				# and the FIRST token is long, it's a "Last First" format (e.g., "Hughes Da")
+				if len(tokens[-1]) <= 3 and len(tokens[0]) > 3 and tokens[-1].lower() not in ln_prefixes:
+					name_dict['last_name'] = tokens[0]
+					tokens = tokens[1:]
+					
+				# Standard Fallback: check for multi-word compounds ("van der Berg John")
+				elif tokens[0].lower() in ln_prefixes or '-' in tokens[0]:
+					split_idx = 1
+					while split_idx < len(tokens) and tokens[split_idx].lower() in ln_prefixes:
+						split_idx += 1
+					if split_idx < len(tokens):  
+						split_idx += 1
+					name_dict['last_name'] = " ".join(tokens[:split_idx])
+					tokens = tokens[split_idx:]
+					
+				# Default "First Last" fallback (e.g., "John Smith")
+				else:
+					name_dict['last_name'] = tokens[-1]
+					tokens = tokens[:-1]
+
+			# 6. Distribute remaining tokens to First Names or Nicknames
+			for part in tokens:
+				nickname_match = re.match(r'[\"\'\(\[](.+)[\"\'\)\]]', part)
+				if nickname_match:
+					name_dict['nicknames'].append(nickname_match.group(1))
+				else:
+					name_dict['first_names'].append(part.upper())
+					
+			parsed_results.append(name_dict)
+
+		return parsed_results
+
 	def _suffix_sim(self, suffix1, suffix2):
 		s1, s2 = suffix1.strip('.').lower(), suffix2.strip('.').lower()
 		if s1 == s2: return 1
