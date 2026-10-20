@@ -43,7 +43,16 @@ __all__ = [
 
 def get_names(val: Any, col: str):
     """
-    Parse a string representation of a list/dict and extract values for `col`.
+    Extract values for a key from a dictionary or a string representation of one.
+
+    Args:
+        val: A dictionary/list, a string containing a Python literal representation,
+            or another value to pass through unchanged.
+        col: Dictionary key to extract.
+
+    Returns:
+        A list of matching values for dictionary/list inputs; the original string
+        when parsing fails or yields another type; otherwise the original value.
     """
     
     if isinstance(val, str):
@@ -64,10 +73,21 @@ def get_names(val: Any, col: str):
 
 def combine_group_rows(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
     """
-    Combine rows in a DataFrame by grouping on specified columns and aggregating other columns.
+    Group rows and combine each non-key column's distinct non-null values.
+
+    A column with no non-null values becomes ``pd.NA``; a single distinct value
+    is retained as-is; multiple values are joined with ``"; "``.
+
+    Args:
+        df: DataFrame to group.
+        group_cols: Columns that identify each group.
+
+    Returns:
+        A new DataFrame with one row per group and aggregated non-key columns.
     """
     
     def combine_series(series):
+        """Aggregate one column using its distinct, non-null values."""
         unique_vals = series.dropna().unique()
         if len(unique_vals) == 0:
             return pd.NA
@@ -82,7 +102,16 @@ def combine_group_rows(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
 
 def preprocess_string_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Uppercase and strip only object/string columns (in-place) and return the DataFrame.
+    Uppercase and trim object-typed columns in place.
+
+    Text values that become ``NAN``, ``NA``, ``NONE``, or ``NULL`` are replaced
+    with ``pd.NA``. Other column types are left unchanged.
+
+    Args:
+        df: DataFrame whose object columns will be normalized.
+
+    Returns:
+        The same, modified DataFrame.
     """
     
     for col in df.select_dtypes(include='object').columns:
@@ -98,11 +127,17 @@ def preprocess_string_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 def _extract_range(x: Any) -> str|None:
     """
-    Extract a page/range string from a variety of inputs:
-    - If input is a dict-like string, try to literal_eval and get 'range'
-    - If it's a list/tuple, join with '-'
-    - If it's a plain string, attempt to extract numeric ranges like "12-34" or "12 to 34"
-    Returns None when nothing sensible can be extracted.
+    Extract a range value from a string, mapping, list, or tuple.
+
+    Mapping inputs use their ``"range"`` value; list/tuple values are joined
+    with hyphens. Plain text is searched for a numeric range (for example,
+    ``"12 to 34"``), then returned trimmed if no such range is present.
+
+    Args:
+        x: Value to inspect.
+
+    Returns:
+        A normalized range/string, or ``None`` for a missing or empty value.
     """
     if pd.isna(x) or x in ('', 'nan', None):
         return None
@@ -144,7 +179,15 @@ def _extract_range(x: Any) -> str|None:
 
 def preprocess(text: Any, stopwords: list[Any]|None) -> str:
     """
-    Minimal text preprocess: lowercase, keep words >=3 chars, remove custom stopwords.
+    Lowercase text, retain alphabetic words of at least three characters, and
+    remove the supplied stopwords.
+
+    Args:
+        text: Text to preprocess. Non-string values produce an empty string.
+        stopwords: Words to remove, or ``None`` for no custom stopwords.
+
+    Returns:
+        The retained words joined by single spaces.
     """
     
     if text is None or not isinstance(text, str):
@@ -157,6 +200,14 @@ def preprocess(text: Any, stopwords: list[Any]|None) -> str:
     return ' '.join([w for w in words if w not in custom_stopwords])
 
 def _join_non_na(row):
+    """Join non-empty, non-null row values with ``"; "``; return ``pd.NA`` if none remain.
+
+    Args:
+        row: Pandas Series containing values to combine.
+
+    Returns:
+        Joined string or ``pd.NA``.
+    """
     vals = (
      row.dropna()
         .astype(str)
@@ -168,7 +219,16 @@ def _join_non_na(row):
 
 def _prepare_vectorizer_corpus(docs: list[str], vectorizer_model):
     """
-    Fit a vectorizer, tokenize documents, and return the dictionary and corpus.
+    Fit a vectorizer and create token, Gensim dictionary, and bag-of-words data.
+
+    Args:
+        docs: Documents used to fit the vectorizer and build the corpus.
+        vectorizer_model: Scikit-learn-style vectorizer with ``fit`` and
+            ``build_tokenizer`` methods.
+
+    Returns:
+        A tuple of the vectorizer tokenizer, per-document tokens, Gensim
+        dictionary, and per-document bag-of-words corpus.
     """
     vectorizer_model.fit(docs)
     tokenizer = vectorizer_model.build_tokenizer()
@@ -180,7 +240,14 @@ def _prepare_vectorizer_corpus(docs: list[str], vectorizer_model):
 
 def _get_topic_words(topic_model, exclude_outliers: bool = True) -> list[str]:
     """
-    Extract topic words from a BERTopic model.
+    Flatten the words returned for topics in a BERTopic model.
+
+    Args:
+        topic_model: Fitted BERTopic-compatible model.
+        exclude_outliers: Whether to omit topic ID ``-1``.
+
+    Returns:
+        Topic words in topic order, including repeated words across topics.
     """
     topic_info = topic_model.get_topic_info()
     if exclude_outliers and 'Topic' in topic_info.columns:
@@ -198,7 +265,15 @@ def _get_topic_words(topic_model, exclude_outliers: bool = True) -> list[str]:
 
 def calculate_topic_diversity_mtld(topic_model, min_words: int = 10) -> float:
     """
-    Estimate topic diversity using MTLD over topic word tokens.
+    Estimate lexical diversity across topic words using MTLD.
+
+    Args:
+        topic_model: Fitted BERTopic-compatible model.
+        min_words: Return ``0.0`` unless the collected words exceed this count.
+
+    Returns:
+        MTLD for the joined topic words, or ``0.0`` when there are too few
+        words or MTLD calculation fails.
     """
     topic_words = _get_topic_words(topic_model)
     if len(topic_words) <= min_words:
@@ -212,7 +287,15 @@ def calculate_topic_diversity_mtld(topic_model, min_words: int = 10) -> float:
 
 def _compute_silhouette_score(embeddings, topics) -> float:
     """
-    Compute silhouette score for clustered documents only.
+    Compute the silhouette score for non-outlier documents.
+
+    Args:
+        embeddings: Numeric document embedding matrix.
+        topics: Topic assignment for each document; ``-1`` denotes an outlier.
+
+    Returns:
+        Silhouette score, or ``-1.0`` when there are too few valid documents,
+        fewer than two valid topics, or score calculation fails.
     """
     valid_idx = [i for i, t in enumerate(topics) if t != -1]
     if len(valid_idx) <= 2:
@@ -239,7 +322,20 @@ def _create_bertopic_model(
     calculate_probabilities=False,
 ):
     """
-    Instantiate a BERTopic model with stable zero-shot and UMAP settings.
+    Construct a BERTopic model with the project's standard UMAP and zero-shot settings.
+
+    Args:
+        vectorizer_model: Text vectorizer supplied to BERTopic.
+        embedding_model: Optional embedding model passed to BERTopic.
+        candidate_topics: Optional zero-shot topic labels.
+        nr_topics: Optional target topic count passed to BERTopic.
+        min_topic_size: Minimum size of a topic.
+        random_state: Seed for the UMAP model.
+        calculate_probabilities: Whether BERTopic should calculate probabilities.
+
+    Returns:
+        A configured, unfitted BERTopic model. The zero-shot minimum similarity
+        is fixed at ``0.8``.
     """
     return BERTopic(
         vectorizer_model=vectorizer_model,
@@ -255,7 +351,14 @@ def _create_bertopic_model(
 
 def _outlier_ratio(topics) -> float:
     """
-    Compute the outlier ratio for BERTopic output.
+    Calculate the proportion of BERTopic assignments considered outliers.
+
+    Args:
+        topics: Topic assignments; ``-1``, ``-1.0``, and ``"unknown"`` count
+            as outliers.
+
+    Returns:
+        Outlier count divided by assignment count, or ``0.0`` for empty input.
     """
     topics_str = [str(t) for t in topics]
     outliers = topics_str.count("-1") + topics_str.count("-1.0") + topics_str.count("unknown")
@@ -264,7 +367,14 @@ def _outlier_ratio(topics) -> float:
 
 def _count_valid_topics(topics) -> int:
     """
-    Count valid topics excluding outliers.
+    Count distinct topic assignments, excluding recognized outlier values.
+
+    Args:
+        topics: Topic assignments; ``-1``, ``-1.0``, and ``"unknown"`` are
+            excluded.
+
+    Returns:
+        Number of distinct non-outlier topic labels.
     """
     topics_str = set(str(t) for t in topics)
     return len(topics_str - {"-1", "-1.0", "unknown"})
@@ -272,15 +382,28 @@ def _count_valid_topics(topics) -> int:
 # functions to evaluate topic model
 
 def calculate_coherence_score(topic_model, dictionary=None, corpus=None, tokens=None):
-    ''' 
-    Quantifies topic coherence using normalised Pointwise Mutual Information coherence measure, which tests 
-    pairwise agreement between every word in a topic and their co-occurrence in the original documents
-    (between -1 and 1, >0 is good, negative value indicate incoherent topics (less semantically similar))
-    - Röder, M., Both, A., & Hinneburg, A. (2015). Exploring the space of topic coherence measures. 
-      In Proceedings of the eighth ACM international conference on Web search and data mining (pp. 399-408).
-    - Gerlof Bouma. 2009. Normalized (pointwise) mutual information in collocation extraction. 
-      Proceedings of Global Summit on Computing and Linguistics (GSCL), 30:31-40
-    '''
+    """
+    Score topic coherence using Gensim's normalized PMI (``c_npmi``) measure.
+
+    Topic words are split into individual words and mapped to IDs in
+    ``dictionary``. Outlier topics and words absent from the dictionary are
+    excluded. A score above zero generally indicates co-occurring topic words.
+
+    Args:
+        topic_model: Fitted topic model exposing ``get_topics`` and ``get_topic``.
+        dictionary: Gensim dictionary built from the source documents.
+        corpus: Optional bag-of-words corpus used by Gensim.
+        tokens: Tokenized source documents; required along with ``dictionary``.
+
+    Returns:
+        The scalar c_npmi coherence score, or ``0.0`` if required inputs or
+        usable topics are absent or score calculation fails.
+
+    References:
+        Röder, Both, and Hinneburg (2015), *Exploring the space of topic
+        coherence measures*; Bouma (2009), *Normalized (pointwise) mutual
+        information in collocation extraction*.
+    """
     if dictionary is None or tokens is None:
         return 0.0
     if not tokens or len(tokens) == 0:
@@ -339,13 +462,19 @@ def calculate_coherence_score(topic_model, dictionary=None, corpus=None, tokens=
 
 
 def calculate_diversity_score(topic_model):
-    ''' 
-    Scores the model based on percentage of unique words across all topics (how distinct each topic is), between 0 and 1, 
-    higher is better. This is equivalent to the inverse of Jaccard Similarity, which is the intersect set of words over 
-    the union set of words across all topics. 
-    Deng, F., Siersdorfer, S., Zerr, S.: Efficient jaccard-based diversity analysis of large document collections. 
-    In: Proceedings CIKM. (2012) 1402-1411
-    '''
+    """
+    Measure distinctiveness of topic vocabularies.
+
+    The score is the number of unique topic words divided by the square root
+    of the total number of topic-word assignments. Higher values indicate
+    more distinct words; the result is not constrained to the interval [0, 1].
+
+    Args:
+        topic_model: Fitted topic model exposing ``get_topics``.
+
+    Returns:
+        The diversity score, or ``0`` if there are no topic-word assignments.
+    """
     topics = topic_model.get_topics()
     unique_words = set()
     total_words = 0
@@ -361,15 +490,27 @@ def calculate_diversity_score(topic_model):
 
 def resolve_overlaps(positions, markers, min_dist, steps=40, repulsion_strength=1.0,
         marker_repulsion_strength=2.0, attraction_strength=0.05, max_step=0.5):
-    '''
-    Resolve overlaps using a force-directed (physics simulation) method.
-    Fully vectorized with NumPy. Very fast.
+    """
+    Iteratively adjust 2D label positions to reduce overlaps with labels/markers.
 
-    positions: (N, 2) initial label positions
-    markers: (N, 2) anchor points
-    min_dist: minimum allowed distance between labels
-    steps: number of physics iterations (20-40 usually enough)
-    '''
+    Repulsion separates nearby labels and markers, while a weaker attraction
+    draws labels toward their corresponding markers. Each iteration's movement
+    is clipped to ``max_step`` per coordinate.
+
+    Args:
+        positions: Initial label coordinates with shape ``(N, 2)``.
+        markers: Corresponding anchor coordinates with shape ``(N, 2)``.
+        min_dist: Distance threshold for repulsion.
+        steps: Number of simulation iterations.
+        repulsion_strength: Multiplier for label-to-label repulsion.
+        marker_repulsion_strength: Multiplier for label-to-marker repulsion.
+        attraction_strength: Multiplier for attraction toward each marker.
+        max_step: Maximum absolute movement per coordinate per iteration.
+
+    Returns:
+        A floating-point array of adjusted coordinates; ``positions`` is not
+        modified in place.
+    """
 
     N = len(positions)
     pos = positions.astype(float)
@@ -422,7 +563,16 @@ def resolve_overlaps(positions, markers, min_dist, steps=40, repulsion_strength=
 
 def float_range(start, stop, step):
     """
-    Create a range generator for a float (normal range function is integer only)
+    Yield values from ``start`` up to, but not including, ``stop`` by ``step``.
+
+    Args:
+        start: First yielded value.
+        stop: Exclusive upper bound.
+        step: Increment applied after each yielded value; use a positive step
+            when ``start`` is less than ``stop``.
+
+    Yields:
+        Successive values beginning at ``start``.
     """
     
     current = start
@@ -432,6 +582,24 @@ def float_range(start, stop, step):
         
 # Apply the logic only where Trace_Type is empty, with a default value of 'NA' for no matches
 def find_and_replace(df, findColumn, replaceColumn, conditions, choices):
+    """
+    Fill empty cells in a destination column using ``numpy.select``.
+
+    If ``replaceColumn`` does not exist it is created with empty-string values.
+    Only rows where that column is exactly ``''`` are assigned. ``conditions``
+    and ``choices`` are passed to ``numpy.select`` with ``'NA'`` as the default.
+    ``findColumn`` is retained in the function signature but is not used.
+
+    Args:
+        df: DataFrame to modify in place.
+        findColumn: Unused legacy argument.
+        replaceColumn: Destination column to populate.
+        conditions: Boolean conditions accepted by ``numpy.select``.
+        choices: Values corresponding to ``conditions``.
+
+    Returns:
+        ``None``. The DataFrame is modified in place.
+    """
     if replaceColumn not in df.columns:
         df[replaceColumn] = ''
     
@@ -441,30 +609,47 @@ def find_and_replace(df, findColumn, replaceColumn, conditions, choices):
     
 def fill_missing_values(df, primary_cols, alternate_cols):
     """
-    Fill missing values in primary columns from alternate columns.
+    Fill null primary-column values from corresponding alternate columns.
+
+    Each alternate column is dropped after its values have been used. The
+    columns are paired using ``zip``, so only pairs up to the shorter list are
+    processed.
     
     Args:
-        df: DataFrame to modify
-        primary_cols: List of primary column names
-        alternate_cols: List of alternate column names (same order as primary_cols)
+        df: DataFrame to modify in place.
+        primary_cols: Primary column names to fill.
+        alternate_cols: Alternate column names in corresponding order.
     
     Returns:
-        Modified DataFrame
+        The modified DataFrame.
     """
     for primary, alternate in zip(primary_cols, alternate_cols):
-        df[primary] = np.where(
-            df[primary].isna() & ~df[alternate].isna(), 
-            df[alternate], 
-            df[primary]
-        )
+        df[primary] = df[primary].fillna(df[alternate])
     
         df.drop(columns=alternate, inplace=True)
     return df
 
 def run_model(docs, embeddings, vectorizer_model, notopics, clustermodel=None, embedding_model=None, candidate_topics=None):
-    '''
-    Train a BERTopic model and return fitted metrics plus the model.
-    '''
+    """
+    Fit a BERTopic model and calculate its evaluation metrics.
+
+    The combined score weights coherence by 0.70, MTLD topic diversity by
+    0.15, and silhouette score by 0.15. The input vectorizer is deep-copied
+    before use. ``clustermodel`` is retained in the signature but is unused.
+
+    Args:
+        docs: Documents to fit the model on.
+        embeddings: Embedding matrix corresponding to ``docs``.
+        vectorizer_model: Vectorizer used by BERTopic and for coherence tokens.
+        notopics: Target topic count passed to BERTopic as ``nr_topics``.
+        clustermodel: Unused legacy argument.
+        embedding_model: Optional BERTopic embedding model.
+        candidate_topics: Optional zero-shot topic labels.
+
+    Returns:
+        A two-item list: ``[results, topic_model]``. ``results`` contains one
+        tuple of ``(notopics, coherence, diversity, silhouette, weighted_score)``.
+    """
     vectorizer = deepcopy(vectorizer_model)
     topic_model = _create_bertopic_model(
         vectorizer_model=vectorizer,
@@ -492,7 +677,23 @@ def cross_validate_zeroshot_bertopic(
     topic_list: list[str] = None,
 ) -> dict[str, Any]:
     """
-    Perform repeated cross-validation for a zero-shot BERTopic model.
+    Evaluate a zero-shot BERTopic model across repeated training folds.
+
+    Uses 5-fold ``RepeatedKFold`` with 5 repeats (25 fitted models). The held-out
+    indices are not used for scoring: the reported fold metrics are calculated
+    on each fold's training documents. Vocabulary-weighted c-TF-IDF vectors
+    are compared with cosine similarity to estimate structural stability.
+
+    Args:
+        docs: Documents to split and use for fitting.
+        embeddings: Embedding matrix aligned row-wise with ``docs``.
+        vectorizer_model: Vectorizer to copy and fit on the full document set.
+        embedding_model: Optional embedding model passed to BERTopic.
+        topic_list: Candidate zero-shot topic labels.
+
+    Returns:
+        Dictionary with mean/std outlier ratio, mean topic count, mean
+        structural stability, and per-fold outlier ratios/topic counts.
     """
     folds = RepeatedKFold(n_splits=5, n_repeats=5)
     fold_outlier_ratios: list[float] = []
@@ -576,3 +777,186 @@ def cross_validate_zeroshot_bertopic(
         },
     }
     
+def rename_key(item, key_mapping):
+    """
+    Rename keys in a string representation of a dictionary or list of dictionaries.
+    
+    The function first quotes unquoted string values where possible, applies
+    each old-to-new key mapping, then parses the result with
+    ``ast.literal_eval``. Non-string, empty, or ``"NA"`` values pass through.
+
+    Args:
+        item: Value containing serialized mapping data.
+        key_mapping: Mapping from old key names to replacement key names.
+
+    Returns:
+        The parsed Python value if parsing succeeds; otherwise the cleaned
+        string. Values that are not processed are returned unchanged.
+    """
+    if not isinstance(item, str) or item.strip() == "NA" or not item.strip():
+        return item
+    
+    clean_item = item.strip()
+    clean_item = re.sub(
+        r':\s*(?!(?:true|false|null|True|False|None)\b)([a-zA-Z_][a-zA-Z0-9_\-]*)\b(?!\s*[:\]}])', 
+        r': "\1"', 
+        clean_item
+        )
+    
+    for old_key, new_key in key_mapping.items():
+        pattern = rf'([\'"]?){re.escape(old_key)}\1\s*:\s*'
+        clean_item = re.sub(pattern, rf'\1{new_key}\1: ', clean_item)
+    
+
+    try:
+        parsed_list = ast.literal_eval(clean_item)
+        return parsed_list
+    except (SyntaxError, ValueError):
+        return clean_item
+
+
+def lib_to_dict(entry: Entry) -> dict:
+    """Convert a bibtexparser entry into a dictionary of its key, type, and fields.
+
+    Args:
+        entry: bibtexparser entry exposing ``key``, ``entry_type``, and
+            ``fields_dict`` attributes.
+
+    Returns:
+        A dictionary containing ``ID``, ``ENTRYTYPE``, and all entry fields.
+    """
+    entry_data = {
+        "ID": entry.key,
+        "ENTRYTYPE": entry.entry_type,
+        **entry.fields_dict
+    }
+    return entry_data
+
+
+def convert_fields(data: pd.Series) -> list:
+    """Extract field values from a Series of bibtexparser fields.
+
+    Args:
+        data: Series whose elements may be bibtexparser ``Field`` instances.
+
+    Returns:
+        A list containing each field's ``value`` or ``pd.NA`` for non-Field
+        elements.
+    """
+    newContent = [field.value if isinstance(field, bibtexparser.model.Field) else pd.NA for field in data]
+    return newContent
+
+def remove_duplicate_dicts(input_data: list[dict]) -> list[dict]:
+    """Flatten nested lists of dictionaries and deduplicate them in input order.
+
+    Dictionary values containing nested dictionaries, lists, or tuples are
+    recursively converted to hashable forms for equality checks. Non-dictionary
+    items are ignored.
+
+    Args:
+        input_data: Iterable list structure containing dictionaries and nested
+            lists.
+
+    Returns:
+        A flat list of unique dictionaries, preserving the first occurrence.
+    """
+    # Step 1: Flatten all nested lists of dicts
+    flat_list = []
+    
+    def flatten(items):
+        """Append dictionaries from nested lists to ``flat_list``."""
+        for item in items:
+            if isinstance(item, list):
+                flatten(item)  # Recursively unwrap lists
+            elif isinstance(item, dict):
+                flat_list.append(item)
+            # If there are other types (like strings), they are skipped
+            
+    flatten(input_data)
+
+    # Step 2: Helper to deep-freeze mutable types so they can be hashed
+    def make_hashable(obj):
+        """Recursively convert dictionary/list/tuple values to hashable forms."""
+        if isinstance(obj, dict):
+            return frozenset((k, make_hashable(v)) for k, v in obj.items())
+        elif isinstance(obj, (list, tuple)):
+            return tuple(make_hashable(item) for item in obj)
+        return obj
+
+    # Step 3: Deduplicate while preserving order
+    seen = set()
+    unique_list = []
+    
+    for d in flat_list:
+        track_key = make_hashable(d)
+        if track_key not in seen:
+            seen.add(track_key)
+            unique_list.append(d)
+            
+    return unique_list
+
+def separate_author_initials(authors):
+    """Insert separators between detected author initials and following names.
+
+    Initial-like tokens are separated with a comma, except when the following
+    token indicates a surname particle according to the module's
+    ``surname_particles`` collection.
+
+    Args:
+        authors: Author string to process.
+
+    Returns:
+        The author string with separators inserted at detected initials.
+    """
+    def add_separator(match):
+        """Build a replacement for one initials-like regular-expression match."""
+        following_token = re.match(r"\w+", authors[match.end():])
+        if match.group(2).lower() in surname_particles and following_token:
+            return match.group(0)
+        return f"{match.group(1)}{match.group(2)}, "
+
+    return re.sub(r"(\s+)((?:[A-Z]{1,2}|[A-Z][a-z]{1,2}))\b\s*", add_separator, authors)
+
+def build_nested_groups(dataframe, keys_remaining, combine_func, rows_list=None):
+    """Recursively group a DataFrame across keys while preserving missing-key rows.
+
+    At each key, non-null values are grouped separately and rows with a null
+    key are processed together as their own branch. At the leaf level,
+    ``combine_func`` is applied once to each non-empty subset.
+
+    Args:
+        dataframe: DataFrame to split into nested groups.
+        keys_remaining: Ordered column names to group by at each recursion level.
+        combine_func: Callable applied to each non-empty leaf DataFrame.
+        rows_list: Optional list to append results to; a new list is created
+            when omitted.
+
+    Returns:
+        The accumulated list of results returned by ``combine_func``.
+    """
+    if rows_list is None:
+        rows_list = []
+        
+    # BASE CASE: When we reach the final level, apply the lambda and save the row
+    if not keys_remaining:
+        if not dataframe.empty:
+            single_row_series = combine_func(dataframe)
+            rows_list.append(single_row_series)
+        return rows_list
+    
+    current_key = keys_remaining[0]
+    next_keys = keys_remaining[1:]
+    
+    valid_mask = dataframe[current_key].notna()
+    valid_df = dataframe[valid_mask]
+    missing_df = dataframe[~valid_mask]
+    
+    # Process valid groups
+    for group_name, group_df in valid_df.groupby(current_key):
+        build_nested_groups(group_df, next_keys, combine_func, rows_list)
+        
+    # Process missing group explicitly
+    if not missing_df.empty:
+        build_nested_groups(missing_df, next_keys, combine_func, rows_list)
+        
+    return rows_list
