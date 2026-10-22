@@ -22,6 +22,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 import umap
 from lexicalrichness import LexicalRichness
 
+import bibtexparser 
+import bibtexparser.middlewares as m
+from bibtexparser.model import Entry, Field
+
 
 __all__ = [
     'get_names',
@@ -908,8 +912,11 @@ def separate_author_initials(authors):
     Returns:
         The author string with separators inserted at detected initials.
     """
+    
     def add_separator(match):
         """Build a replacement for one initials-like regular-expression match."""
+        surname_particles = {'da', 'de', 'del', 'den', 'der', 'di', 'du', 'la', 'le', 'st', 'van', 'von'}
+
         following_token = re.match(r"\w+", authors[match.end():])
         if match.group(2).lower() in surname_particles and following_token:
             return match.group(0)

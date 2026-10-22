@@ -7,13 +7,16 @@ import json
 import ast
 import re
 import numpy as np
-import util_functions as uf
+
 import bibtexparser 
 import bibtexparser.middlewares as m
 from bibtexparser.model import Entry, Field
 import datetime
 from namematcher import NameMatcher as nm
+import util_functions as uf
+from importlib import reload
 
+reload(uf)
 
 #  lambda logic to fill empty cells of a grouped DataFrame 
 row_combiner = lambda x: ( pd.DataFrame(x).T if isinstance(x, pd.Series) else x).ffill().bfill().iloc[0]
@@ -41,9 +44,7 @@ modelledData = modelledData.map(lambda x: pd.NA if isinstance(x, float) and np.i
 modelledData_norm = modelledData.copy()
 modelledData_norm['Title'] = modelledData_norm['Title'].apply(lambda x: re.sub(r"[\{\}']", "", str(x)).upper().strip() if pd.notna(x) else x)
 
-surname_particles = {'da', 'de', 'del', 'den', 'der', 'di', 'du', 'la', 'le', 'st', 'van', 'von'}
-
-modelledData_norm['Authors'] = modelledData_norm['Authors'].apply(separate_author_initials)
+modelledData_norm['Authors'] = modelledData_norm['Authors'].apply(uf.separate_author_initials)
 modelledData_norm['Authors'] = modelledData_norm['Authors'].str.upper()
 modelledData_norm['Authors_dict'] = [nm_engine.parse_names_list(entry) if pd.notna(entry) else None for entry in modelledData_norm['Authors']]
 
@@ -65,12 +66,12 @@ model_authors = [
 entry_list = []
 for entry in bib_db.entries:
     # Blend core attributes (key, entry_type) with the rest of the fields
-    entry_data = lib_to_dict(entry)
+    entry_data = uf.lib_to_dict(entry)
     entry_list.append(entry_data)
 
 
 zotero_refs = pd.DataFrame(entry_list)
-zotero_refs=zotero_refs.apply(lambda x: convert_fields(x) if x.apply(lambda y: isinstance(y, bibtexparser.model.Field)).any() else x)
+zotero_refs=zotero_refs.apply(lambda x: uf.convert_fields(x) if x.apply(lambda y: isinstance(y, bibtexparser.model.Field)).any() else x)
 
 zotero_refs = zotero_refs.loc[:, ['title', 'date', 'author', 'journaltitle', 'keywords', 'publisher',
        'pages', 'abstract', 'doi', 'issn', 'volume','ENTRYTYPE', 'url','number',
@@ -89,25 +90,7 @@ model_authors.extend([author for author_list in zotero_refs['Authors_dict']
 ])
 
 #remove duplicate authors from model_authors
-model_authors = remove_duplicate_dicts(model_authors)
-
-# a bit slow
-# zoteroAuthors = []
-# for author_list in zotero_refs['Authors_dict']:
-#     if isinstance(author_list, list):
-#         foundAuthors = nm_engine.find_closest_names(
-#             target_names=author_list,
-#             other_names=model_authors,
-#             min_sim=0.9
-#         )
-#         zoteroAuthors.append(foundAuthors)
-
-# zotero_refs['Authors_str2'] = pd.Series(zoteroAuthors).astype(object).apply(
-#     lambda x: [
-#         f"{author.get('last_name', '')} {' '.join(author.get('first_names', ''))}" if isinstance(author, dict) and pd.notna(author) else 
-#         pd.NA for author in x
-#         ] 
-#     if isinstance(x, list) else x)
+model_authors = uf.remove_duplicate_dicts(model_authors)
 
 zotero_refs['Authors_str'] = zotero_refs['Authors_str'].apply(lambda x: re.sub(r"[\[\]'\{\}\.\,]", "", str(x)).upper().strip())
 zotero_refs['Authors_str'] = zotero_refs['Authors_str'].apply(lambda x: re.sub(r"\b(\w)\s(\w)\b", r"\1\2", x))
@@ -159,8 +142,8 @@ combinedData = uf.fill_missing_values(
 
 
 # Run the row combiner and build the final DataFrame directly
-collected_rows = build_nested_groups(combinedData, ['doi', 'Authors_str','Year', 'Journal_Book_Institution_Meeting'], row_combiner)
-final_df = pd.DataFrame(collected_rows).reset_index(drop=True)
+collected_rows = uf.build_nested_groups(combinedData, ['doi', 'Authors_str','Year', 'Journal_Book_Institution_Meeting'], row_combiner)
+combinedData = pd.DataFrame(collected_rows).reset_index(drop=True)
 
 
 # Load refs from John
@@ -169,6 +152,7 @@ with open('data/TPPRsearchResults.json', 'r', encoding='utf-8') as f:
 
 jb_refs_raw = jb_refs['data']
 jbrefs_list = []
+
 for ref in jb_refs_raw:
     ref_data = pd.DataFrame.from_dict(ref, orient='index').T
     jbrefs_list.append(ref_data)
@@ -187,20 +171,17 @@ jb_refs['Authors_str'] = jb_refs['Authors_str'].apply(
 
 jb_refs['Authors_dict'] = [[nm_engine.parse_name(author) for author in entry.split(', ')] if pd.notna(entry) else None for entry in jb_refs['Authors_str']]
 
-# a bit slow
-# jbAuthors = []
-# for author_list in jb_refs['Authors_dict']:
-#     if isinstance(author_list, list):
-#         foundAuthors = nm_engine.find_closest_names(
-#             target_names=author_list,
-#             other_names=model_authors,
-#         )
-#         jbAuthors.append(foundAuthors)
-
 jb_refs['Authors_str'] = jb_refs['Authors_dict'].apply(lambda x: ', '.join([f"{author.get('last_name', '')} {author.get('first_names', '')}" for author in x]) if isinstance(x, list) else x)
 jb_refs['Authors_str'] = jb_refs['Authors_str'].apply(lambda x: re.sub(r"[\[\]'\.]", "", str(x)).upper().strip())
 jb_refs['Authors_str']= jb_refs['Authors_str'].apply(lambda x: re.sub(r"\,\s*$", "", x))
 jb_refs['Authors_str'] = jb_refs['Authors_str'].str.replace(r';', ',', regex=True)
+
+# standardise all empty strings, NaNs, None and <NA> values in the zotero_refs Dataframe to be true NAs
+jb_refs = jb_refs.replace(r'^\s*$', pd.NA, regex=True)
+jb_refs = jb_refs.replace([None, 'None', 'nan', 'NaN', 'NAN', '[nan nan]','<NA>'], pd.NA)
+jb_refs = jb_refs.map(lambda x: pd.NA if isinstance(x, str) and x.strip() == '' else x)
+jb_refs = jb_refs.map(lambda x: pd.NA if isinstance(x, float) and np.isnan(x) else x)
+jb_refs = jb_refs.fillna(pd.NA)
 
 jb_refs = jb_refs.reset_index(drop=True)
 
@@ -219,19 +200,22 @@ jb_refs_norm = jb_refs_norm.apply(lambda x: x.astype(str).str.encode('utf-8') if
 combinedData = combinedData.merge(
     jb_refs_norm, 
     how='outer', 
-    left_on=['Title', 'Authors', 'Year', 'Journal_Book_Institution_Meeting'], 
-    right_on=['title', 'Authors_str', 'year', 'journal'],
-    suffixes=('_modelledData', '_jbRefs'),
+    left_on=['doi','Title', 'Authors_str', 'Year', 'Journal_Book_Institution_Meeting'], 
+    right_on=['doi','title', 'Authors_str', 'year', 'journal'],
+    suffixes=('', '_jbRefs'),
     validate='1:1'
 )
 
 
 combinedData = uf.fill_missing_values(
     combinedData,
-    primary_cols=['doi_modelledData', 'url_modelledData', 'Year', 'Journal_Book_Institution_Meeting', 'Abstract', 'Authors'],
-    alternate_cols=['doi_jbRefs', 'url_jbRefs', 'year', 'journal', 'abstract', 'Authors_str']
+    primary_cols=[ 'url', 'Title', 'Year', 'Journal_Book_Institution_Meeting', 'Abstract', 'Authors_dict'],
+    alternate_cols=[ 'url_jbRefs','title', 'year', 'journal', 'abstract', 'Authors_dict_jbRefs']
 )
 
+
+collected_rows = uf.build_nested_groups(combinedData, ['doi', 'Authors_str','Year', 'Journal_Book_Institution_Meeting'], row_combiner)
+combinedData = pd.DataFrame(collected_rows).reset_index(drop=True)
 
 retrieved_dois = pd.read_csv(
     'data/crossref_responses.csv',
@@ -248,75 +232,38 @@ retrieved_dois['container-title'] = retrieved_dois['container-title'].str.upper(
 
 # standardise the author representation in the retrieved_dois DataFrame to match the modelledData and zotero_refs DataFrames
 retrieved_dois['author'] = retrieved_dois['author'].astype(object)
-retrieved_dois.loc[:,'author'] = retrieved_dois.loc[:,'author'].apply(lambda d: rename_key(d, {'given': 'first_names','family': 'last_name'}))
+retrieved_dois.loc[:,'author'] = retrieved_dois.loc[:,'author'].apply(lambda d: uf.rename_key(d, {'given': 'first_names','family': 'last_name'}))
 
 retrieved_dois.drop_duplicates(subset=['DOI'], keep='first', inplace=True)
 
-# a bit slow
-# doi_Authors = []
-# for author_list in retrieved_dois['author'] :
-#     if isinstance(author_list, list):
-#         # for all dicts in the list add an empty key called "suffix" if it doesn't exist
-#         for author in author_list:
-#             author.setdefault('first_names', [])
-#             author.setdefault('last_name', '')
-#             author.setdefault('suffix', '')
-#             author.setdefault('nicknames', [])
-
-#         if isinstance(author['first_names'], str):
-#             author['first_names'] = author['first_names'].split()
-        
-#         if 'suffix' not in author:
-#                     author['suffix'] = ''  
-                
-#         foundAuthors = nm_engine.find_closest_names(
-#             target_names=author_list,
-#             other_names=model_authors,
-#             min_sim=0.95
-#         )
-#         doi_Authors.append(foundAuthors)
-
-
 retrieved_dois['Authors_str'] =  retrieved_dois['author'] .apply(lambda x: ', '.join([f"{author.get('last_name', '')} {author.get('first_names', '')}" for author in x]) if isinstance(x, list) else x)
-retrieved_dois['Authors_str'] = retrieved_dois['Authors_str'].apply(lambda x: re.sub(r"^\s*,\s*|\.", "", str(x)).upper().strip())
-retrieved_dois['Authors_str']= retrieved_dois['Authors_str'].apply(lambda x: re.sub(r"\,\s*$", "", x))
+retrieved_dois['Authors_str'] = retrieved_dois['Authors_str'].apply(lambda x: re.sub(r"^\s*,\s*|\.", "", str(x)).upper().strip() if isinstance(x, str) else pd.NA)
+retrieved_dois['Authors_str']= retrieved_dois['Authors_str'].apply(lambda x: re.sub(r"\,\s*$", "", x) if isinstance(x,str) else pd.NA)
 retrieved_dois['Authors_str'] = retrieved_dois['Authors_str'].str.replace(r';', ',', regex=True)
 retrieved_dois_norm = retrieved_dois.apply(lambda x: x.str.encode('utf-8') if x.dtype == 'str' else x)
 
 combinedData = combinedData.merge(
     retrieved_dois_norm, 
     how='outer', 
-    left_on=['Title', 'Authors','Journal_Book_Institution_Meeting', 'Year'], 
-    right_on=['title', 'Authors_str','container-title', 'issued'],
-    suffixes=('_orig', '_retrieved'),
+    left_on=['doi','Title', 'Authors_str','Journal_Book_Institution_Meeting', 'Year'], 
+    right_on=['DOI','title', 'Authors_str','container-title', 'issued'],
+    suffixes=('', '_retrieved'),
     validate='1:1'
 )
 
 combinedData = uf.fill_missing_values(
     combinedData,
-    primary_cols=['Title','Authors','doi_modelledData', 'Issue', 'pages_model', 'Volume', 'publisher_orig', 'types', 'issn_model', 'Journal_Book_Institution_Meeting', 'Authors_dict_model'],
-    alternate_cols=['title_retrieved','Authors_str','DOI', 'issue', 'page', 'volume', 'publisher_retrieved', 'type', 'ISSN', 'container-title', 'author_retrieved']
+    primary_cols=['Title','doi', 'Issue', 'pages', 'Volume', 'publisher', 'types', 'issn', 'Journal_Book_Institution_Meeting', 'Authors_dict'],
+    alternate_cols=['title','DOI', 'issue', 'page', 'volume', 'publisher_retrieved', 'type', 'ISSN', 'container-title', 'author_retrieved']
 )
 
-# remove duplicated rows in combinedData
-# combinedData = combinedData.drop_duplicates(subset=['Title', 'Authors', 'Year', 'Journal_Book_Institution_Meeting'], keep='first')
+collected_rows = uf.build_nested_groups(combinedData, ['doi', 'Authors_str','Year', 'Journal_Book_Institution_Meeting'], row_combiner)
+combinedData = pd.DataFrame(collected_rows).reset_index(drop=True)
 
+combinedData['Authors'] = combinedData['Authors_str']
 
+combinedData = uf.fill_missing_values(combinedData, primary_cols=['Doc_Type', 'Year', 'Year', 'Doc_Type'], alternate_cols=['types', 'issued', 'publicationDate','publicationTypes'])
 
-# # Extract DOI from Publishing_Details or use existing DOI column
-# combinedData['doi'] = (combinedData['doi_model']
-#     .fillna(combinedData['DOI'])
-#     .fillna(
-#         combinedData['Publishing_Details']
-#         .str.extract(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', flags=re.IGNORECASE)[0]
-#     )
-#     .fillna(
-#         combinedData['Publishing_Details']
-#         .str.extract(r'(https?://[-._=?&;()/:A-Z0-9]+)(?=\s|$)', flags=re.IGNORECASE)[0]
-#     )
-# )
-
-combinedData_new = combinedData.groupby(['doi_modelledData', 'Authors','Year', 'Journal_Book_Institution_Meeting']).agg(lambda x: x.ffill().bfill().iloc[0] if x.notna().any() else pd.NA).reset_index()
 
 # Decode byte columns back to strings for readability
 combinedData = combinedData.apply(lambda x: x.str.decode('utf-8') if isinstance(x, bytes) else x)
